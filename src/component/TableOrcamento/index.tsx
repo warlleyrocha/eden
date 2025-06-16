@@ -112,7 +112,7 @@ const TableRowOrcamento = memo(
             className="border-2 border-zinc-700"
             onClick={() => onDeleteOrcamento(orcamento.id)}
           >
-            <Printer className="mr-1" />
+            <X className="mr-1" />
             Deletar
           </Button>
         </TableCell>
