@@ -38,6 +38,7 @@ interface TableProps {
     nameStore: string;
     emailStore: string;
     cnpjStore: string;
+    enderecoStore: string;
   };
 }
 
@@ -377,6 +378,7 @@ function TableOrcamento({
       nameStore: '',
       emailStore: '',
       cnpjStore: '',
+      enderecoStore: '',
     };
   }, [externalStoreData]);
 
@@ -385,12 +387,17 @@ function TableOrcamento({
     () => ({
       nome: storeData.nameStore,
       cnpj: formatCpfCnpj(storeData.cnpjStore),
-      endereco: 'Endereço da Empresa',
+      endereco: storeData.enderecoStore,
       telefone: '00 00000-0000',
       email: storeData.emailStore,
       data: '2023-10-01',
     }),
-    [storeData.nameStore, storeData.emailStore, storeData.cnpjStore]
+    [
+      storeData.nameStore,
+      storeData.emailStore,
+      storeData.cnpjStore,
+      storeData.enderecoStore,
+    ]
   );
 
   // Handlers memorizados para produtos

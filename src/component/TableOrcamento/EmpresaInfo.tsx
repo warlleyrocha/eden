@@ -66,7 +66,7 @@ export function OrcamentoModelDetals({
               {empresaInfo.nome}
             </h1>
             {/*<h2 className="text-sm text-gray-500">{empresaInfo.slug}</h2>*/}
-            <h3 className="text-sm text-gray-500">{empresaInfo.telefone}</h3>
+            <h3 className="text-sm text-gray-500">{empresaInfo.endereco}</h3>
             <h3 className="text-sm text-gray-500">{empresaInfo.cnpj}</h3>
             <h3 className="text-sm text-gray-500">{empresaInfo.email}</h3>
           </div>
@@ -94,14 +94,12 @@ export function OrcamentoModelDetals({
           <p className="text-sm font-semibold mb-2">Itens</p>
           <Table className="w-full border rounded-lg shadow-sm">
             <TableCaption>Este orçamento tem validade de 7 dias.</TableCaption>
-            <TableCaption>
-              J.M CELL - Assistência Técnica Especializada
-            </TableCaption>
+            <TableCaption>{empresaInfo.nome}</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Descrição</TableHead>
                 <TableHead className="text-center">Qtd.</TableHead>
-                <TableHead className="text-rigth">Valor Unit.</TableHead>
+                <TableHead className="text-right">Valor Unit.</TableHead>
                 <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>

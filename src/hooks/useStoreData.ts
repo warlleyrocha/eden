@@ -5,6 +5,7 @@ const useStoreData = () => {
   const [nameStore, setNameStore] = useState('Carregando...');
   const [emailStore, setEmailStore] = useState('Carregando...');
   const [cnpjStore, setCnpjStore] = useState('Carregando...');
+  const [enderecoStore, setEnderecoStore] = useState('Carregando...');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -18,9 +19,11 @@ const useStoreData = () => {
           const response = await api.get(`/lojas/${storeId}`, {
             signal: abortController.signal,
           });
+          console.log('Resposta:', response.data);
           setNameStore(response.data.nome);
           setEmailStore(response.data.email);
           setCnpjStore(response.data.cnpj);
+          setEnderecoStore(response.data.endereco);
           setError(false);
         } else {
           setError(true);
@@ -59,7 +62,7 @@ const useStoreData = () => {
     };
   }, []);
 
-  return { nameStore, emailStore, cnpjStore, error, loading };
+  return { nameStore, emailStore, cnpjStore, enderecoStore, error, loading };
 };
 
 export default useStoreData;
