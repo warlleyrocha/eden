@@ -181,7 +181,7 @@ npm run build
 
 - **Warlley Rocha** - *Desenvolvedor Frontend*
   - Responsável pelas requisições e integração com backend
-  - GitHub: [Warlley Rossmann Rocha](https://github.com/warlleyrocha)
+  - GitHub: [warlleyrocha](https://github.com/warlleyrocha)
   - Email: [warlleyrocha@icloud.com](warlleyrocha@icloud.com)
 
 ## 🔗 Repositórios Relacionados
