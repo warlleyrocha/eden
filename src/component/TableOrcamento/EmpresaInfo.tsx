@@ -156,7 +156,7 @@ export function OrcamentoModelDetals({
                       <TableCell>
                         {item.descricao.replace('Serviço: ', '')}
                       </TableCell>
-                      <TableCell className="text-center">1</TableCell>
+                      <TableCell className="text-center"></TableCell>
                       <TableCell className="text-right">
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
