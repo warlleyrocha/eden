@@ -5,7 +5,14 @@ import { Header } from '@/component/Header';
 import LabelBullet from '@/component/LabelBullet';
 import CashClosureModel from '@/component/PaymentModel';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Banknote, CreditCard, ArrowRight } from 'lucide-react';
+import {
+  PlusCircle,
+  Banknote,
+  CreditCard,
+  ArrowRight,
+  Download,
+  Loader2,
+} from 'lucide-react';
 import { useCaixa } from './useCaixa';
 
 export default function Caixa() {
@@ -13,6 +20,7 @@ export default function Caixa() {
 
   const {
     isSubmitting,
+    isGeneratingPDF,
     error,
     showModal,
     showExitModal,
@@ -44,6 +52,7 @@ export default function Caixa() {
     formatarMoeda,
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
+    handleDateChange,
     downloadPDF,
   } = useCaixa();
 
@@ -66,8 +75,16 @@ export default function Caixa() {
                 <Button
                   className="px-4 py-2 rounded-lg bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200"
                   onClick={() => setShowModal(true)}
+                  disabled={isGeneratingPDF}
                 >
-                  FECHAR CAIXA
+                  {isGeneratingPDF ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Gerando PDF...
+                    </>
+                  ) : (
+                    'FECHAR CAIXA'
+                  )}
                 </Button>
               </div>
 
@@ -232,16 +249,18 @@ export default function Caixa() {
         </div>
       </div>
 
-      {/* Modals (keep existing) */}
+      {/* Modal de Fechamento de Caixa */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
           <button
             className="bg-black opacity-60 absolute inset-0 backdrop-blur-sm transition-opacity"
             onClick={() => setShowModal(false)}
+            disabled={isGeneratingPDF}
           ></button>
           <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg min-h-[32rem]">
             <button
               onClick={() => setShowModal(false)}
+              disabled={isGeneratingPDF}
               className="absolute top-6 right-6 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
               aria-label="Close"
             >
@@ -260,17 +279,45 @@ export default function Caixa() {
                 />
               </svg>
             </button>
+            {/* Overlay de loading durante geração do PDF */}
+            {isGeneratingPDF && (
+              <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-20">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#1E3A8A] mx-auto mb-4" />
+                  <p className="text-[#1E3A8A] font-medium">
+                    Gerando relatório PDF...
+                  </p>
+                  <p className="text-sm text-gray-600 mt-2">
+                    Por favor, aguarde
+                  </p>
+                </div>
+              </div>
+            )}
+
             <CashClosureModel
               totalEntries={totalEntries}
               totalExits={totalSaidas}
               finalBalance={finalBalance}
+              onDateChange={handleDateChange}
             />
+
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
               <Button
                 className="bg-[#22C55E] text-white px-6 py-4 rounded-full hover:bg-[#1AAE4E] w-full sm:w-auto text-lg transition-colors duration-200"
                 onClick={downloadPDF}
+                disabled={isGeneratingPDF}
               >
-                Exportar como PDF
+                {isGeneratingPDF ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Gerando PDF...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" />
+                    Exportar como PDF
+                  </>
+                )}
               </Button>
             </div>
           </div>
@@ -282,11 +329,25 @@ export default function Caixa() {
           <button
             className="bg-black opacity-60 absolute inset-0"
             onClick={() => setShowExitModal(false)}
+            disabled={isSubmitting}
           ></button>
           <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg">
             <h2 className="text-xl font-semibold text-[#1E3A8A] mb-4">
               Registrar Nova Saída
             </h2>
+
+            {/* Overlay de loading durante submissão */}
+            {isSubmitting && (
+              <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-20">
+                <div className="text-center">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#1E3A8A] mx-auto mb-4" />
+                  <p className="text-[#1E3A8A] font-medium">
+                    Registrando saída...
+                  </p>
+                </div>
+              </div>
+            )}
+
             <form className="space-y-4 justify-between">
               <div>
                 <label
@@ -303,6 +364,7 @@ export default function Caixa() {
                   placeholder="0,00"
                   value={valorSaida}
                   onChange={(e) => setValorSaida(e.target.value)}
+                  disabled={isSubmitting}
                   required
                 />
               </div>
@@ -320,6 +382,7 @@ export default function Caixa() {
                   placeholder="Descrição da saída"
                   value={descricaoSaida}
                   onChange={(e) => setDescricaoSaida(e.target.value)}
+                  disabled={isSubmitting}
                 />
               </div>
 
@@ -339,6 +402,7 @@ export default function Caixa() {
                       value="pix"
                       checked={metodoPagamento === 'pix'}
                       onChange={() => setMetodoPagamento('pix')}
+                      disabled={isSubmitting}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                     />
                     <label htmlFor="pix" className="flex items-center gap-2">
@@ -354,6 +418,7 @@ export default function Caixa() {
                       value="dinheiro"
                       checked={metodoPagamento === 'dinheiro'}
                       onChange={() => setMetodoPagamento('dinheiro')}
+                      disabled={isSubmitting}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                     />
                     <label
@@ -372,6 +437,7 @@ export default function Caixa() {
                       value="debito"
                       checked={metodoPagamento === 'debito'}
                       onChange={() => setMetodoPagamento('debito')}
+                      disabled={isSubmitting}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                     />
                     <label htmlFor="debito" className="flex items-center gap-2">
@@ -387,6 +453,7 @@ export default function Caixa() {
                       value="credito"
                       checked={metodoPagamento === 'credito'}
                       onChange={() => setMetodoPagamento('credito')}
+                      disabled={isSubmitting}
                       className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
                     />
                     <label
@@ -414,6 +481,7 @@ export default function Caixa() {
                       className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                       value={parcelas}
                       onChange={(e) => setParcelas(Number(e.target.value))}
+                      disabled={isSubmitting}
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((num) => (
                         <option key={num} value={num}>
@@ -438,6 +506,7 @@ export default function Caixa() {
                       placeholder="0"
                       value={juros}
                       onChange={(e) => setJuros(Number(e.target.value))}
+                      disabled={isSubmitting}
                     />
                   </div>
                   {juros > 0 && valorSaida && (
@@ -464,6 +533,7 @@ export default function Caixa() {
                   variant="outline"
                   className="w-full sm:w-auto rounded-full border-gray-300 hover:bg-gray-50"
                   onClick={() => setShowExitModal(false)}
+                  disabled={isSubmitting}
                 >
                   Cancelar
                 </Button>
@@ -472,10 +542,21 @@ export default function Caixa() {
                   disabled={isSubmitting}
                   onClick={handleSaidaSubmit}
                 >
-                  {isSubmitting ? 'Registrando...' : 'Registrar Saída'}
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Registrando...
+                    </>
+                  ) : (
+                    'Registrar Saída'
+                  )}
                 </Button>
-                {error && <div className="error-message">{error}</div>}
               </div>
+              {error && (
+                <div className="error-message text-red-600 text-sm mt-2 text-center">
+                  {error}
+                </div>
+              )}
             </form>
           </div>
         </div>

@@ -24,6 +24,7 @@ export const useCaixa = () => {
 
   // Estados do hook
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
@@ -32,6 +33,9 @@ export const useCaixa = () => {
   const [descricaoSaida, setDescricaoSaida] = useState('');
   const [parcelas, setParcelas] = useState(1);
   const [juros, setJuros] = useState(0);
+  // Estados para controlar o período do relatório
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   // Carrega as saídas financeiras
   useEffect(() => {
@@ -55,6 +59,17 @@ export const useCaixa = () => {
       minute: '2-digit',
     };
     return data.toLocaleString('pt-BR', options);
+  }, []);
+
+  // Formatação apenas de data (sem hora)
+  const formatarDataSimples = useCallback((dataString: string) => {
+    const data = new Date(dataString);
+
+    if (isNaN(data.getTime())) {
+      return 'Data inválida';
+    }
+
+    return data.toLocaleDateString('pt-BR');
   }, []);
 
   // Formatação de moeda
@@ -214,33 +229,211 @@ export const useCaixa = () => {
     ]
   );
 
-  // Exporta para PDF (simulação)
-  const exportToPDF = useCallback(() => {
-    const content = `
-      Resumo do Caixa
-      Entradas por Método de Pagamento
+  // Função para gerar PDF baseado no período selecionado
+  const gerarPDFComPeriodo = useCallback(
+    async (dataInicial: string, dataFinal: string) => {
+      setIsGeneratingPDF(true);
 
-      Total de Entradas: R$ ${totalEntries}
-      Total de Saídas: R$ ${totalSaidas}
-      Saldo: R$ ${finalBalance}
-      Data de Fechamento: ${new Date().toLocaleDateString()}
-    `;
+      try {
+        // Busca o relatório com o período específico
+        const relatorioFiltrado = await fetchRelatorioFinanceiro({
+          dataInicial,
+          dataFinal,
+        });
 
-    const blob = new Blob([content], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'resumo_do_caixa.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }, [totalEntries, totalSaidas, finalBalance]);
+        if (!relatorioFiltrado) {
+          throw new Error('Não foi possível gerar o relatório');
+        }
 
-  // Download do PDF
+        // Gera o conteúdo do PDF
+        const periodo = `${formatarDataSimples(
+          dataInicial
+        )} à ${formatarDataSimples(dataFinal)}`;
+
+        const conteudoPDF = `
+RELATÓRIO DE FECHAMENTO DE CAIXA
+================================================================
+
+PERÍODO: ${periodo}
+Data de Geração: ${formatarDataSimples(new Date().toISOString())}
+
+================================================================
+RESUMO FINANCEIRO
+================================================================
+
+💰 ENTRADAS
+────────────────────────────────────────────────────────────────
+${Object.entries(relatorioFiltrado.totalPorMetodo || {})
+    .filter(([_, valor]) => valor > 0)
+    .map(([metodo, valor]) => {
+      const nomeMetodo =
+      METODOS_PAGAMENTO_LABELS[
+        metodo as keyof typeof METODOS_PAGAMENTO_LABELS
+      ] || metodo;
+      return `${nomeMetodo.padEnd(20)} ${formatarMoeda(valor)}`;
+    })
+    .join('\n')}
+
+TOTAL DE ENTRADAS:        ${formatarMoeda(relatorioFiltrado.totalEntradas || 0)}
+
+----------------------------------------------------------------
+💸 SAÍDAS
+----------------------------------------------------------------
+TOTAL DE SAÍDAS:          ${formatarMoeda(relatorioFiltrado.totalSaidas || 0)}
+
+----------------------------------------------------------------
+📊 SALDO FINAL
+----------------------------------------------------------------
+SALDO:                    ${formatarMoeda(relatorioFiltrado.saldo || 0)}
+
+================================================================
+DETALHAMENTO DAS MOVIMENTAÇÕES
+================================================================
+
+📈 ENTRADAS DETALHADAS:
+${
+  movimentacoes
+    .filter((m) => {
+      const dataMovimento = new Date(m.criadoEm).toISOString().split('T')[0];
+      return (
+        m.tipo === 'ENTRADA' &&
+        dataMovimento >= dataInicial &&
+        dataMovimento <= dataFinal
+      );
+    })
+    .map(
+      (movimento) =>
+        `${formatarDataSimples(
+          movimento.criadoEm
+        )} | ${formatarMetodoPagamentoCompleto(
+          movimento.metodoPagamento,
+          movimento.parcelas,
+          movimento.juros
+        )} | ${formatarMoeda(movimento.valor)} | ${
+          movimento.descricao || 'Entrada'
+        }`
+    )
+    .join('\n') || 'Nenhuma entrada no período'
+}
+
+📉 SAÍDAS DETALHADAS:
+${
+  movimentacoes
+    .filter((m) => {
+      const dataMovimento = new Date(m.criadoEm).toISOString().split('T')[0];
+      return (
+        m.tipo === 'SAIDA' &&
+        dataMovimento >= dataInicial &&
+        dataMovimento <= dataFinal
+      );
+    })
+    .map(
+      (movimento) =>
+        `${formatarDataSimples(
+          movimento.criadoEm
+        )} | ${formatarMetodoPagamentoCompleto(
+          movimento.metodoPagamento,
+          movimento.parcelas,
+          movimento.juros
+        )} | ${formatarMoeda(movimento.valor)} | ${
+          movimento.descricao || 'Saída'
+        }`
+    )
+    .join('\n') || 'Nenhuma saída no período'
+}
+
+================================================================
+ESTATÍSTICAS DO PERÍODO
+================================================================
+
+Número total de transações: ${
+  movimentacoes.filter((m) => {
+    const dataMovimento = new Date(m.criadoEm)
+      .toISOString()
+      .split('T')[0];
+    return dataMovimento >= dataInicial && dataMovimento <= dataFinal;
+  }).length
+}
+
+Número de entradas: ${
+  movimentacoes.filter((m) => {
+    const dataMovimento = new Date(m.criadoEm)
+      .toISOString()
+      .split('T')[0];
+    return (
+      m.tipo === 'ENTRADA' &&
+              dataMovimento >= dataInicial &&
+              dataMovimento <= dataFinal
+    );
+  }).length
+}
+
+Número de saídas: ${
+  movimentacoes.filter((m) => {
+    const dataMovimento = new Date(m.criadoEm)
+      .toISOString()
+      .split('T')[0];
+    return (
+      m.tipo === 'SAIDA' &&
+              dataMovimento >= dataInicial &&
+              dataMovimento <= dataFinal
+    );
+  }).length
+}
+
+================================================================
+Sistema de Caixa - Gerado automaticamente
+================================================================
+      `;
+
+        // Cria e baixa o arquivo
+        const blob = new Blob([conteudoPDF], {
+          type: 'text/plain;charset=utf-8',
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `fechamento-caixa-${dataInicial}-${dataFinal}.txt`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+
+        toast.success('Relatório PDF gerado com sucesso!');
+      } catch (error) {
+        console.error('Erro ao gerar PDF:', error);
+        toast.error('Erro ao gerar o relatório PDF');
+      } finally {
+        setIsGeneratingPDF(false);
+      }
+    },
+    [
+      fetchRelatorioFinanceiro,
+      movimentacoes,
+      formatarDataSimples,
+      formatarMoeda,
+      formatarMetodoPagamentoCompleto,
+    ]
+  );
+
+  // Callback para quando as datas são alteradas no CashClosureModel
+  const handleDateChange = useCallback(
+    (dataInicial: string, dataFinal: string) => {
+      setStartDate(dataInicial);
+      setEndDate(dataFinal);
+    },
+    []
+  );
+
+  // Download do PDF com período selecionado
   const downloadPDF = useCallback(() => {
-    exportToPDF();
-  }, [exportToPDF]);
+    if (!startDate || !endDate) {
+      toast.error('Por favor, selecione um período válido');
+      return;
+    }
+
+    gerarPDFComPeriodo(startDate, endDate);
+  }, [startDate, endDate, gerarPDFComPeriodo]);
 
   // Função para filtrar apenas entradas
   const filtrarEntradas = (movimentacoes: MovimentoFinanceiro[]) => {
@@ -317,6 +510,7 @@ export const useCaixa = () => {
     totalSaidaDinheiro,
     totalSaidaCredito,
     isSubmitting,
+    isGeneratingPDF,
     error,
     showModal,
     showExitModal,
@@ -336,6 +530,8 @@ export const useCaixa = () => {
     parcelas,
     juros,
     movimentacoes,
+    startDate,
+    endDate,
 
     // Setters
     setShowModal,
@@ -345,15 +541,20 @@ export const useCaixa = () => {
     setDescricaoSaida,
     setParcelas,
     setJuros,
+    setStartDate,
+    setEndDate,
 
     // Funções
     filtrarEntradas,
     filtrarSaidas,
     formatarData,
+    formatarDataSimples,
     formatarMoeda,
     formatarMetodoPagamento,
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
+    handleDateChange,
     downloadPDF,
+    gerarPDFComPeriodo,
   };
 };
