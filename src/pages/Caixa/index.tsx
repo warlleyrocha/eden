@@ -235,10 +235,10 @@ export default function Caixa() {
       {/* Modals (keep existing) */}
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
-          <div
+          <button
             className="bg-black opacity-60 absolute inset-0 backdrop-blur-sm transition-opacity"
             onClick={() => setShowModal(false)}
-          ></div>
+          ></button>
           <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg min-h-[32rem]">
             <button
               onClick={() => setShowModal(false)}
@@ -264,7 +264,6 @@ export default function Caixa() {
               totalEntries={totalEntries}
               totalExits={totalSaidas}
               finalBalance={finalBalance}
-              closureDate={new Date().toLocaleDateString()}
             />
             <div className="flex flex-col sm:flex-row justify-center gap-4 mt-6">
               <Button
@@ -280,17 +279,20 @@ export default function Caixa() {
 
       {showExitModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
-          <div
+          <button
             className="bg-black opacity-60 absolute inset-0"
             onClick={() => setShowExitModal(false)}
-          ></div>
+          ></button>
           <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg">
             <h2 className="text-xl font-semibold text-[#1E3A8A] mb-4">
               Registrar Nova Saída
             </h2>
             <form className="space-y-4 justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="value"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Valor
                 </label>
                 <input
@@ -306,7 +308,10 @@ export default function Caixa() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="description"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Descrição
                 </label>
                 <input
@@ -319,7 +324,10 @@ export default function Caixa() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="payment-method"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Método de Pagamento
                 </label>
                 <div className="grid grid-cols-2 gap-4">
@@ -415,7 +423,10 @@ export default function Caixa() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                    <label
+                      htmlFor="juros"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
                       Juros (%)
                     </label>
                     <input
