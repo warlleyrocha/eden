@@ -6,6 +6,7 @@ const useStoreData = () => {
   const [emailStore, setEmailStore] = useState('Carregando...');
   const [cnpjStore, setCnpjStore] = useState('Carregando...');
   const [enderecoStore, setEnderecoStore] = useState('Carregando...');
+  const [subTitleStore, setSubTitleStore] = useState('Carregando ...');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -24,6 +25,7 @@ const useStoreData = () => {
           setEmailStore(response.data.email);
           setCnpjStore(response.data.cnpj);
           setEnderecoStore(response.data.endereco);
+          setSubTitleStore(response.data.subTitulo);
           setError(false);
         } else {
           setError(true);
@@ -62,7 +64,15 @@ const useStoreData = () => {
     };
   }, []);
 
-  return { nameStore, emailStore, cnpjStore, enderecoStore, error, loading };
+  return {
+    nameStore,
+    emailStore,
+    cnpjStore,
+    enderecoStore,
+    subTitleStore,
+    error,
+    loading,
+  };
 };
 
 export default useStoreData;

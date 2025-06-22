@@ -16,6 +16,7 @@ type OrcamentoModelDetalsProps = {
     nome: string;
     cnpj: string;
     endereco: string;
+    subTitle: string;
     telefone: string;
     email: string;
   };
@@ -28,6 +29,7 @@ type OrcamentoModelDetalsProps = {
       id: string;
       nome?: string;
       telefone?: string;
+      endereco: string;
     };
     lojaId: string;
     descricao: string;
@@ -87,6 +89,9 @@ export function OrcamentoModelDetals({
             {orcamentoInfo.cliente?.nome ?? 'Sem nome'}
           </h1>
           <p className="text-sm text-gray-500">
+            {orcamentoInfo.cliente?.endereco ?? 'Sem endereço'}
+          </p>
+          <p className="text-sm text-gray-500">
             {orcamentoInfo.cliente?.telefone ?? 'Sem telefone'}
           </p>
         </div>
@@ -94,7 +99,9 @@ export function OrcamentoModelDetals({
           <p className="text-sm font-semibold mb-2">Itens</p>
           <Table className="w-full border rounded-lg shadow-sm">
             <TableCaption>Este orçamento tem validade de 7 dias.</TableCaption>
-            <TableCaption>{empresaInfo.nome}</TableCaption>
+            <TableCaption>
+              {empresaInfo.nome} - {empresaInfo.subTitle}
+            </TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Descrição</TableHead>
