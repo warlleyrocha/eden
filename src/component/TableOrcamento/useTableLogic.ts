@@ -257,7 +257,7 @@ export function useTableLogic({
   const calculateTotal = useCallback(() => {
     const totalProdutos = orcamentoProdutos.reduce((acc, item) => {
       const preco = parseFloat(item.unitPrice) || 0;
-      const quantidade = parseInt(item.quantity || '1') || 0;
+      const quantidade = parseInt(item.quantity ?? '1') || 0;
       return acc + preco * quantidade;
     }, 0);
 
@@ -372,7 +372,7 @@ export function useTableLogic({
     if (error instanceof Error) {
       message = error.message;
     } else if (axios.isAxiosError(error)) {
-      message = error.response?.data?.message || 'Erro na requisição';
+      message = error.response?.data?.message ?? 'Erro na requisição';
     }
 
     alert(message);

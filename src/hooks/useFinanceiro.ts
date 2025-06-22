@@ -254,7 +254,7 @@ export function useFinanceiro() {
               throw new Error('Erro interno do servidor.');
             default:
               throw new Error(
-                err.response.data?.message || 'Erro desconhecido'
+                err.response.data?.message ?? 'Erro desconhecido'
               );
             }
           } else {
