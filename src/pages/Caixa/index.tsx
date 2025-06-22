@@ -27,10 +27,10 @@ export default function Caixa() {
     totalEntries,
     totalSaidas,
     finalBalance,
-    totalEntradaPix,
-    totalEntradaDebito,
-    totalEntradaDinheiro,
-    totalEntradaCredito,
+    PIX,
+    DINHEIRO,
+    DEBITO,
+    totalCreditoEntrada,
     metodoPagamento,
     valorSaida,
     descricaoSaida,
@@ -121,22 +121,22 @@ export default function Caixa() {
                     <LabelBullet
                       title="PIX"
                       type="pix"
-                      value={formatarMoeda(totalEntradaPix)}
+                      value={formatarMoeda(PIX)}
                     />
                     <LabelBullet
                       title="Dinheiro"
                       type="money"
-                      value={formatarMoeda(totalEntradaDinheiro)}
+                      value={formatarMoeda(DINHEIRO)}
                     />
                     <LabelBullet
                       title="Débito"
                       type="debit"
-                      value={formatarMoeda(totalEntradaDebito)}
+                      value={formatarMoeda(DEBITO)}
                     />
                     <LabelBullet
                       title="Crédito"
                       type="credit"
-                      value={formatarMoeda(totalEntradaCredito)}
+                      value={formatarMoeda(totalCreditoEntrada)}
                     />
                   </div>
 

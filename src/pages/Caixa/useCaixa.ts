@@ -151,7 +151,7 @@ export const useCaixa = () => {
   }, [relatorio, formatarMoeda]);
 
   // Extrai os totais por método de pagamento do relatório
-  const totalPorMetodo = relatorio?.totalPorMetodo ?? {};
+  const totalPorMetodoEntrada = relatorio?.totalPorMetodoEntrada ?? {};
 
   // Desestruturação dos totais por método de pagamento
   const {
@@ -160,10 +160,10 @@ export const useCaixa = () => {
     DEBITO = 0,
     CREDITO_AVISTA = 0,
     CREDITO_PARCELADO = 0,
-  } = totalPorMetodo;
+  } = totalPorMetodoEntrada;
 
   // Calcula o total de crédito (avista + parcelado)
-  const totalCredito = CREDITO_AVISTA + CREDITO_PARCELADO;
+  const totalCreditoEntrada = CREDITO_AVISTA + CREDITO_PARCELADO;
 
   // Manipulador de envio de saída
   const handleSaidaSubmit = useCallback(
@@ -263,16 +263,16 @@ RESUMO FINANCEIRO
 
 💰 ENTRADAS
 ────────────────────────────────────────────────────────────────
-${Object.entries(relatorioFiltrado.totalPorMetodo || {})
-    .filter(([_, valor]) => valor > 0)
-    .map(([metodo, valor]) => {
-      const nomeMetodo =
+${Object.entries(relatorioFiltrado.totalPorMetodoEntrada || {})
+  .filter(([_, valor]) => valor > 0)
+  .map(([metodo, valor]) => {
+    const nomeMetodo =
       METODOS_PAGAMENTO_LABELS[
         metodo as keyof typeof METODOS_PAGAMENTO_LABELS
       ] || metodo;
-      return `${nomeMetodo.padEnd(20)} ${formatarMoeda(valor)}`;
-    })
-    .join('\n')}
+    return `${nomeMetodo.padEnd(20)} ${formatarMoeda(valor)}`;
+  })
+  .join('\n')}
 
 TOTAL DE ENTRADAS:        ${formatarMoeda(relatorioFiltrado.totalEntradas || 0)}
 
@@ -347,39 +347,39 @@ ESTATÍSTICAS DO PERÍODO
 ================================================================
 
 Número total de transações: ${
-  movimentacoes.filter((m) => {
-    const dataMovimento = new Date(m.criadoEm)
-      .toISOString()
-      .split('T')[0];
-    return dataMovimento >= dataInicial && dataMovimento <= dataFinal;
-  }).length
-}
+          movimentacoes.filter((m) => {
+            const dataMovimento = new Date(m.criadoEm)
+              .toISOString()
+              .split('T')[0];
+            return dataMovimento >= dataInicial && dataMovimento <= dataFinal;
+          }).length
+        }
 
 Número de entradas: ${
-  movimentacoes.filter((m) => {
-    const dataMovimento = new Date(m.criadoEm)
-      .toISOString()
-      .split('T')[0];
-    return (
-      m.tipo === 'ENTRADA' &&
+          movimentacoes.filter((m) => {
+            const dataMovimento = new Date(m.criadoEm)
+              .toISOString()
+              .split('T')[0];
+            return (
+              m.tipo === 'ENTRADA' &&
               dataMovimento >= dataInicial &&
               dataMovimento <= dataFinal
-    );
-  }).length
-}
+            );
+          }).length
+        }
 
 Número de saídas: ${
-  movimentacoes.filter((m) => {
-    const dataMovimento = new Date(m.criadoEm)
-      .toISOString()
-      .split('T')[0];
-    return (
-      m.tipo === 'SAIDA' &&
+          movimentacoes.filter((m) => {
+            const dataMovimento = new Date(m.criadoEm)
+              .toISOString()
+              .split('T')[0];
+            return (
+              m.tipo === 'SAIDA' &&
               dataMovimento >= dataInicial &&
               dataMovimento <= dataFinal
-    );
-  }).length
-}
+            );
+          }).length
+        }
 
 ================================================================
 Sistema de Caixa - Gerado automaticamente
@@ -522,7 +522,7 @@ Sistema de Caixa - Gerado automaticamente
     DEBITO,
     CREDITO_AVISTA,
     CREDITO_PARCELADO,
-    totalCredito,
+    totalCreditoEntrada,
     relatorio,
     metodoPagamento,
     valorSaida,
