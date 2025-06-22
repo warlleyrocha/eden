@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useFinanceiro } from '@/hooks/useFinanceiro';
+import { useRelatorioFechamento } from '@/hooks/useRelatorioFechamento';
 import type { MovimentoFinanceiro } from '@/@types/financeiro';
 
 // Mapeamento de métodos de pagamento
@@ -18,9 +19,12 @@ export const useCaixa = () => {
     createSaida,
     fetchMovimentacoesFinanceiras,
     fetchRelatorioFinanceiro,
+    fetchRelatorioFinanceiroComPeriodo,
     movimentacoes,
     relatorio,
   } = useFinanceiro();
+
+  const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
 
   // Estados do hook
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,6 +36,9 @@ export const useCaixa = () => {
   const [descricaoSaida, setDescricaoSaida] = useState('');
   const [parcelas, setParcelas] = useState(1);
   const [juros, setJuros] = useState(0);
+  // Estados para controlar o período do relatório
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   // Carrega as saídas financeiras
   useEffect(() => {
@@ -55,6 +62,17 @@ export const useCaixa = () => {
       minute: '2-digit',
     };
     return data.toLocaleString('pt-BR', options);
+  }, []);
+
+  // Formatação apenas de data (sem hora)
+  const formatarDataSimples = useCallback((dataString: string) => {
+    const data = new Date(dataString);
+
+    if (isNaN(data.getTime())) {
+      return 'Data inválida';
+    }
+
+    return data.toLocaleDateString('pt-BR');
   }, []);
 
   // Formatação de moeda
@@ -136,7 +154,7 @@ export const useCaixa = () => {
   }, [relatorio, formatarMoeda]);
 
   // Extrai os totais por método de pagamento do relatório
-  const totalPorMetodo = relatorio?.totalPorMetodo ?? {};
+  const totalPorMetodoEntrada = relatorio?.totalPorMetodoEntrada ?? {};
 
   // Desestruturação dos totais por método de pagamento
   const {
@@ -145,10 +163,10 @@ export const useCaixa = () => {
     DEBITO = 0,
     CREDITO_AVISTA = 0,
     CREDITO_PARCELADO = 0,
-  } = totalPorMetodo;
+  } = totalPorMetodoEntrada;
 
   // Calcula o total de crédito (avista + parcelado)
-  const totalCredito = CREDITO_AVISTA + CREDITO_PARCELADO;
+  const totalCreditoEntrada = CREDITO_AVISTA + CREDITO_PARCELADO;
 
   // Manipulador de envio de saída
   const handleSaidaSubmit = useCallback(
@@ -214,33 +232,42 @@ export const useCaixa = () => {
     ]
   );
 
-  // Exporta para PDF (simulação)
-  const exportToPDF = useCallback(() => {
-    const content = `
-      Resumo do Caixa
-      Entradas por Método de Pagamento
-
-      Total de Entradas: R$ ${totalEntries}
-      Total de Saídas: R$ ${totalSaidas}
-      Saldo: R$ ${finalBalance}
-      Data de Fechamento: ${new Date().toLocaleDateString()}
-    `;
-
-    const blob = new Blob([content], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'resumo_do_caixa.pdf';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  }, [totalEntries, totalSaidas, finalBalance]);
-
-  // Download do PDF
+  // Download do PDF com período selecionado
   const downloadPDF = useCallback(() => {
-    exportToPDF();
-  }, [exportToPDF]);
+    if (!startDate || !endDate) {
+      toast.error('Por favor, selecione um período válido');
+      return;
+    }
+
+    gerarPDFComPeriodo(
+      startDate,
+      endDate,
+      fetchRelatorioFinanceiroComPeriodo,
+      movimentacoes,
+      formatarDataSimples,
+      formatarMoeda,
+      formatarMetodoPagamentoCompleto,
+      METODOS_PAGAMENTO_LABELS
+    );
+  }, [
+    startDate,
+    endDate,
+    gerarPDFComPeriodo,
+    fetchRelatorioFinanceiroComPeriodo,
+    movimentacoes,
+    formatarDataSimples,
+    formatarMoeda,
+    formatarMetodoPagamentoCompleto,
+  ]);
+
+  // Callback para quando as datas são alteradas no CashClosureModel
+  const handleDateChange = useCallback(
+    (dataInicial: string, dataFinal: string) => {
+      setStartDate(dataInicial);
+      setEndDate(dataFinal);
+    },
+    []
+  );
 
   // Função para filtrar apenas entradas
   const filtrarEntradas = (movimentacoes: MovimentoFinanceiro[]) => {
@@ -317,6 +344,7 @@ export const useCaixa = () => {
     totalSaidaDinheiro,
     totalSaidaCredito,
     isSubmitting,
+    isGeneratingPDF,
     error,
     showModal,
     showExitModal,
@@ -328,7 +356,7 @@ export const useCaixa = () => {
     DEBITO,
     CREDITO_AVISTA,
     CREDITO_PARCELADO,
-    totalCredito,
+    totalCreditoEntrada,
     relatorio,
     metodoPagamento,
     valorSaida,
@@ -336,6 +364,8 @@ export const useCaixa = () => {
     parcelas,
     juros,
     movimentacoes,
+    startDate,
+    endDate,
 
     // Setters
     setShowModal,
@@ -345,15 +375,20 @@ export const useCaixa = () => {
     setDescricaoSaida,
     setParcelas,
     setJuros,
+    setStartDate,
+    setEndDate,
 
     // Funções
     filtrarEntradas,
     filtrarSaidas,
     formatarData,
+    formatarDataSimples,
     formatarMoeda,
     formatarMetodoPagamento,
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
+    handleDateChange,
     downloadPDF,
+    gerarPDFComPeriodo,
   };
 };

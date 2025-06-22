@@ -2,7 +2,6 @@
 import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
@@ -10,45 +9,50 @@ import {
 } from '@/components/ui/table';
 import { Smartphone } from 'lucide-react';
 
-type OrcamentoModelDetalsProps = {
-  empresaInfo?: {
-    //slug: string;
+type OrcamentoModelDetalsProps = Readonly<{
+  empresaInfo?: Readonly<{
     nome: string;
     cnpj: string;
     endereco: string;
+    subTitle: string;
     telefone: string;
     email: string;
-  };
+  }>;
 
-  orcamentoInfo: {
+  orcamentoInfo: Readonly<{
     index?: number;
     totalOrcamentos?: number;
     orcamentoId: string;
-    cliente?: {
+    cliente?: Readonly<{
       id: string;
       nome?: string;
       telefone?: string;
-    };
+      endereco: string;
+    }>;
     lojaId: string;
     descricao: string;
     metodoPagamento: string;
     date: string;
-    itens: Array<{
-      produtoId: string;
-      nome?: string;
-      precoUnitario: number;
-      quantidade: number;
-      valorTotal: number;
-    }>;
-    servicos: Array<{
-      descricao: string;
-      valor: number;
-    }>;
+    itens: ReadonlyArray<
+      Readonly<{
+        produtoId: string;
+        nome?: string;
+        precoUnitario: number;
+        quantidade: number;
+        valorTotal: number;
+      }>
+    >;
+    servicos: ReadonlyArray<
+      Readonly<{
+        descricao: string;
+        valor: number;
+      }>
+    >;
     numeroParcelas: number;
     status: string;
     total: number;
-  };
-};
+  }>;
+}>;
 
 export function OrcamentoModelDetals({
   empresaInfo,
@@ -66,7 +70,7 @@ export function OrcamentoModelDetals({
               {empresaInfo.nome}
             </h1>
             {/*<h2 className="text-sm text-gray-500">{empresaInfo.slug}</h2>*/}
-            <h3 className="text-sm text-gray-500">{empresaInfo.telefone}</h3>
+            <h3 className="text-sm text-gray-500">{empresaInfo.endereco}</h3>
             <h3 className="text-sm text-gray-500">{empresaInfo.cnpj}</h3>
             <h3 className="text-sm text-gray-500">{empresaInfo.email}</h3>
           </div>
@@ -87,21 +91,20 @@ export function OrcamentoModelDetals({
             {orcamentoInfo.cliente?.nome ?? 'Sem nome'}
           </h1>
           <p className="text-sm text-gray-500">
+            {orcamentoInfo.cliente?.endereco ?? 'Sem endereço'}
+          </p>
+          <p className="text-sm text-gray-500">
             {orcamentoInfo.cliente?.telefone ?? 'Sem telefone'}
           </p>
         </div>
         <div className="mb-4">
           <p className="text-sm font-semibold mb-2">Itens</p>
           <Table className="w-full border rounded-lg shadow-sm">
-            <TableCaption>Este orçamento tem validade de 7 dias.</TableCaption>
-            <TableCaption>
-              J.M CELL - Assistência Técnica Especializada
-            </TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[100px]">Descrição</TableHead>
                 <TableHead className="text-center">Qtd.</TableHead>
-                <TableHead className="text-rigth">Valor Unit.</TableHead>
+                <TableHead className="text-right">Valor Unit.</TableHead>
                 <TableHead className="text-right">Total</TableHead>
               </TableRow>
             </TableHeader>
@@ -118,8 +121,10 @@ export function OrcamentoModelDetals({
                   </TableRow>
                   {orcamentoInfo.itens
                     .filter((item) => item.nome?.includes('Produto:'))
-                    .map((item, index) => (
-                      <TableRow key={`produto-${index}`}>
+                    .map((item) => (
+                      <TableRow
+                        key={`produto-${item.produtoId}-${item.precoUnitario}-${item.quantidade}`}
+                      >
                         <TableCell>
                           {item.nome
                             ? item.nome.replace('Produto: ', '')
@@ -153,12 +158,12 @@ export function OrcamentoModelDetals({
                       Serviços
                     </TableCell>
                   </TableRow>
-                  {orcamentoInfo.servicos.map((item, index) => (
-                    <TableRow key={`servico-${index}`}>
+                  {orcamentoInfo.servicos.map((item) => (
+                    <TableRow key={`servico-${item.descricao}-${item.valor}`}>
                       <TableCell>
                         {item.descricao.replace('Serviço: ', '')}
                       </TableCell>
-                      <TableCell className="text-center">1</TableCell>
+                      <TableCell className="text-center"></TableCell>
                       <TableCell className="text-right">
                         {new Intl.NumberFormat('pt-BR', {
                           style: 'currency',
@@ -190,6 +195,39 @@ export function OrcamentoModelDetals({
               </TableRow>
             </TableBody>
           </Table>
+        </div>
+      </div>
+
+      <div className="mt-8 space-y-10 text-sm text-gray-700">
+        <div className="flex flex-col">
+          <span className="font-semibold text-gray-800 mb-2">
+            Assinatura da Loja
+          </span>
+          <div className="h-[80px] border-b border-gray-400 mb-2"></div>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Data de Recebimento: __ /__ / __</span>
+            <span>Data de Entrega: __ /__ / __</span>
+          </div>
+        </div>
+
+        <div className="text-center text-xs text-gray-500 pt-1 pb-0.5">
+          <p>Este orçamento tem validade de 7 dias.</p>
+          <p className="font-semibold">
+            {empresaInfo.nome} - {empresaInfo.subTitle}
+          </p>
+        </div>
+        <div className="border-b border-dashed my-1"></div>
+        <br />
+
+        <div className="flex flex-col border-t pt-6 border-gray-300 print:border-none">
+          <span className="font-semibold text-gray-800 mb-2">
+            Assinatura do Cliente (Recorte aqui)
+          </span>
+          <div className="h-[80px] border-b border-gray-400 mb-2"></div>
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Data de Recebimento: __ /__ / __</span>
+            <span>Data de Entrega: __ /__ / __</span>
+          </div>
         </div>
       </div>
     </div>

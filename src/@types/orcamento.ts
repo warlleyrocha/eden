@@ -1,7 +1,7 @@
 export interface Orcamento {
   id: string;
   cliente: {
-    // Mude de clienteId para cliente
+    endereco: string;
     id: string;
     nome?: string;
     telefone?: string;

@@ -7,6 +7,8 @@ interface StoreData {
   nameStore: string;
   emailStore: string;
   cnpjStore: string;
+  enderecoStore: string;
+  subTitleStore: string;
   storeId: string | null;
 }
 
@@ -44,6 +46,8 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
         nameStore: 'Carregando...',
         emailStore: 'Carregando...',
         cnpjStore: 'Carregando...',
+        enderecoStore: 'Carregando...',
+        subTitleStore: 'Carregando...',
         storeId: localStorage.getItem('storeId'),
       }
     );
@@ -98,6 +102,8 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
           nameStore: response.data.nome,
           emailStore: response.data.email,
           cnpjStore: response.data.cnpj,
+          enderecoStore: response.data.endereco,
+          subTitleStore: response.data.subTitulo,
           storeId,
         };
 
@@ -135,6 +141,8 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
       nameStore: 'Carregando...',
       emailStore: 'Carregando...',
       cnpjStore: 'Carregando...',
+      enderecoStore: 'Carregando...',
+      subTitleStore: 'Carregando...',
       storeId: localStorage.getItem('storeId'),
     });
     setLoading(true);

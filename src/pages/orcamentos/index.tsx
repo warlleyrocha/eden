@@ -36,11 +36,11 @@ const convertToRenderDetails = (
     cliente: orcamento.cliente
       ? {
         id: orcamento.cliente.id,
-        nome: orcamento.cliente.nome || '',
-        telefone: orcamento.cliente.telefone || '',
+        nome: orcamento.cliente.nome ?? '',
+        telefone: orcamento.cliente.telefone ?? '',
       }
       : undefined,
-    criadoEm: orcamento.criadoEm || new Date().toISOString(),
+    criadoEm: orcamento.criadoEm ?? new Date().toISOString(),
     total: orcamento.total ?? totalCalculado,
     status: orcamento.status,
   };
@@ -152,7 +152,7 @@ export default function Orcamento() {
           nome: client.nome || '',
           telefone: client.telefone || '',
           email: client.email || '',
-          cpfCnpj: client.cpfCnpj || '',
+          cpfCnpj: client.cpfCnpj ?? '',
           doc: client.doc || '',
           endereco: client.endereco || '',
         };
@@ -250,7 +250,9 @@ export default function Orcamento() {
       <Header />
 
       <div className="container mx-auto px-4 py-8 ">
-        <h1 className="text-3xl text-[#1E3A8A] font-bold mb-6">Clientes e Orçamentos</h1>
+        <h1 className="text-3xl text-[#1E3A8A] font-bold mb-6">
+          Clientes e Orçamentos
+        </h1>
 
         <div className="flex mb-4 w-full gap-5 p-5 bg-white rounded-lg shadow-md hover:none ">
           <Button

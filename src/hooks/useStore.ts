@@ -6,6 +6,8 @@ interface StoreData {
   nameStore: string;
   emailStore: string;
   cnpjStore: string;
+  enderecoStore: string;
+  subTitleStore: string;
   storeId: string | null;
 }
 
@@ -36,6 +38,8 @@ export const useStoreData = () => {
     nameStore: storeData.nameStore,
     emailStore: storeData.emailStore,
     cnpjStore: storeData.cnpjStore,
+    enderecoStore: storeData.enderecoStore,
+    subTitleStore: storeData.subTitleStore,
     loading,
     error,
   };

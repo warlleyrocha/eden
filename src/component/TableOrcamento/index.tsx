@@ -38,6 +38,8 @@ interface TableProps {
     nameStore: string;
     emailStore: string;
     cnpjStore: string;
+    enderecoStore: string;
+    subTitleStore: string;
   };
 }
 
@@ -93,7 +95,7 @@ const TableRowOrcamento = memo(
       <TableRow className="hover:bg-gray-50 text-center">
         <TableCell className="py-2 px-4">{totalLength - index}</TableCell>
         <TableCell className="py-2 px-4">
-          {orcamento.cliente?.nome || 'Sem nome'}
+          {orcamento.cliente?.nome ?? 'Sem nome'}
         </TableCell>
         <TableCell className="py-2 px-4">{formattedDate}</TableCell>
         <TableCell className="py-2 px-4">{formattedTotal}</TableCell>
@@ -112,7 +114,7 @@ const TableRowOrcamento = memo(
             className="border-2 border-zinc-700"
             onClick={() => onDeleteOrcamento(orcamento.id)}
           >
-            <Printer className="mr-1" />
+            <X className="mr-1" />
             Deletar
           </Button>
         </TableCell>
@@ -215,7 +217,7 @@ const ProductItem = memo(
             type="number"
             placeholder="Quantidade"
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={item.quantity || ''}
+            value={item.quantity ?? ''}
             onChange={handleQuantityChange}
           />
         </div>
@@ -377,6 +379,8 @@ function TableOrcamento({
       nameStore: '',
       emailStore: '',
       cnpjStore: '',
+      enderecoStore: '',
+      subTitleStore: '',
     };
   }, [externalStoreData]);
 
@@ -385,12 +389,19 @@ function TableOrcamento({
     () => ({
       nome: storeData.nameStore,
       cnpj: formatCpfCnpj(storeData.cnpjStore),
-      endereco: 'Endereço da Empresa',
+      endereco: storeData.enderecoStore,
+      subTitle: storeData.subTitleStore,
       telefone: '00 00000-0000',
       email: storeData.emailStore,
       data: '2023-10-01',
     }),
-    [storeData.nameStore, storeData.emailStore, storeData.cnpjStore]
+    [
+      storeData.nameStore,
+      storeData.emailStore,
+      storeData.cnpjStore,
+      storeData.enderecoStore,
+      storeData.subTitleStore,
+    ]
   );
 
   // Handlers memorizados para produtos
@@ -486,6 +497,7 @@ function TableOrcamento({
             id: selectedOrcamento.cliente?.id ?? '',
             nome: selectedOrcamento.cliente?.nome ?? 'Cliente não informado',
             telefone: selectedOrcamento.cliente?.telefone ?? 'Não informado',
+            endereco: selectedOrcamento.cliente?.endereco ?? 'Não informado',
           },
           date: selectedOrcamento.criadoEm
             ? new Date(selectedOrcamento.criadoEm).toLocaleDateString('pt-BR')

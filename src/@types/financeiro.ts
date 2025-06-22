@@ -35,5 +35,5 @@ export interface RelatorioFinanceiro {
   totalEntradas: number;
   totalSaidas: number;
   saldo: number;
-  totalPorMetodo: Partial<Record<MetodoPagamento, number>>;
+  totalPorMetodoEntrada: Partial<Record<MetodoPagamento, number>>;
 }
