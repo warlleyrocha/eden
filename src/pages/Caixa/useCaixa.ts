@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useFinanceiro } from '@/hooks/useFinanceiro';
+import { useRelatorioFechamento } from '@/hooks/useRelatorioFechamento';
 import type { MovimentoFinanceiro } from '@/@types/financeiro';
 
 // Mapeamento de métodos de pagamento
@@ -18,13 +19,15 @@ export const useCaixa = () => {
     createSaida,
     fetchMovimentacoesFinanceiras,
     fetchRelatorioFinanceiro,
+    fetchRelatorioFinanceiroComPeriodo,
     movimentacoes,
     relatorio,
   } = useFinanceiro();
 
+  const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
+
   // Estados do hook
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [showExitModal, setShowExitModal] = useState(false);
@@ -229,192 +232,33 @@ export const useCaixa = () => {
     ]
   );
 
-  // Função para gerar PDF baseado no período selecionado
-  const gerarPDFComPeriodo = useCallback(
-    async (dataInicial: string, dataFinal: string) => {
-      setIsGeneratingPDF(true);
+  // Download do PDF com período selecionado
+  const downloadPDF = useCallback(() => {
+    if (!startDate || !endDate) {
+      toast.error('Por favor, selecione um período válido');
+      return;
+    }
 
-      try {
-        // Busca o relatório com o período específico
-        const relatorioFiltrado = await fetchRelatorioFinanceiro({
-          dataInicial,
-          dataFinal,
-        });
-
-        if (!relatorioFiltrado) {
-          throw new Error('Não foi possível gerar o relatório');
-        }
-
-        // Gera o conteúdo do PDF
-        const periodo = `${formatarDataSimples(
-          dataInicial
-        )} à ${formatarDataSimples(dataFinal)}`;
-
-        const conteudoPDF = `
-RELATÓRIO DE FECHAMENTO DE CAIXA
-================================================================
-
-PERÍODO: ${periodo}
-Data de Geração: ${formatarDataSimples(new Date().toISOString())}
-
-================================================================
-RESUMO FINANCEIRO
-================================================================
-
-💰 ENTRADAS
-────────────────────────────────────────────────────────────────
-${Object.entries(relatorioFiltrado.totalPorMetodoEntrada || {})
-  .filter(([_, valor]) => valor > 0)
-  .map(([metodo, valor]) => {
-    const nomeMetodo =
-      METODOS_PAGAMENTO_LABELS[
-        metodo as keyof typeof METODOS_PAGAMENTO_LABELS
-      ] || metodo;
-    return `${nomeMetodo.padEnd(20)} ${formatarMoeda(valor)}`;
-  })
-  .join('\n')}
-
-TOTAL DE ENTRADAS:        ${formatarMoeda(relatorioFiltrado.totalEntradas || 0)}
-
-----------------------------------------------------------------
-💸 SAÍDAS
-----------------------------------------------------------------
-TOTAL DE SAÍDAS:          ${formatarMoeda(relatorioFiltrado.totalSaidas || 0)}
-
-----------------------------------------------------------------
-📊 SALDO FINAL
-----------------------------------------------------------------
-SALDO:                    ${formatarMoeda(relatorioFiltrado.saldo || 0)}
-
-================================================================
-DETALHAMENTO DAS MOVIMENTAÇÕES
-================================================================
-
-📈 ENTRADAS DETALHADAS:
-${
-  movimentacoes
-    .filter((m) => {
-      const dataMovimento = new Date(m.criadoEm).toISOString().split('T')[0];
-      return (
-        m.tipo === 'ENTRADA' &&
-        dataMovimento >= dataInicial &&
-        dataMovimento <= dataFinal
-      );
-    })
-    .map(
-      (movimento) =>
-        `${formatarDataSimples(
-          movimento.criadoEm
-        )} | ${formatarMetodoPagamentoCompleto(
-          movimento.metodoPagamento,
-          movimento.parcelas,
-          movimento.juros
-        )} | ${formatarMoeda(movimento.valor)} | ${
-          movimento.descricao || 'Entrada'
-        }`
-    )
-    .join('\n') || 'Nenhuma entrada no período'
-}
-
-📉 SAÍDAS DETALHADAS:
-${
-  movimentacoes
-    .filter((m) => {
-      const dataMovimento = new Date(m.criadoEm).toISOString().split('T')[0];
-      return (
-        m.tipo === 'SAIDA' &&
-        dataMovimento >= dataInicial &&
-        dataMovimento <= dataFinal
-      );
-    })
-    .map(
-      (movimento) =>
-        `${formatarDataSimples(
-          movimento.criadoEm
-        )} | ${formatarMetodoPagamentoCompleto(
-          movimento.metodoPagamento,
-          movimento.parcelas,
-          movimento.juros
-        )} | ${formatarMoeda(movimento.valor)} | ${
-          movimento.descricao || 'Saída'
-        }`
-    )
-    .join('\n') || 'Nenhuma saída no período'
-}
-
-================================================================
-ESTATÍSTICAS DO PERÍODO
-================================================================
-
-Número total de transações: ${
-          movimentacoes.filter((m) => {
-            const dataMovimento = new Date(m.criadoEm)
-              .toISOString()
-              .split('T')[0];
-            return dataMovimento >= dataInicial && dataMovimento <= dataFinal;
-          }).length
-        }
-
-Número de entradas: ${
-          movimentacoes.filter((m) => {
-            const dataMovimento = new Date(m.criadoEm)
-              .toISOString()
-              .split('T')[0];
-            return (
-              m.tipo === 'ENTRADA' &&
-              dataMovimento >= dataInicial &&
-              dataMovimento <= dataFinal
-            );
-          }).length
-        }
-
-Número de saídas: ${
-          movimentacoes.filter((m) => {
-            const dataMovimento = new Date(m.criadoEm)
-              .toISOString()
-              .split('T')[0];
-            return (
-              m.tipo === 'SAIDA' &&
-              dataMovimento >= dataInicial &&
-              dataMovimento <= dataFinal
-            );
-          }).length
-        }
-
-================================================================
-Sistema de Caixa - Gerado automaticamente
-================================================================
-      `;
-
-        // Cria e baixa o arquivo
-        const blob = new Blob([conteudoPDF], {
-          type: 'text/plain;charset=utf-8',
-        });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `fechamento-caixa-${dataInicial}-${dataFinal}.txt`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-
-        toast.success('Relatório PDF gerado com sucesso!');
-      } catch (error) {
-        console.error('Erro ao gerar PDF:', error);
-        toast.error('Erro ao gerar o relatório PDF');
-      } finally {
-        setIsGeneratingPDF(false);
-      }
-    },
-    [
-      fetchRelatorioFinanceiro,
+    gerarPDFComPeriodo(
+      startDate,
+      endDate,
+      fetchRelatorioFinanceiroComPeriodo,
       movimentacoes,
       formatarDataSimples,
       formatarMoeda,
       formatarMetodoPagamentoCompleto,
-    ]
-  );
+      METODOS_PAGAMENTO_LABELS
+    );
+  }, [
+    startDate,
+    endDate,
+    gerarPDFComPeriodo,
+    fetchRelatorioFinanceiroComPeriodo,
+    movimentacoes,
+    formatarDataSimples,
+    formatarMoeda,
+    formatarMetodoPagamentoCompleto,
+  ]);
 
   // Callback para quando as datas são alteradas no CashClosureModel
   const handleDateChange = useCallback(
@@ -424,16 +268,6 @@ Sistema de Caixa - Gerado automaticamente
     },
     []
   );
-
-  // Download do PDF com período selecionado
-  const downloadPDF = useCallback(() => {
-    if (!startDate || !endDate) {
-      toast.error('Por favor, selecione um período válido');
-      return;
-    }
-
-    gerarPDFComPeriodo(startDate, endDate);
-  }, [startDate, endDate, gerarPDFComPeriodo]);
 
   // Função para filtrar apenas entradas
   const filtrarEntradas = (movimentacoes: MovimentoFinanceiro[]) => {

@@ -23,7 +23,7 @@ const handleApiError = (err: unknown): ApiError => {
   if (axios.isAxiosError(err)) {
     const status = err.response?.status;
     const message =
-      err.response?.data?.message || err.message || 'Erro desconhecido';
+      err.response?.data?.message ?? err.message ?? 'Erro desconhecido';
 
     if (status === 401)
       return { message: 'Não autorizado. Faça login novamente.', status };
@@ -154,7 +154,6 @@ export function useFinanceiro() {
             'Relatório financeiro gerado com sucesso:',
             response.data
           );
-          await fetch;
           setRelatorio(response.data);
         } else {
           setError({ message: 'Resposta inválida da API.' });
@@ -194,6 +193,75 @@ export function useFinanceiro() {
         }
       } finally {
         setLoading(false);
+      }
+    },
+    []
+  );
+
+  const fetchRelatorioFinanceiroComPeriodo = useCallback(
+    async ({
+      dataInicial,
+      dataFinal,
+      cancelToken,
+    }: {
+      dataInicial: string;
+      dataFinal: string;
+      cancelToken?: CancelTokenSource;
+    }) => {
+      try {
+        const token = getAuthToken();
+        const lojaId = getStoreId();
+
+        if (!lojaId) {
+          throw new Error('Loja não encontrada.');
+        }
+
+        const response = await api.get(
+          `/financeiro/relatorio/?dataInicio=${dataInicial}&dataFim=${dataFinal}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            cancelToken: cancelToken?.token,
+          }
+        );
+
+        if (response.status === 200) {
+          console.log(
+            'Relatório financeiro gerado com sucesso:',
+            response.data
+          );
+          return response.data; // RETORNA os dados
+        } else {
+          throw new Error('Resposta inválida da API.');
+        }
+      } catch (err) {
+        if (
+          err instanceof Error &&
+          err.message === 'Usuário não autenticado: token não encontrado.'
+        ) {
+          throw new Error(
+            'Usuário não autenticado. Por favor, faça login novamente.'
+          );
+        } else if (!axios.isCancel(err)) {
+          if (axios.isAxiosError(err) && err.response) {
+            switch (err.response.status) {
+            case 400:
+              throw new Error('Erro ao gerar relatório financeiro.');
+            case 404:
+              throw new Error('Loja não encontrada.');
+            case 500:
+              throw new Error('Erro interno do servidor.');
+            default:
+              throw new Error(
+                err.response.data?.message || 'Erro desconhecido'
+              );
+            }
+          } else {
+            throw err;
+          }
+        }
+        throw err;
       }
     },
     []
@@ -277,5 +345,6 @@ export function useFinanceiro() {
     error,
     fetchMovimentacoesFinanceiras,
     fetchRelatorioFinanceiro,
+    fetchRelatorioFinanceiroComPeriodo,
   };
 }
