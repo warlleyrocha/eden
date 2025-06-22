@@ -39,7 +39,7 @@ interface TableProps {
     emailStore: string;
     cnpjStore: string;
     enderecoStore: string;
-    subTitle: string;
+    subTitleStore: string;
   };
 }
 
@@ -95,7 +95,7 @@ const TableRowOrcamento = memo(
       <TableRow className="hover:bg-gray-50 text-center">
         <TableCell className="py-2 px-4">{totalLength - index}</TableCell>
         <TableCell className="py-2 px-4">
-          {orcamento.cliente?.nome || 'Sem nome'}
+          {orcamento.cliente?.nome ?? 'Sem nome'}
         </TableCell>
         <TableCell className="py-2 px-4">{formattedDate}</TableCell>
         <TableCell className="py-2 px-4">{formattedTotal}</TableCell>
@@ -217,7 +217,7 @@ const ProductItem = memo(
             type="number"
             placeholder="Quantidade"
             className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={item.quantity || ''}
+            value={item.quantity ?? ''}
             onChange={handleQuantityChange}
           />
         </div>
