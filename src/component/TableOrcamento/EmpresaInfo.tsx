@@ -231,9 +231,19 @@ export function OrcamentoModelDetals({
           <br />
 
           <div className="flex flex-col border-t pt-6 border-gray-300 print:border-none">
-            <span className="font-semibold text-gray-800 mb-2">
-              Assinatura do Cliente (Recorte aqui)
-            </span>
+            <div className="flex justify-between">
+              <span className="font-semibold text-gray-800 mb-2">
+                Assinatura do Cliente (Recorte aqui)
+              </span>
+              <h1 className="text-sm font-semibold text-gray-700">
+                Orçamento: #
+                {orcamentoInfo.totalOrcamentos &&
+                orcamentoInfo.index !== undefined
+                  ? orcamentoInfo.totalOrcamentos - orcamentoInfo.index
+                  : orcamentoInfo.orcamentoId}
+              </h1>
+            </div>
+
             <div className="h-[80px] border-b border-gray-400 mb-2"></div>
             <div className="flex justify-between text-xs text-gray-500">
               <span>Data de Recebimento: __ /__ / __</span>
