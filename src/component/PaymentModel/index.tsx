@@ -28,6 +28,12 @@ const CashClosureModel: React.FC<CashClosureModelProps> = ({
     return today.toISOString().split('T')[0];
   };
 
+  const getTomorrowDate = () => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    return tomorrow.toISOString().split('T')[0];
+  };
+
   const validateDates = () => {
     if (!startDate || !endDate) return true;
     return new Date(startDate) <= new Date(endDate);
@@ -78,8 +84,8 @@ const CashClosureModel: React.FC<CashClosureModelProps> = ({
           <span className="text-sm text-gray-700 font-medium">
             {startDate && endDate
               ? `${formatDateForDisplay(startDate)} à ${formatDateForDisplay(
-                endDate
-              )}`
+                  endDate
+                )}`
               : 'Selecione as datas'}
           </span>
         </div>
@@ -119,7 +125,7 @@ const CashClosureModel: React.FC<CashClosureModelProps> = ({
             value={endDate}
             onChange={(e) => handleEndDateChange(e.target.value)}
             min={startDate}
-            max={getCurrentDate()}
+            max={getTomorrowDate()}
             className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
         </div>
