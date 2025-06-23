@@ -38,9 +38,9 @@ export function useStock() {
         response.data;
 
       setProducts(produtos);
-      setTotalProdutos(totalProdutos || 0);
-      setQuantidadeTotal(quantidadeTotal || 0);
-      setValorTotal(valorTotal || 0);
+      setTotalProdutos(totalProdutos ?? 0);
+      setQuantidadeTotal(quantidadeTotal ?? 0);
+      setValorTotal(valorTotal ?? 0);
       setError(null);
     } catch (err) {
       console.error('Erro ao buscar produtos:', err);

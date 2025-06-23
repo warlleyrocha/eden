@@ -19,7 +19,6 @@ export default function Stock() {
   const [quantidade, setQuantidade] = useState('');
   const [preco, setPreco] = useState('');
   const [busca, setBusca] = useState('');
-  //const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
   const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
 
   const { products, addProduct, updateProduct, deleteProduct } = useStock();
@@ -172,7 +171,6 @@ export default function Stock() {
         <DialogModal
           title="Adicionar ao Estoque"
           description="Preencha os detalhes do item abaixo"
-          titleButton="Adicionar"
           isOpen={isOpen}
           onOpen={() => setIsOpen(true)}
           onClose={() => setIsOpen(false)}

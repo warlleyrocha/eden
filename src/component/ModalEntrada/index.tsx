@@ -3,19 +3,19 @@ import { Button } from '@/components/ui/button';
 import type { Dispatch, SetStateAction } from 'react';
 
 interface ModalEntradaProps {
-  showExitModal: boolean;
-  setShowExitModal: Dispatch<SetStateAction<boolean>>;
-  valorEntrada: string;
-  setValorEntrada: Dispatch<SetStateAction<string>>;
-  descricaoEntrada: string;
-  setDescricaoEntrada: Dispatch<SetStateAction<string>>;
-  metodoPagamento: string;
-  setMetodoPagamento: Dispatch<SetStateAction<string>>;
-  parcelas: number;
-  setParcelas: Dispatch<SetStateAction<number>>;
-  juros: number;
-  setJuros: Dispatch<SetStateAction<number>>;
-  handleEntradaSubmit: () => void;
+  readonly showExitModal: boolean;
+  readonly setShowExitModal: Dispatch<SetStateAction<boolean>>;
+  readonly valorEntrada: string;
+  //readonly setValorEntrada: Dispatch<SetStateAction<string>>;
+  readonly descricaoEntrada: string;
+  readonly setDescricaoEntrada: Dispatch<SetStateAction<string>>;
+  readonly metodoPagamento: string;
+  readonly setMetodoPagamento: Dispatch<SetStateAction<string>>;
+  readonly parcelas: number;
+  readonly setParcelas: Dispatch<SetStateAction<number>>;
+  readonly juros: number;
+  readonly setJuros: Dispatch<SetStateAction<number>>;
+  readonly handleEntradaSubmit: () => void;
 }
 
 export default function ModalEntrada({
@@ -35,23 +35,26 @@ export default function ModalEntrada({
   if (!showExitModal) return null;
 
   const enviarEntradaComMetodo = () => {
-    const metodoFinal =
-      metodoPagamento === 'credito'
-        ? parcelas === 1
-          ? 'CREDITO_AVISTA'
-          : 'CREDITO_PARCELADO'
-        : metodoPagamento;
+    let metodoFinal = metodoPagamento;
 
-    setMetodoPagamento(metodoFinal); // opcional se o estado for usado fora
+    if (metodoPagamento === 'credito') {
+      if (parcelas === 1) {
+        metodoFinal = 'CREDITO_AVISTA';
+      } else {
+        metodoFinal = 'CREDITO_PARCELADO';
+      }
+    }
+
+    setMetodoPagamento(metodoFinal);
     handleEntradaSubmit();
   };
-
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
-      <div
+      <button
         className="bg-black opacity-60 absolute inset-0"
         onClick={() => setShowExitModal(false)}
-      ></div>
+        aria-label="Fechar modal"
+      ></button>
       <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg">
         <h2 className="text-xl font-semibold text-black mb-4">
           Registrar Nova Entrada
@@ -60,7 +63,10 @@ export default function ModalEntrada({
           <div></div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="descricao-entrada"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Descrição
             </label>
             <input
@@ -73,7 +79,10 @@ export default function ModalEntrada({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label
+              htmlFor="metodo-pagamento"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Método de Pagamento
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -140,7 +149,10 @@ export default function ModalEntrada({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="taxa-juros"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   Juros (%)
                 </label>
                 <input

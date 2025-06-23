@@ -50,7 +50,7 @@ export function useClients() {
         signal,
       });
 
-      setClients(response.data || []);
+      setClients(response.data ?? []);
       setError(null);
     } catch (err: unknown) {
       if (

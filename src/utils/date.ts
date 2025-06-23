@@ -50,22 +50,35 @@ export const extrairDataSemTimezone = (dataISO: string): string => {
 /**
  * Formata data garantindo que não mude por timezone
  */
-export const formatarDataSegura = (dataInput: string | Date): string => {
-  let data: Date;
+export const formatarDataSegura = (data: string | Date): string => {
+  try {
+    let dataObj: Date;
 
-  if (typeof dataInput === 'string') {
-    // Se é string, usa a função segura de conversão
-    data = converterDataStringParaLocal(extrairDataSemTimezone(dataInput));
-  } else {
-    data = dataInput;
+    if (typeof data === 'string') {
+      // Se for string, criar Date object
+      dataObj = new Date(data);
+    } else {
+      // Se já for Date object
+      dataObj = data;
+    }
+
+    // Verificar se a data é válida
+    if (isNaN(dataObj.getTime())) {
+      console.error('Data inválida:', data);
+      return 'Data inválida';
+    }
+
+    // Formatar usando toLocaleDateString para evitar problemas de timezone
+    return dataObj.toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      timeZone: 'America/Sao_Paulo', // Ajuste conforme sua timezone
+    });
+  } catch (error) {
+    console.error('Erro ao formatar data:', error, data);
+    return 'Erro na data';
   }
-
-  // Formata usando as funções locais para evitar conversão de timezone
-  const dia = data.getDate().toString().padStart(2, '0');
-  const mes = (data.getMonth() + 1).toString().padStart(2, '0');
-  const ano = data.getFullYear();
-
-  return `${dia}/${mes}/${ano}`;
 };
 
 /**

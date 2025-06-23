@@ -89,19 +89,19 @@ export function useFinanceiro() {
         } else if (!axios.isCancel(err)) {
           if (axios.isAxiosError(err) && err.response) {
             switch (err.response.status) {
-              case 400:
-                setError({
-                  message: 'Erro ao listar movimentações financeiras.',
-                });
-                break;
-              case 404:
-                setError({ message: 'Loja não encontrada.' });
-                break;
-              case 500:
-                setError({ message: 'Erro interno do servidor.' });
-                break;
-              default:
-                setError(handleApiError(err));
+            case 400:
+              setError({
+                message: 'Erro ao listar movimentações financeiras.',
+              });
+              break;
+            case 404:
+              setError({ message: 'Loja não encontrada.' });
+              break;
+            case 500:
+              setError({ message: 'Erro interno do servidor.' });
+              break;
+            default:
+              setError(handleApiError(err));
             }
           } else {
             setError(handleApiError(err));
@@ -172,19 +172,19 @@ export function useFinanceiro() {
         } else if (!axios.isCancel(err)) {
           if (axios.isAxiosError(err) && err.response) {
             switch (err.response.status) {
-              case 400:
-                setError({
-                  message: 'Erro ao gerar relatório financeiro.',
-                });
-                break;
-              case 404:
-                setError({ message: 'Loja não encontrada.' });
-                break;
-              case 500:
-                setError({ message: 'Erro interno do servidor.' });
-                break;
-              default:
-                setError(handleApiError(err));
+            case 400:
+              setError({
+                message: 'Erro ao gerar relatório financeiro.',
+              });
+              break;
+            case 404:
+              setError({ message: 'Loja não encontrada.' });
+              break;
+            case 500:
+              setError({ message: 'Erro interno do servidor.' });
+              break;
+            default:
+              setError(handleApiError(err));
             }
           } else {
             setError(handleApiError(err));
@@ -263,16 +263,16 @@ export function useFinanceiro() {
         } else if (!axios.isCancel(err)) {
           if (axios.isAxiosError(err) && err.response) {
             switch (err.response.status) {
-              case 400:
-                throw new Error('Erro ao gerar relatório financeiro.');
-              case 404:
-                throw new Error('Loja não encontrada.');
-              case 500:
-                throw new Error('Erro interno do servidor.');
-              default:
-                throw new Error(
-                  err.response.data?.message ?? 'Erro desconhecido'
-                );
+            case 400:
+              throw new Error('Erro ao gerar relatório financeiro.');
+            case 404:
+              throw new Error('Loja não encontrada.');
+            case 500:
+              throw new Error('Erro interno do servidor.');
+            default:
+              throw new Error(
+                err.response.data?.message ?? 'Erro desconhecido'
+              );
             }
           } else {
             throw err;
@@ -328,19 +328,19 @@ export function useFinanceiro() {
         } else if (!axios.isCancel(err)) {
           if (axios.isAxiosError(err) && err.response) {
             switch (err.response.status) {
-              case 400:
-                setError({
-                  message: 'Erro ao registrar saída financeira.',
-                });
-                break;
-              case 404:
-                setError({ message: 'Loja não encontrada.' });
-                break;
-              case 500:
-                setError({ message: 'Erro interno do servidor.' });
-                break;
-              default:
-                setError(handleApiError(err));
+            case 400:
+              setError({
+                message: 'Erro ao registrar saída financeira.',
+              });
+              break;
+            case 404:
+              setError({ message: 'Loja não encontrada.' });
+              break;
+            case 500:
+              setError({ message: 'Erro interno do servidor.' });
+              break;
+            default:
+              setError(handleApiError(err));
             }
           } else {
             setError(handleApiError(err));

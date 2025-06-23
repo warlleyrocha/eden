@@ -4,7 +4,7 @@ import { pdf } from '@react-pdf/renderer';
 import { toast } from 'sonner';
 import { RelatorioFechamentoPDF } from '../component/RelatorioFechamentoPDF';
 import type { RelatorioFinanceiro, Movimento } from '@/@types/relatorio';
-import { extrairDataSemTimezone, formatarDataSegura } from '../utils/date';
+import { extrairDataSemTimezone } from '../utils/date';
 
 /**
  * Hook para gerenciar a geração de relatórios PDF
@@ -67,9 +67,9 @@ export const useRelatorioFechamento = () => {
         };
 
         // Período formatado usando função segura
-        const periodo = `${formatarDataSegura(
+        const periodo = `${formatarDataSimples(
           dataInicialSegura
-        )} à ${formatarDataSegura(dataFinalSegura)}`;
+        )} à ${formatarDataSimples(dataFinalSegura)}`;
 
         // Filtrar movimentações do período de forma mais segura
         const movimentacoesPeriodo = movimentacoes.filter((m) => {
@@ -94,7 +94,7 @@ export const useRelatorioFechamento = () => {
         });
 
         // Data de geração usando função segura
-        const dataGeracao = formatarDataSegura(new Date());
+        const dataGeracao = formatarDataSimples(new Date().toString());
 
         // Gerar PDF usando React PDF
         const pdfDoc = (
@@ -105,7 +105,7 @@ export const useRelatorioFechamento = () => {
             saidasPeriodo={saidasPeriodo}
             dataGeracao={dataGeracao}
             formatarMoeda={formatarMoeda}
-            formatarDataSimples={formatarDataSegura}
+            formatarDataSimples={formatarDataSimples}
             formatarMetodoPagamentoCompleto={formatarMetodoPagamentoCompleto}
             METODOS_PAGAMENTO_LABELS={METODOS_PAGAMENTO_LABELS}
           />
