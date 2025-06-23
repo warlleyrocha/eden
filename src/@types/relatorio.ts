@@ -1,5 +1,6 @@
 // types/relatorio.types.ts
 export interface Movimento {
+  id: string;
   criadoEm: string;
   tipo: 'ENTRADA' | 'SAIDA';
   metodoPagamento: string;

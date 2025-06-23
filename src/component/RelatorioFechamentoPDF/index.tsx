@@ -38,7 +38,7 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
           ENTRADAS POR MÉTODO
         </Text>
         {Object.entries(relatorio.totalPorMetodoEntrada)
-          .filter(([_, valor]) => valor > 0)
+          .filter(([, valor]) => valor > 0)
           .map(([metodo, valor]) => {
             const nomeMetodo = METODOS_PAGAMENTO_LABELS[metodo] || metodo;
             return (
@@ -114,8 +114,8 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
         </View>
 
         {entradasPeriodo.length > 0 ? (
-          entradasPeriodo.map((movimento, index) => (
-            <View key={index} style={pdfStyles.detailRow}>
+          entradasPeriodo.map((movimento) => (
+            <View key={movimento.id} style={pdfStyles.detailRow}>
               <Text style={pdfStyles.date}>
                 {formatarDataSimples(movimento.criadoEm)}
               </Text>
@@ -159,8 +159,8 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
         </View>
 
         {saidasPeriodo.length > 0 ? (
-          saidasPeriodo.map((movimento, index) => (
-            <View key={index} style={pdfStyles.detailRow}>
+          saidasPeriodo.map((movimento) => (
+            <View key={movimento.id} style={pdfStyles.detailRow}>
               <Text style={pdfStyles.date}>
                 {formatarDataSimples(movimento.criadoEm)}
               </Text>

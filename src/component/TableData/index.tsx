@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
-import { ConfirmDialog } from "../ConfirmDialog";
+import { Button } from '@/components/ui/button';
+import { Edit, Trash } from 'lucide-react';
+import { ConfirmDialog } from '../ConfirmDialog';
 
 import {
   Table,
@@ -8,10 +8,10 @@ import {
   TableCell,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from '@/components/ui/table';
 import { useState } from 'react';
 
-type TableDataProps = {
+type TableDataProps = Readonly<{
   items: {
     id: string;
     produto: string;
@@ -21,7 +21,7 @@ type TableDataProps = {
   }[];
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-};
+}>;
 
 export function TableData({ items, onEdit, onDelete }: TableDataProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -34,7 +34,7 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
 
   const handleConfirmDelete = async () => {
     if (selectedId && onDelete) {
-      await onDelete(selectedId);
+      onDelete(selectedId);
     }
     setDialogOpen(false);
     setSelectedId(null);
@@ -63,8 +63,8 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {items.map((item, index) => (
-            <TableRow key={index} className="hover:bg-gray-50">
+          {items.map((item) => (
+            <TableRow key={item.id} className="hover:bg-gray-50">
               <TableCell className="px-6 py-4 text-sm text-[#1E3A8A]">
                 {item.produto}
               </TableCell>
