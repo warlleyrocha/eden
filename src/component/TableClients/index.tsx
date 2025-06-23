@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash } from 'lucide-react';
+import { Edit, Trash, Search } from 'lucide-react';
 
 import type { Client } from '@/@types/clients';
 
@@ -17,7 +17,6 @@ import { formatPhone } from '@/utils/formatPhone';
 
 import useTableClientLogic from './useTableClientLogic';
 
-import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from '../ConfirmDialog';
 
@@ -47,7 +46,7 @@ export default function TableClient({
 
   const handleConfirmDelete = async () => {
     if (selectedId && onDelete) {
-      await onDelete(selectedId);
+      onDelete(selectedId);
     }
     setDialogOpen(false);
     setSelectedId(null);

@@ -22,7 +22,7 @@ const ModalOrcamentos: React.FC<ModalOrcamentosProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay com fundo escuro semi-transparente */}
-      <div
+      <button
         className="absolute inset-0 bg-black/20 backdrop-blur"
         onClick={onClose}
       />
