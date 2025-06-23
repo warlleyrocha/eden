@@ -346,7 +346,7 @@ function TableOrcamento({
     setOrcamentoProdutos,
     setServices,
     setShowExitModal,
-    setValorEntrada,
+    //setValorEntrada,
     setDescricaoEntrada,
     setMetodoPagamento,
     setParcelas,
@@ -702,7 +702,7 @@ function TableOrcamento({
                   showExitModal={showExitModal}
                   setShowExitModal={setShowExitModal}
                   valorEntrada={valorEntrada}
-                  setValorEntrada={setValorEntrada}
+                  //setValorEntrada={setValorEntrada}
                   descricaoEntrada={descricaoEntrada}
                   setDescricaoEntrada={setDescricaoEntrada}
                   metodoPagamento={metodoPagamento}
