@@ -1,5 +1,21 @@
-version: '3.8'
 services:
+  # Aplicação React + TypeScript
+  web:
+    image: node:20-alpine
+    container_name: react-app-eden
+    ports:
+      - '5173:5173' # porta padrão do Vite
+    volumes:
+      - .:/app
+      - /app/node_modules
+    working_dir: /app
+    command: sh -c "npm install --legacy-peer-deps && npm run dev -- --host 0.0.0.0"
+    environment:
+      - NODE_ENV=development
+      - VITE_HOST=0.0.0.0
+    stdin_open: true
+    tty: true
+
   sonarqube:
     image: sonarqube:10-community
     container_name: sonarqube-eden
