@@ -13,6 +13,7 @@ interface AuthContextType {
   login: (userData?: any) => void;
   logout: () => void;
   user?: any;
+  token?: string | null;
   loading: boolean;
 }
 
@@ -27,26 +28,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const storedToken = localStorage.getItem('token');
+    if (storedToken) {
+      setToken(storedToken);
       setAuthenticated(true);
     }
     setLoading(false);
   }, []);
 
-  const login = (userData?: any) => {
+  const login = (userData?: any, authToken?: string) => {
     setAuthenticated(true);
+
     if (userData) {
       setUser(userData);
+    }
+
+    if (authToken) {
+      setToken(authToken);
+      localStorage.setItem('token', authToken);
     }
   };
 
   const logout = () => {
     setAuthenticated(false);
     setUser(null);
+    setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
   };
 
   const contextValue = useMemo(
@@ -57,8 +68,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       login,
       logout,
       user,
+      token,
     }),
-    [authenticated, loading, user]
+    [authenticated, loading, user, token]
   );
 
   return (
