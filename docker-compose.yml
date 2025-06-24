@@ -1,6 +1,6 @@
 services:
   # Aplicação React + TypeScript
-  web:
+  eden:
     image: node:20-alpine
     container_name: react-app-eden
     ports:
