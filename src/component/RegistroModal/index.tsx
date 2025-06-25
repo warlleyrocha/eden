@@ -1,0 +1,253 @@
+import { ArrowRight, Banknote, CreditCard, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import React from 'react';
+
+interface RegistroModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  tipo: 'entrada' | 'saida';
+  isSubmitting: boolean;
+  onSubmit: (e: React.FormEvent) => void;
+  error?: string | null;
+  valor: string;
+  setValor: (v: string) => void;
+  descricao: string;
+  setDescricao: (v: string) => void;
+  metodoPagamento: string;
+  setMetodoPagamento: (v: string) => void;
+  parcelas: number;
+  setParcelas: (n: number) => void;
+  juros: number;
+  setJuros: (n: number) => void;
+}
+
+export const RegistroModal: React.FC<RegistroModalProps> = ({
+  isOpen,
+  onClose,
+  tipo,
+  isSubmitting,
+  onSubmit,
+  error,
+  valor,
+  setValor,
+  descricao,
+  setDescricao,
+  metodoPagamento,
+  setMetodoPagamento,
+  parcelas,
+  setParcelas,
+  juros,
+  setJuros,
+}) => {
+  if (!isOpen) return null;
+
+  const isCredito = metodoPagamento === 'credito';
+  const titulo =
+    tipo === 'entrada' ? 'Registrar Nova Entrada' : 'Registrar Nova Saída';
+  const botaoTexto =
+    tipo === 'entrada' ? 'Registrar Entrada' : 'Registrar Saída';
+  const loadingTexto =
+    tipo === 'entrada' ? 'Registrando entrada...' : 'Registrando saída...';
+
+  return (
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
+      <button
+        className="bg-black opacity-60 absolute inset-0"
+        onClick={onClose}
+        disabled={isSubmitting}
+      ></button>
+
+      <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg">
+        <h2 className="text-xl font-semibold text-[#1E3A8A] mb-4">{titulo}</h2>
+
+        {isSubmitting && (
+          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-20">
+            <div className="text-center">
+              <Loader2 className="h-8 w-8 animate-spin text-[#1E3A8A] mx-auto mb-4" />
+              <p className="text-[#1E3A8A] font-medium">{loadingTexto}</p>
+            </div>
+          </div>
+        )}
+
+        <form className="space-y-4 justify-between">
+          <div>
+            <label
+              htmlFor="value"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Valor
+            </label>
+            <input
+              type="number"
+              step="0.01"
+              min="0.01"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder="0,00"
+              value={valor}
+              onChange={(e) => setValor(e.target.value)}
+              disabled={isSubmitting}
+              required
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="description"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Descrição
+            </label>
+            <input
+              type="text"
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={`Descrição da ${tipo}`}
+              value={descricao}
+              onChange={(e) => setDescricao(e.target.value)}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="payment-method"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              Método de Pagamento
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                {
+                  id: 'pix',
+                  label: 'PIX',
+                  icon: <ArrowRight className="h-4 w-4" />,
+                },
+                {
+                  id: 'dinheiro',
+                  label: 'Dinheiro',
+                  icon: <Banknote className="h-4 w-4" />,
+                },
+                {
+                  id: 'debito',
+                  label: 'Débito',
+                  icon: <CreditCard className="h-4 w-4" />,
+                },
+                {
+                  id: 'credito',
+                  label: 'Crédito',
+                  icon: <CreditCard className="h-4 w-4" />,
+                },
+              ].map(({ id, label, icon }) => (
+                <div key={id} className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    id={id}
+                    name="metodo"
+                    value={id}
+                    checked={metodoPagamento === id}
+                    onChange={() => setMetodoPagamento(id)}
+                    disabled={isSubmitting}
+                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                  />
+                  <label htmlFor={id} className="flex items-center gap-2">
+                    {icon}
+                    {label}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {isCredito && (
+            <div className="space-y-4">
+              <div>
+                <label
+                  htmlFor="parcelas-select"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Número de Parcelas
+                </label>
+                <select
+                  id="parcelas-select"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  value={parcelas}
+                  onChange={(e) => setParcelas(Number(e.target.value))}
+                  disabled={isSubmitting}
+                >
+                  {[...Array(12)].map((_, i) => (
+                    <option key={i + 1} value={i + 1}>
+                      {i + 1}x
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label
+                  htmlFor="juros"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Juros (%)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.1"
+                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  placeholder="0"
+                  value={juros}
+                  onChange={(e) => setJuros(Number(e.target.value))}
+                  disabled={isSubmitting}
+                />
+              </div>
+              {juros > 0 && valor && (
+                <div className="text-sm text-gray-600">
+                  <p>Valor Original: R$ {Number(valor).toFixed(2)}</p>
+                  <p>
+                    Valor com Juros: R${' '}
+                    {(Number(valor) * (1 + juros / 100)).toFixed(2)}
+                  </p>
+                  <p>
+                    Valor por Parcela: R${' '}
+                    {((Number(valor) * (1 + juros / 100)) / parcelas).toFixed(
+                      2
+                    )}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
+            <Button
+              variant="outline"
+              className="w-full sm:w-auto rounded-full border-gray-300 hover:bg-gray-50"
+              onClick={onClose}
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+            <Button
+              className="w-full sm:w-auto bg-[#22C55E] hover:bg-[#1AAE4E] text-white px-5 py-3 rounded-full transition-colors duration-200"
+              disabled={isSubmitting}
+              onClick={onSubmit}
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
+                  Registrando...
+                </>
+              ) : (
+                botaoTexto
+              )}
+            </Button>
+          </div>
+          {error && (
+            <div className="error-message text-red-600 text-sm mt-2 text-center">
+              {error}
+            </div>
+          )}
+        </form>
+      </div>
+    </div>
+  );
+};
