@@ -17,9 +17,9 @@ const METODOS_PAGAMENTO_LABELS = {
 export const useCaixa = () => {
   const {
     createSaida,
-    fetchMovimentacoesFinanceiras,
-    fetchRelatorioFinanceiro,
-    fetchRelatorioFinanceiroComPeriodo,
+    fetchMovimentacoes,
+    fetchRelatorioHoje,
+    fetchRelatorioPorPeriodo,
     movimentacoes,
     relatorio,
   } = useFinanceiro();
@@ -42,9 +42,9 @@ export const useCaixa = () => {
 
   // Carrega as saídas financeiras
   useEffect(() => {
-    fetchMovimentacoesFinanceiras();
-    fetchRelatorioFinanceiro();
-  }, [fetchMovimentacoesFinanceiras, fetchRelatorioFinanceiro]);
+    fetchMovimentacoes();
+    fetchRelatorioHoje();
+  }, [fetchMovimentacoes, fetchRelatorioHoje]);
 
   // Formatação de data
   const formatarData = useCallback((dataString: string) => {
@@ -252,7 +252,7 @@ export const useCaixa = () => {
     gerarPDFComPeriodo(
       startDate,
       endDate,
-      fetchRelatorioFinanceiroComPeriodo,
+      fetchRelatorioPorPeriodo,
       movimentacoes,
       formatarDataSimples,
       formatarMoeda,
@@ -263,7 +263,7 @@ export const useCaixa = () => {
     startDate,
     endDate,
     gerarPDFComPeriodo,
-    fetchRelatorioFinanceiroComPeriodo,
+    fetchRelatorioPorPeriodo,
     movimentacoes,
     formatarDataSimples,
     formatarMoeda,
