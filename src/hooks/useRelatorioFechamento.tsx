@@ -67,9 +67,9 @@ export const useRelatorioFechamento = () => {
         };
 
         // Período formatado usando função segura
-        const periodo = `${formatarDataSegura(
+        const periodo = `${formatarDataSimples(
           dataInicialSegura
-        )} à ${formatarDataSegura(dataFinalSegura)}`;
+        )} à ${formatarDataSimples(dataFinalSegura)}`;
 
         // Filtrar movimentações do período de forma mais segura
         const movimentacoesPeriodo = movimentacoes.filter((m) => {
