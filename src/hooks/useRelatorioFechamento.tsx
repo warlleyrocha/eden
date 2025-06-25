@@ -6,6 +6,28 @@ import { RelatorioFechamentoPDF } from '../component/RelatorioFechamentoPDF';
 import type { RelatorioFinanceiro, Movimento } from '@/@types/relatorio';
 import { extrairDataSemTimezone } from '../utils/date';
 
+interface PDFUtilities {
+  formatarDataSimples: (data: string) => string;
+  formatarMoeda: (valor: number) => string;
+  formatarMetodoPagamentoCompleto: (
+    metodo: string,
+    parcelas?: number,
+    juros?: number
+  ) => string;
+  METODOS_PAGAMENTO_LABELS: Record<string, string>;
+}
+
+// Interface para os dados necessários
+interface PDFData {
+  dataInicial: string;
+  dataFinal: string;
+  fetchRelatorioFinanceiroComPeriodo: (params: {
+    dataInicial: string;
+    dataFinal: string;
+  }) => Promise<RelatorioFinanceiro>;
+  movimentacoes: Movimento[];
+}
+
 /**
  * Hook para gerenciar a geração de relatórios PDF
  */
@@ -16,23 +38,20 @@ export const useRelatorioFechamento = () => {
    * Gera PDF com período específico usando seu hook existente
    */
   const gerarPDFComPeriodo = useCallback(
-    async (
-      dataInicial: string,
-      dataFinal: string,
-      fetchRelatorioFinanceiroComPeriodo: (params: {
-        dataInicial: string;
-        dataFinal: string;
-      }) => Promise<RelatorioFinanceiro>,
-      movimentacoes: Movimento[],
-      formatarDataSimples: (data: string) => string,
-      formatarMoeda: (valor: number) => string,
-      formatarMetodoPagamentoCompleto: (
-        metodo: string,
-        parcelas?: number,
-        juros?: number
-      ) => string,
-      METODOS_PAGAMENTO_LABELS: Record<string, string>
-    ) => {
+    async (data: PDFData, utilities: PDFUtilities) => {
+      const {
+        dataInicial,
+        dataFinal,
+        fetchRelatorioFinanceiroComPeriodo,
+        movimentacoes,
+      } = data;
+      const {
+        formatarDataSimples,
+        formatarMoeda,
+        formatarMetodoPagamentoCompleto,
+        METODOS_PAGAMENTO_LABELS,
+      } = utilities;
+
       setIsGeneratingPDF(true);
 
       try {

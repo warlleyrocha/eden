@@ -223,14 +223,10 @@ export function useTableLogic({
       const produto = products.find((p) => p.id === item.value);
       const quantidade = Number(item.quantity);
 
-      if (
-        produto &&
-        produto.estoque !== undefined &&
-        produto.estoque < quantidade
-      ) {
-        errors[
-          item.value
-        ] = `Estoque insuficiente (${produto.estoque} disponíveis)`;
+      if ((produto?.estoque ?? 0) < quantidade) {
+        errors[item.value] = `Estoque insuficiente (${
+          produto?.estoque ?? 0
+        } disponíveis)`;
       }
     }
 
@@ -397,6 +393,7 @@ export function useTableLogic({
     }
 
     const lojaId = getStoreId();
+
     if (!lojaId) {
       alert('Loja não identificada');
       return;
@@ -404,11 +401,6 @@ export function useTableLogic({
 
     if (!validateStock()) {
       alert('Corrija os problemas de estoque antes de enviar');
-      return;
-    }
-
-    if (orcamentoProdutos.length === 0 && services.length === 0) {
-      alert('Adicione pelo menos um item ou serviço');
       return;
     }
 
@@ -431,7 +423,7 @@ export function useTableLogic({
     try {
       const newOrcamento: CreateOrcamento = {
         clienteId: clienteSelecionado.id.toString(),
-        lojaId: lojaId as string,
+        lojaId,
         status: 'ABERTO',
         descricao: pagamentoState.descricaoEntrada,
         metodoPagamento: pagamentoState.metodoPagamento.toUpperCase(),
