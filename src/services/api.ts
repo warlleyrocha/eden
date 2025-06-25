@@ -1,5 +1,5 @@
-import Axios from "axios";
+import Axios from 'axios';
 
 export const api = Axios.create({
-  baseURL: "http://localhost:3333",
+  baseURL: 'https://edenbackend-production.up.railway.app',
 });
