@@ -1,16 +1,20 @@
-import React from "react";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import React from 'react';
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from 'react-router-dom';
 
-import SignIn from "../pages/Signin";
-import Home from "../pages/Home";
-import useAuth from "../hook";
-import Caixa from "@/pages/Caixa";
-import Stock from "@/pages/estoque";
-import Orcamento from "@/pages/orcamentos";
+import SignIn from '../pages/Signin';
+import Home from '../pages/Home';
+import useAuth from '../hooks/useAuth';
+import Caixa from '@/pages/Caixa';
+import Stock from '@/pages/estoque';
+import Orcamento from '@/pages/orcamentos';
 
 const Private = ({ children }: { children: React.ReactElement }) => {
   const { authenticated, loading } = useAuth();
-  const accessToken = localStorage.getItem("token");
+  const accessToken = localStorage.getItem('token');
   const isLoggedIn = authenticated && !!accessToken;
   if (loading) return null; // ou um spinner
   return isLoggedIn ? children : <Navigate to="/signin" replace />;
@@ -18,7 +22,7 @@ const Private = ({ children }: { children: React.ReactElement }) => {
 
 const Public = ({ children }: { children: React.ReactElement }) => {
   const { authenticated, loading } = useAuth();
-  const accessToken = localStorage.getItem("token");
+  const accessToken = localStorage.getItem('token');
   const isLoggedIn = authenticated && !!accessToken;
   if (loading) return null; // ou um spinner
   return isLoggedIn ? <Navigate to="/home" replace /> : children;
@@ -27,7 +31,7 @@ const Public = ({ children }: { children: React.ReactElement }) => {
 const router = createBrowserRouter(
   [
     {
-      path: "/home",
+      path: '/home',
       element: (
         <Private>
           <Home />
@@ -35,7 +39,7 @@ const router = createBrowserRouter(
       ),
     },
     {
-      path: "/caixa",
+      path: '/caixa',
       element: (
         <Private>
           <Caixa />
@@ -43,7 +47,7 @@ const router = createBrowserRouter(
       ),
     },
     {
-      path: "/estoque",
+      path: '/estoque',
       element: (
         <Private>
           <Stock />
@@ -51,7 +55,7 @@ const router = createBrowserRouter(
       ),
     },
     {
-      path: "/orcamento",
+      path: '/orcamento',
       element: (
         <Private>
           <Orcamento />
@@ -59,7 +63,7 @@ const router = createBrowserRouter(
       ),
     },
     {
-      path: "/signin",
+      path: '/signin',
       element: (
         <Public>
           <SignIn />
@@ -67,7 +71,7 @@ const router = createBrowserRouter(
       ),
     },
     {
-      path: "*",
+      path: '*',
       element: (
         <Public>
           <SignIn />

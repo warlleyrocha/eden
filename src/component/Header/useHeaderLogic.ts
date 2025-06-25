@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '@/hook';
+import useAuth from '@/hooks/useAuth';
 import { useStore } from '@/hooks/useStore';
 import { useOrcamento } from '@/hooks/useOrcamento';
 
