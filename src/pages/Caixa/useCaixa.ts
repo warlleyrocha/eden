@@ -139,7 +139,7 @@ export const useCaixa = () => {
   );
 
   // Calcula o total de entradas
-  const totalEntries = useMemo(() => {
+  const totalEntradas = useMemo(() => {
     return relatorio ? formatarMoeda(relatorio.totalEntradas || 0) : 'R$ 0,00';
   }, [relatorio, formatarMoeda]);
 
@@ -149,24 +149,34 @@ export const useCaixa = () => {
   }, [relatorio, formatarMoeda]);
 
   // Calcula o saldo final
-  const finalBalance = useMemo(() => {
+  const saldoFinal = useMemo(() => {
     return relatorio ? formatarMoeda(relatorio.saldo || 0) : 'R$ 0,00';
   }, [relatorio, formatarMoeda]);
 
   // Extrai os totais por método de pagamento do relatório
   const totalPorMetodoEntrada = relatorio?.totalPorMetodoEntrada ?? {};
+  const totalPorMetodoSaida = relatorio?.totalPorMetodoSaida ?? {};
 
   // Desestruturação dos totais por método de pagamento
   const {
-    PIX = 0,
-    DINHEIRO = 0,
-    DEBITO = 0,
-    CREDITO_AVISTA = 0,
-    CREDITO_PARCELADO = 0,
+    PIX: pixEntrada = 0,
+    DINHEIRO: dinheiroEntrada = 0,
+    DEBITO: debitoEntrada = 0,
+    CREDITO_AVISTA: creditoAvistaEntrada = 0,
+    CREDITO_PARCELADO: creditoParceladoEntrada = 0,
   } = totalPorMetodoEntrada;
 
+  const {
+    PIX: pixSaida = 0,
+    DINHEIRO: dinheiroSaida = 0,
+    DEBITO: debitoSaida = 0,
+    CREDITO_AVISTA: creditoAvistaSaida = 0,
+    CREDITO_PARCELADO: creditoParceladoSaida = 0,
+  } = totalPorMetodoSaida;
+
   // Calcula o total de crédito (avista + parcelado)
-  const totalCreditoEntrada = CREDITO_AVISTA + CREDITO_PARCELADO;
+  const totalCreditoEntrada = creditoAvistaEntrada + creditoParceladoEntrada;
+  const totalCreditoSaida = creditoAvistaSaida + creditoParceladoSaida;
 
   // Manipulador de envio de saída
   const handleSaidaSubmit = useCallback(
@@ -335,35 +345,45 @@ export const useCaixa = () => {
 
   return {
     // Estados
-    totalEntradaPix,
-    totalEntradaDebito,
-    totalEntradaDinheiro,
-    totalEntradaCredito,
-    totalSaidaPix,
-    totalSaidaDebito,
-    totalSaidaDinheiro,
-    totalSaidaCredito,
     isSubmitting,
     isGeneratingPDF,
     error,
     showModal,
     showExitModal,
-    totalEntries,
+
+    // Referente ao estado *relatorio¹* do hook useFinanceiro
+    totalEntradas,
     totalSaidas,
-    finalBalance,
-    PIX,
-    DINHEIRO,
-    DEBITO,
-    CREDITO_AVISTA,
-    CREDITO_PARCELADO,
+    saldoFinal,
+
+    pixEntrada,
+    dinheiroEntrada,
+    debitoEntrada,
     totalCreditoEntrada,
-    relatorio,
+
+    pixSaida,
+    dinheiroSaida,
+    debitoSaida,
+    totalCreditoSaida,
+
+    // Referente ao estado *movimentacoes²* do hook useFinanceiro
+    totalEntradaPix,
+    totalEntradaDinheiro,
+    totalEntradaDebito,
+    totalEntradaCredito,
+
+    totalSaidaPix,
+    totalSaidaDinheiro,
+    totalSaidaDebito,
+    totalSaidaCredito,
+
+    relatorio /* 1* */,
+    movimentacoes /* 2* */,
     metodoPagamento,
     valorSaida,
     descricaoSaida,
     parcelas,
     juros,
-    movimentacoes,
     startDate,
     endDate,
 
