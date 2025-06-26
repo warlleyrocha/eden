@@ -18,8 +18,8 @@ export default function Caixa() {
     isSubmitting,
     isGeneratingPDF,
     error,
-    showModal,
-    showExitModal,
+    showCashClosureModal,
+    showSaidaModal,
     totalEntradas,
     totalSaidas,
     saldoFinal,
@@ -39,8 +39,9 @@ export default function Caixa() {
     movimentacoes,
 
     // Setters
-    setShowModal,
-    setShowExitModal,
+    setShowCashClosureModal,
+    setShowSaidaModal,
+    setShowEntradaModal,
     setMetodoPagamento,
     setValorSaida,
     setDescricaoSaida,
@@ -74,7 +75,7 @@ export default function Caixa() {
                 </div>
                 <Button
                   className="px-4 py-2 rounded-lg bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200"
-                  onClick={() => setShowModal(true)}
+                  onClick={() => setShowCashClosureModal(true)}
                   disabled={isGeneratingPDF}
                 >
                   {isGeneratingPDF ? (
@@ -133,7 +134,13 @@ export default function Caixa() {
                   totalSaidas={totalSaidas}
                   saldoFinal={saldoFinal}
                   // Handler para adicionar
-                  onAddClick={() => setShowExitModal(true)}
+                  onAddClick={() => {
+                    if (activeTab === 'entradas') {
+                      setShowEntradaModal(true);
+                    } else {
+                      setShowSaidaModal(true);
+                    }
+                  }}
                   // Funções de formatação
                   formatarMoeda={formatarMoeda}
                   formatarData={formatarData}
@@ -162,7 +169,7 @@ export default function Caixa() {
                   totalSaidas={totalSaidas}
                   saldoFinal={saldoFinal}
                   // Handler para adicionar
-                  onAddClick={() => setShowExitModal(true)}
+                  onAddClick={() => setShowSaidaModal(true)}
                   // Funções de formatação
                   formatarMoeda={formatarMoeda}
                   formatarData={formatarData}
@@ -177,16 +184,16 @@ export default function Caixa() {
       </div>
 
       {/* Modal de Fechamento de Caixa */}
-      {showModal && (
+      {showCashClosureModal && (
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
           <button
             className="bg-black opacity-60 absolute inset-0 backdrop-blur-sm transition-opacity"
-            onClick={() => setShowModal(false)}
+            onClick={() => setShowCashClosureModal(false)}
             disabled={isGeneratingPDF}
           ></button>
           <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg min-h-[32rem]">
             <button
-              onClick={() => setShowModal(false)}
+              onClick={() => setShowCashClosureModal(false)}
               disabled={isGeneratingPDF}
               className="absolute top-6 right-6 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
               aria-label="Close"
@@ -251,11 +258,34 @@ export default function Caixa() {
         </div>
       )}
 
-      {showExitModal && (
+      {/* Modal de Registro de Entrada */}
+      {/*{showEntradaModal && (
         <RegistroModal
-          isOpen={showExitModal}
-          onClose={() => setShowExitModal(false)}
-          tipo={activeTab === 'entradas' ? 'entrada' : 'saida'}
+          isOpen={showEntradaModal}
+          onClose={() => setShowEntradaModal(false)}
+          tipo='entrada'
+          isSubmitting={isSubmitting}
+          onSubmit={handleEntradaSubmit}
+          error={error}
+          valor={valorEntrada}
+          setValor={setValorEntarda}
+          descricao={descricaoEntrada}
+          setDescricao={setDescricaoEntrada}
+          metodoPagamento={metodoPagamento}
+          setMetodoPagamento={setMetodoPagamento}
+          parcelas={parcelas}
+          setParcelas={setParcelas}
+          juros={juros}
+          setJuros={setJuros}
+        />
+      )}*/}
+
+      {/* Modal de Registro de Saída */}
+      {showSaidaModal && (
+        <RegistroModal
+          isOpen={showSaidaModal}
+          onClose={() => setShowSaidaModal(false)}
+          tipo="saida"
           isSubmitting={isSubmitting}
           onSubmit={handleSaidaSubmit}
           error={error}

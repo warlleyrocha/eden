@@ -29,8 +29,9 @@ export const useCaixa = () => {
   // Estados do hook
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showExitModal, setShowExitModal] = useState(false);
+  const [showCashClosureModal, setShowCashClosureModal] = useState(false);
+  const [showEntradaModal, setShowEntradaModal] = useState(false);
+  const [showSaidaModal, setShowSaidaModal] = useState(false);
   const [metodoPagamento, setMetodoPagamento] = useState('pix');
   const [valorSaida, setValorSaida] = useState('');
   const [descricaoSaida, setDescricaoSaida] = useState('');
@@ -219,7 +220,7 @@ export const useCaixa = () => {
         setMetodoPagamento('pix');
         setParcelas(1);
         setJuros(0);
-        setShowExitModal(false);
+        setShowSaidaModal(false);
 
         toast.success('Saída registrada com sucesso!');
       } catch (err) {
@@ -241,6 +242,70 @@ export const useCaixa = () => {
       createSaida,
     ]
   );
+
+  //Manipulador de envio de entrada
+  /*const handleEntradaSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      if (!valorEntrada || isNaN(Number(valorEntrada))) {
+        setError('Valor inválido');
+        return;
+      }
+
+      setIsSubmitting(true);
+      setError(null);
+
+      try {
+        // Calcula valor final (com juros se for crédito)
+        let valorFinal = Number(valorEntrada);
+        if (metodoPagamento === 'credito' && juros > 0) {
+          valorFinal = valorFinal * (1 + juros / 100);
+        }
+
+        const payload = {
+          metodoPagamento: formatarTipoMetodo(
+            metodoPagamento,
+            metodoPagamento === 'credito' ? parcelas : undefined
+          ),
+          valor: valorFinal,
+          descricao: descricaoSaida,
+          ...(metodoPagamento === 'credito' && {
+            parcelas: Number(parcelas),
+            juros: Number(juros),
+          }),
+        };
+
+        await createEntrada({ payload });
+
+        // Reset dos campos após sucesso
+        setValorEntrada('');
+        setDescricaoEntrada('');
+        setMetodoPagamento('pix');
+        setParcelas(1);
+        setJuros(0);
+        setShowEntradaModal(false);
+
+        toast.success('Venda registrada com sucesso!');
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erro desconhecido';
+        setError(errorMessage);
+        console.error('Erro ao registrar saída:', err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [
+      valorEntrada,
+      metodoPagamento,
+      juros,
+      descricaoEntrada,
+      parcelas,
+      formatarTipoMetodo,
+      createEntrada,
+    ]
+  );*/
 
   // Download do PDF com período selecionado
   const downloadPDF = useCallback(() => {
@@ -348,8 +413,9 @@ export const useCaixa = () => {
     isSubmitting,
     isGeneratingPDF,
     error,
-    showModal,
-    showExitModal,
+    showCashClosureModal,
+    showSaidaModal,
+    showEntradaModal,
 
     // Referente ao estado *relatorio¹* do hook useFinanceiro
     totalEntradas,
@@ -388,8 +454,9 @@ export const useCaixa = () => {
     endDate,
 
     // Setters
-    setShowModal,
-    setShowExitModal,
+    setShowCashClosureModal,
+    setShowSaidaModal,
+    setShowEntradaModal,
     setMetodoPagamento,
     setValorSaida,
     setDescricaoSaida,
