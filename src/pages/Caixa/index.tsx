@@ -23,10 +23,10 @@ export default function Caixa() {
     totalEntradas,
     totalSaidas,
     saldoFinal,
-    totalSaidaPix,
-    totalSaidaDebito,
-    totalSaidaDinheiro,
-    totalSaidaCredito,
+    pixSaida,
+    dinheiroSaida,
+    debitoSaida,
+    totalCreditoSaida,
     pixEntrada,
     dinheiroEntrada,
     debitoEntrada,
@@ -154,10 +154,10 @@ export default function Caixa() {
               {activeTab === 'saidas' && (
                 <MovimentacoesTab
                   // Valores dos cartões de resumo
-                  pixValue={totalSaidaPix}
-                  dinheiroValue={totalSaidaDinheiro}
-                  debitoValue={totalSaidaDebito}
-                  creditoValue={totalSaidaCredito}
+                  pixValue={pixSaida}
+                  dinheiroValue={dinheiroSaida}
+                  debitoValue={debitoSaida}
+                  creditoValue={totalCreditoSaida}
                   // Configurações da seção principal
                   sectionTitle="Resumo de Saídas"
                   movimentacoes={movimentacoes}
