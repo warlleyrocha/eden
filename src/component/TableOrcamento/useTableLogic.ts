@@ -83,18 +83,18 @@ function pagamentoReducer(
   action: PagamentoAction
 ): PagamentoState {
   switch (action.type) {
-    case 'SET_FIELD':
-      return { ...state, [action.field]: action.value };
-    case 'RESET':
-      return initialPagamentoState;
-    case 'SET_TOTAL':
-      return {
-        ...state,
-        totalCalculado: action.total,
-        valorEntrada: action.total.toString(),
-      };
-    default:
-      return state;
+  case 'SET_FIELD':
+    return { ...state, [action.field]: action.value };
+  case 'RESET':
+    return initialPagamentoState;
+  case 'SET_TOTAL':
+    return {
+      ...state,
+      totalCalculado: action.total,
+      valorEntrada: action.total.toString(),
+    };
+  default:
+    return state;
   }
 }
 

@@ -35,10 +35,10 @@ const convertToRenderDetails = (
     id: orcamento.id,
     cliente: orcamento.cliente
       ? {
-          id: orcamento.cliente.id,
-          nome: orcamento.cliente.nome ?? '',
-          telefone: orcamento.cliente.telefone ?? '',
-        }
+        id: orcamento.cliente.id,
+        nome: orcamento.cliente.nome ?? '',
+        telefone: orcamento.cliente.telefone ?? '',
+      }
       : undefined,
     criadoEm: orcamento.criadoEm ?? new Date().toISOString(),
     total: orcamento.total ?? totalCalculado,
@@ -209,28 +209,28 @@ export default function Orcamento() {
   // Renderização condicional otimizada
   const renderContent = useMemo(() => {
     switch (activeTab) {
-      case 'Clientes':
-        return (
-          <TableClient
-            key={tableClientKey}
-            clients={formattedClients}
-            onDelete={deleteClient}
-            onSelectClientForEdit={handleSelectClientForEdit}
-          />
-        );
-      case 'Orçamentos':
-        return (
-          <TableOrcamento
-            formattedOrcamentos={formattedOrcamentos}
-            formattedClients={formattedClients}
-            onDeleteOrcamento={handleDeleteOrcamento}
-            onSubmitOrcamento={handleOrcamentoSubmit}
-            products={products}
-            storeData={storeData}
-          />
-        );
-      default:
-        return null;
+    case 'Clientes':
+      return (
+        <TableClient
+          key={tableClientKey}
+          clients={formattedClients}
+          onDelete={deleteClient}
+          onSelectClientForEdit={handleSelectClientForEdit}
+        />
+      );
+    case 'Orçamentos':
+      return (
+        <TableOrcamento
+          formattedOrcamentos={formattedOrcamentos}
+          formattedClients={formattedClients}
+          onDeleteOrcamento={handleDeleteOrcamento}
+          onSubmitOrcamento={handleOrcamentoSubmit}
+          products={products}
+          storeData={storeData}
+        />
+      );
+    default:
+      return null;
     }
   }, [
     activeTab,
