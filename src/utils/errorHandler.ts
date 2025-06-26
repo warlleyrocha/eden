@@ -46,6 +46,31 @@ const CREATE_OUTFLOW_ERRORS = {
   404: ERROR_MESSAGES.NOT_FOUND_STORE,
 };
 
+const FETCH_BUDGETS_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao listar orçamentos.',
+  [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
+};
+
+const FETCH_BUDGET_BY_ID_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao buscar orçamento.',
+  [HTTP_STATUS.NOT_FOUND]: 'Orçamento não encontrado.',
+};
+
+const CREATE_BUDGET_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao criar orçamento.',
+  [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
+};
+
+const UPDATE_BUDGET_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao atualizar orçamento.',
+  [HTTP_STATUS.NOT_FOUND]: 'Orçamento não encontrado para atualização.',
+};
+
+const DELETE_BUDGET_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao deletar orçamento.',
+  [HTTP_STATUS.NOT_FOUND]: 'Orçamento não encontrado para exclusão.',
+};
+
 const createErrorHandlerMap = (
   operationMessages: ErrorMessageMap
 ): Record<number, ErrorHandler> => ({
@@ -113,4 +138,9 @@ export {
   FETCH_MOVEMENTS_ERRORS,
   FETCH_REPORT_ERRORS,
   CREATE_OUTFLOW_ERRORS,
+  FETCH_BUDGETS_ERRORS,
+  FETCH_BUDGET_BY_ID_ERRORS,
+  CREATE_BUDGET_ERRORS,
+  UPDATE_BUDGET_ERRORS,
+  DELETE_BUDGET_ERRORS,
 };
