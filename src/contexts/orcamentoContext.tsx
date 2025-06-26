@@ -3,7 +3,7 @@ import React, {
   useContext,
   useState,
   useCallback,
-  ReactNode,
+  type ReactNode,
 } from 'react';
 
 import type { Orcamento } from '@/@types/orcamento';
@@ -14,6 +14,10 @@ interface OrcamentoSequenciaContextData {
   adicionarOrcamento: (orcamento: Orcamento) => void;
   getNumeroSequencial: (orcamentoId: string) => number | null;
   getOrcamentosOrdenados: () => Orcamento[];
+  modalAberto: boolean;
+  orcamentoParaImprimir: Orcamento | null;
+  abrirModalImpressao: (orcamento: Orcamento) => void;
+  fecharModalImpressao: () => void;
 }
 
 interface OrcamentoSequenciaProviderProps {
@@ -28,6 +32,21 @@ export const OrcamentoSequenciaProvider: React.FC<
   OrcamentoSequenciaProviderProps
 > = ({ children }) => {
   const [orcamentos, setOrcamentosState] = useState<Orcamento[]>([]);
+  // Estados do modal
+  const [modalAberto, setModalAberto] = useState(false);
+  const [orcamentoParaImprimir, setOrcamentoParaImprimir] =
+    useState<Orcamento | null>(null);
+
+  // Funções do modal
+  const abrirModalImpressao = useCallback((orcamento: Orcamento) => {
+    setOrcamentoParaImprimir(orcamento);
+    setModalAberto(true);
+  }, []);
+
+  const fecharModalImpressao = useCallback(() => {
+    setModalAberto(false);
+    setOrcamentoParaImprimir(null);
+  }, []);
 
   // Função para ordenar orçamentos por data de criação (mais antigo primeiro)
   const getOrcamentosOrdenados = useCallback((): Orcamento[] => {
@@ -51,12 +70,27 @@ export const OrcamentoSequenciaProvider: React.FC<
 
   // Função para definir lista de orçamentos
   const setOrcamentos = useCallback((novosOrcamentos: Orcamento[]) => {
-    setOrcamentosState(novosOrcamentos);
+    const orcamentosTratados = novosOrcamentos.map((orcamento) => ({
+      ...orcamento,
+      itens: orcamento.itens.map((item) => ({
+        ...item,
+        nomeProduto:
+          item.nomeProduto ?? `Produto ${item.produtoId.slice(0, 8)}`,
+      })),
+    }));
+    setOrcamentosState(orcamentosTratados);
   }, []);
 
-  // Função para adicionar novo orçamento
   const adicionarOrcamento = useCallback((novoOrcamento: Orcamento) => {
-    setOrcamentosState((prev) => [...prev, novoOrcamento]);
+    const orcamentoCompleto = {
+      ...novoOrcamento,
+      itens: novoOrcamento.itens.map((item) => ({
+        ...item,
+        nomeProduto:
+          item.nomeProduto ?? `Produto ${item.produtoId.slice(0, 8)}`,
+      })),
+    };
+    setOrcamentosState((prev) => [...prev, orcamentoCompleto]);
   }, []);
 
   const value: OrcamentoSequenciaContextData = {
@@ -65,6 +99,10 @@ export const OrcamentoSequenciaProvider: React.FC<
     adicionarOrcamento,
     getNumeroSequencial,
     getOrcamentosOrdenados,
+    modalAberto,
+    orcamentoParaImprimir,
+    abrirModalImpressao,
+    fecharModalImpressao,
   };
 
   return (
