@@ -1,4 +1,4 @@
-// src/hooks/useStock.ts
+// src/hooks/useEstoque.ts
 import { useState, useEffect, useRef } from 'react';
 import { estoqueAPI } from '@/services/estoque.api';
 
@@ -10,7 +10,7 @@ import type {
   ProductUpdatePayload,
 } from '@/@types/product';
 
-export function useStock() {
+export function useEstoque() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Produto[]>([]);
   const [totalProdutos, setTotalProdutos] = useState(0);

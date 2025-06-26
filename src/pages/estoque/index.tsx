@@ -8,7 +8,7 @@ import { TableData } from '@/component/TableData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useStock } from '@/hooks/useStock';
+import { useEstoque } from '@/hooks/useEstoque';
 import { toast } from 'sonner';
 
 import type { Produto } from '@/@types/product';
@@ -22,7 +22,7 @@ export default function Stock() {
   //const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
   const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
 
-  const { products, addProduct, updateProduct, deleteProduct } = useStock();
+  const { products, addProduct, updateProduct, deleteProduct } = useEstoque();
 
   const produtosFiltrados = useMemo(() => {
     if (!busca.trim()) {
