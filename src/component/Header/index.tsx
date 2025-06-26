@@ -17,7 +17,7 @@ import Forms from '../Forms';
 import { useModalImpressao } from '@/hooks/useModalOrcamento';
 import { useHeaderLogic } from './useHeaderLogic';
 
-import { useOrcamentoSequencia } from '@/contexts/orcamentoContext';
+import { useOrcamentoContext } from '@/contexts/orcamentoContext';
 
 type HeaderProps = Readonly<{
   name?: string;
@@ -27,7 +27,7 @@ export function Header({ name }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { setOrcamentos, getNumeroSequencial } = useOrcamentoSequencia();
+  const { setOrcamentos, getNumeroSequencial } = useOrcamentoContext();
   const { abrirModalImpressao } = useModalImpressao();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);

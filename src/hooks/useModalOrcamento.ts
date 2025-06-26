@@ -1,6 +1,6 @@
 // Hook específico para controle do modal
 import { useCallback } from 'react';
-import { useOrcamentoSequencia } from '@/contexts/orcamentoContext';
+import { useOrcamentoContext } from '@/contexts/orcamentoContext';
 
 export const useModalImpressao = () => {
   const {
@@ -10,7 +10,7 @@ export const useModalImpressao = () => {
     fecharModalImpressao,
     getNumeroSequencial,
     orcamentos,
-  } = useOrcamentoSequencia();
+  } = useOrcamentoContext();
 
   // Função helper para obter dados formatados para impressão
   const getDadosImpressao = useCallback(() => {

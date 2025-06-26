@@ -8,7 +8,7 @@ import React, {
 
 import type { Orcamento } from '@/@types/orcamento';
 
-interface OrcamentoSequenciaContextData {
+interface OrcamentoContextData {
   orcamentos: Orcamento[];
   setOrcamentos: (orcamentos: Orcamento[]) => void;
   adicionarOrcamento: (orcamento: Orcamento) => void;
@@ -25,7 +25,7 @@ interface OrcamentoSequenciaProviderProps {
 }
 
 const OrcamentoSequenciaContext = createContext<
-  OrcamentoSequenciaContextData | undefined
+  OrcamentoContextData | undefined
 >(undefined);
 
 export const OrcamentoSequenciaProvider: React.FC<
@@ -93,7 +93,7 @@ export const OrcamentoSequenciaProvider: React.FC<
     setOrcamentosState((prev) => [...prev, orcamentoCompleto]);
   }, []);
 
-  const value: OrcamentoSequenciaContextData = {
+  const value: OrcamentoContextData = {
     orcamentos,
     setOrcamentos,
     adicionarOrcamento,
@@ -113,12 +113,12 @@ export const OrcamentoSequenciaProvider: React.FC<
 };
 
 // Hook personalizado para usar o contexto
-export const useOrcamentoSequencia = (): OrcamentoSequenciaContextData => {
+export const useOrcamentoContext = (): OrcamentoContextData => {
   const context = useContext(OrcamentoSequenciaContext);
 
   if (context === undefined) {
     throw new Error(
-      'useOrcamentoSequencia deve ser usado dentro de um OrcamentoSequenciaProvider'
+      'useOrcamento deve ser usado dentro de um OrcamentoSequenciaProvider'
     );
   }
 
@@ -127,6 +127,6 @@ export const useOrcamentoSequencia = (): OrcamentoSequenciaContextData => {
 
 // Hook específico para obter apenas o número sequencial
 export const useNumeroSequencial = (orcamentoId: string): number | null => {
-  const { getNumeroSequencial } = useOrcamentoSequencia();
+  const { getNumeroSequencial } = useOrcamentoContext();
   return getNumeroSequencial(orcamentoId);
 };
