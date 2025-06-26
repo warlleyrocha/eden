@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import axios from 'axios';
 import { financeiroAPI } from '@/services/financeiro.api';
+
 import type {
   MovimentoFinanceiro,
   RelatorioFinanceiro,
@@ -15,27 +16,6 @@ interface CreateSaidaParams {
 type ApiError = {
   message: string;
   status?: number;
-};
-
-// Helper para tratar erros
-const handleApiError = (err: unknown): ApiError => {
-  if (axios.isAxiosError(err)) {
-    const status = err.response?.status;
-    const message =
-      err.response?.data?.message ?? err.message ?? 'Erro desconhecido';
-
-    const errorMessages: Record<number, string> = {
-      401: 'Não autorizado. Faça login novamente.',
-      404: 'Recurso não encontrado.',
-      500: 'Erro interno do servidor.',
-    };
-
-    return {
-      message: errorMessages[status!] || message,
-      status,
-    };
-  }
-  return { message: 'Erro desconhecido ao processar a requisição.' };
 };
 
 export function useFinanceiro() {
@@ -55,7 +35,7 @@ export function useFinanceiro() {
       setMovimentacoes(data);
     } catch (err) {
       if (!axios.isCancel(err)) {
-        setError(handleApiError(err));
+        setError(err as ApiError); // A API já retorna ApiError
         setMovimentacoes([]);
       }
     } finally {
@@ -73,7 +53,7 @@ export function useFinanceiro() {
       setRelatorio(data);
     } catch (err) {
       if (!axios.isCancel(err)) {
-        setError(handleApiError(err));
+        setError(err as ApiError); // A API já retorna ApiError
         setRelatorio(null);
       }
     } finally {
@@ -88,15 +68,11 @@ export function useFinanceiro() {
       signal?: AbortSignal
     ) => {
       const { dataInicial, dataFinal } = params;
-      try {
-        return await financeiroAPI.fetchRelatorioFinanceiroComPeriodo({
-          dataInicial,
-          dataFinal,
-          signal,
-        });
-      } catch (err) {
-        throw handleApiError(err);
-      }
+      return await financeiroAPI.fetchRelatorioFinanceiroComPeriodo({
+        dataInicial,
+        dataFinal,
+        signal,
+      });
     },
     []
   );
@@ -119,7 +95,7 @@ export function useFinanceiro() {
         return result;
       } catch (err) {
         if (!axios.isCancel(err)) {
-          setError(handleApiError(err));
+          setError(err as ApiError); // A API já retorna ApiError
         }
         throw err;
       } finally {
