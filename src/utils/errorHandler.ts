@@ -71,6 +71,31 @@ const DELETE_BUDGET_ERRORS = {
   [HTTP_STATUS.NOT_FOUND]: 'Orçamento não encontrado para exclusão.',
 };
 
+const FETCH_PRODUCTS_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao listar produtos.',
+  [HTTP_STATUS.NOT_FOUND]: 'Produtos não encontrados.',
+  403: 'Sem permissão para acessar produtos.',
+};
+
+const CREATE_PRODUCT_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao criar produto.',
+  409: 'Produto já existe.',
+  422: 'Dados do produto não processáveis.',
+};
+
+const UPDATE_PRODUCT_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao atualizar produto.',
+  [HTTP_STATUS.NOT_FOUND]: 'Produto não encontrado para atualização.',
+  409: 'Conflito ao atualizar produto.',
+  422: 'Dados não processáveis.',
+};
+
+const DELETE_PRODUCT_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao deletar produto.',
+  [HTTP_STATUS.NOT_FOUND]: 'Produto não encontrado para exclusão.',
+  409: 'Não é possível deletar produto em uso.',
+};
+
 const createErrorHandlerMap = (
   operationMessages: ErrorMessageMap
 ): Record<number, ErrorHandler> => ({
@@ -143,4 +168,8 @@ export {
   CREATE_BUDGET_ERRORS,
   UPDATE_BUDGET_ERRORS,
   DELETE_BUDGET_ERRORS,
+  FETCH_PRODUCTS_ERRORS,
+  CREATE_PRODUCT_ERRORS,
+  UPDATE_PRODUCT_ERRORS,
+  DELETE_PRODUCT_ERRORS,
 };
