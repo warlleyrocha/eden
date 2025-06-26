@@ -96,6 +96,34 @@ const DELETE_PRODUCT_ERRORS = {
   409: 'Não é possível deletar produto em uso.',
 };
 
+const FETCH_CLIENTS_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao listar clientes.',
+  [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
+};
+
+const FETCH_CLIENT_BY_ID_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao buscar cliente.',
+  [HTTP_STATUS.NOT_FOUND]: 'Cliente não encontrado.',
+};
+
+const CREATE_CLIENT_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao criar cliente.',
+  [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
+  409: 'Cliente já cadastrado (CPF/CNPJ ou e-mail já existe).',
+};
+
+const UPDATE_CLIENT_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao atualizar cliente.',
+  [HTTP_STATUS.NOT_FOUND]: 'Cliente não encontrado para atualização.',
+  409: 'Conflito ao atualizar cliente (CPF/CNPJ ou e-mail já existe).',
+};
+
+const DELETE_CLIENT_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao deletar cliente.',
+  [HTTP_STATUS.NOT_FOUND]: 'Cliente não encontrado para exclusão.',
+  409: 'Não é possível deletar cliente com orçamentos vinculados.',
+};
+
 const createErrorHandlerMap = (
   operationMessages: ErrorMessageMap
 ): Record<number, ErrorHandler> => ({
@@ -172,4 +200,9 @@ export {
   CREATE_PRODUCT_ERRORS,
   UPDATE_PRODUCT_ERRORS,
   DELETE_PRODUCT_ERRORS,
+  FETCH_CLIENTS_ERRORS,
+  FETCH_CLIENT_BY_ID_ERRORS,
+  CREATE_CLIENT_ERRORS,
+  UPDATE_CLIENT_ERRORS,
+  DELETE_CLIENT_ERRORS,
 };

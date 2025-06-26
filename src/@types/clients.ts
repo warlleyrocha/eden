@@ -7,3 +7,11 @@ export interface Client {
   endereco: string;
   cpfCnpj?: string;
 }
+export interface CreateClient {
+  nome: string;
+  telefone: string;
+  email: string;
+  cpfCnpj: string;
+  endereco: string;
+  lojaId: string;
+}
