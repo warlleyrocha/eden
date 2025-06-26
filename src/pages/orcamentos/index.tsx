@@ -8,10 +8,10 @@ import Forms from '@/component/Forms';
 import TableOrcamento from '@/component/TableOrcamento';
 import TableClient from '@/component/TableClients';
 
-import { useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useCliente';
 import { useOrcamento } from '@/hooks/useOrcamento';
 import { useEstoque } from '@/hooks/useEstoque';
-import { useStore } from '@/hooks/useStore';
+import { useStore } from '@/hooks/useLoja';
 import { useClientContext } from '@/contexts/client';
 
 import type {

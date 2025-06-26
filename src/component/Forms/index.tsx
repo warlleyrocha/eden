@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { clientsAPI } from '@/services/cliente.api';
 
 import { useClientContext } from '@/contexts/client';
-import { useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useCliente';
 
 type FormsProps = Readonly<{
   showModal: boolean;

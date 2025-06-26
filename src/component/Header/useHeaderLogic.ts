@@ -3,7 +3,7 @@
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
-import { useStore } from '@/hooks/useStore';
+import { useStore } from '@/hooks/useLoja';
 import { useOrcamento } from '@/hooks/useOrcamento';
 import { toast } from 'sonner';
 
@@ -21,7 +21,7 @@ export function useHeaderLogic() {
   const navigate = useNavigate();
 
   const { storeData } = useStore();
-  const nameStore = storeData.nome;
+  const nameStore = storeData?.nome;
 
   const {
     orcamentos,

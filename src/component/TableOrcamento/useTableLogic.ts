@@ -9,7 +9,7 @@ import {
 
 import { getStoreId } from '@/utils/getStoreId';
 
-import { useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useCliente';
 import { useOrcamento } from '@/hooks/useOrcamento';
 
 import type { Client } from '@/@types/clients';

@@ -9,7 +9,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { OrcamentoModelDetals } from '@/component/TableOrcamento/EmpresaInfo';
 
 import { useModalImpressao } from '@/hooks/useModalOrcamento';
-import { useStore } from '@/hooks/useStore';
+import { useStore } from '@/hooks/useLoja';
 
 export function ModalImpressao() {
   const { modalAberto, fecharModalImpressao, getDadosImpressao } =

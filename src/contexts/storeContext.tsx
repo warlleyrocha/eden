@@ -1,32 +1,27 @@
-// contexts/StoreContext.tsx
-import React, { createContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import type { ReactNode } from 'react';
-import { api } from '@/services/api';
-
-interface StoreData {
-  nome: string;
-  email: string;
-  cnpj: string;
-  endereco: string;
-  telefone: string;
-  subTitle: string;
-  lojaId: string | null;
-}
+import { storeAPI } from '@/services/loja.api';
+import type { StoreData } from '@/@types/loja';
 
 interface StoreContextType {
-  // Dados
-  storeData: StoreData;
+  storeData: StoreData | null;
   loading: boolean;
   error: boolean;
-
-  // Funções
-  refreshStoreData: () => Promise<void>;
+  refreshStoreData: (force?: boolean) => Promise<void>;
   clearStoreData: () => void;
 }
 
-const StoreContext = createContext<StoreContextType | undefined>(undefined);
+export const StoreContext = createContext<StoreContextType | undefined>(
+  undefined
+);
 
-// Cache para persistir dados mesmo após remontagem
+// Cache com tipagem forte
 const storeCache = {
   data: null as StoreData | null,
   lastFetch: null as number | null,
@@ -40,137 +35,88 @@ interface StoreProviderProps {
 }
 
 export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
-  const [storeData, setStoreData] = useState<StoreData>(() => {
-    // Inicializa com dados do cache se disponível
-    return (
-      storeCache.data || {
-        nome: 'Carregando...',
-        email: 'Carregando...',
-        cnpj: 'Carregando...',
-        telefone: 'Carregadno...',
-        endereco: 'Carregando...',
-        subTitle: 'Carregando...',
-        lojaId: localStorage.getItem('storeId'),
-      }
-    );
-  });
+  const [state, setState] = useState<{
+    data: StoreData | null;
+    loading: boolean;
+    error: boolean;
+  }>(() => ({
+    data: storeCache.data || null,
+    loading: !storeCache.data,
+    error: false,
+  }));
 
-  const [loading, setLoading] = useState(() => {
-    // Se já tem dados no cache, não precisa mostrar loading
-    return !storeCache.data;
-  });
+  const fetchStoreData = useCallback(async (force = false): Promise<void> => {
+    const now = Date.now();
+    const shouldUseCache =
+      !force &&
+      storeCache.data &&
+      storeCache.lastFetch &&
+      now - storeCache.lastFetch < CACHE_DURATION;
 
-  const [error, setError] = useState(false);
+    if (shouldUseCache) {
+      setState((prev) => ({
+        ...prev,
+        data: storeCache.data,
+        loading: false,
+        error: false,
+      }));
+      return;
+    }
 
-  const fetchStoreData = useCallback(
-    async (forceRefresh = false): Promise<void> => {
-      const now = Date.now();
-      const lojaId = localStorage.getItem('storeId');
+    if (storeCache.isLoading && !force) return;
 
-      if (!lojaId) {
-        setError(true);
-        setStoreData((prev) => ({ ...prev, nome: 'ID Not found' }));
-        setLoading(false);
-        return;
-      }
-
-      // Verifica se deve usar cache
-      if (
-        !forceRefresh &&
-        storeCache.data &&
-        storeCache.lastFetch &&
-        now - storeCache.lastFetch < CACHE_DURATION
-      ) {
-        // Usa dados do cache
-        setStoreData(storeCache.data);
-        setLoading(false);
-        setError(false);
-        return;
-      }
-
-      // Evita múltiplas chamadas simultâneas
-      if (storeCache.isLoading && !forceRefresh) {
-        return;
-      }
-
+    try {
       storeCache.isLoading = true;
-      setLoading(true);
-      setError(false);
+      setState((prev) => ({ ...prev, loading: true, error: false }));
 
-      try {
-        const response = await api.get(`/lojas/${lojaId}`);
+      const data = await storeAPI.fetchStoreData();
 
-        const newStoreData: StoreData = {
-          nome: response.data.nome,
-          email: response.data.email,
-          cnpj: response.data.cnpj,
-          endereco: response.data.endereco,
-          telefone: response.data.telefone,
-          subTitle: response.data.subTitulo,
-          lojaId: response.data.lojaId,
-        };
+      storeCache.data = data;
+      storeCache.lastFetch = Date.now();
 
-        // Atualiza cache e estado
-        storeCache.data = newStoreData;
-        storeCache.lastFetch = now;
+      setState({ data, loading: false, error: false });
+    } catch (error) {
+      console.error('Erro ao buscar dados da loja:', error);
+      setState((prev) => ({
+        ...prev,
+        error: true,
+        data: prev.data ? { ...prev.data, nome: 'Erro ao carregar' } : null,
+      }));
+    } finally {
+      storeCache.isLoading = false;
+    }
+  }, []);
 
-        setStoreData(newStoreData);
-        setError(false);
-      } catch (error: unknown) {
-        console.error('Erro ao buscar dados da loja:', error);
-        setError(true);
-        setStoreData((prev) => ({
-          ...prev,
-          nome: 'Erro ao carregar',
-        }));
-      } finally {
-        storeCache.isLoading = false;
-        setLoading(false);
-      }
+  const refreshStoreData = useCallback(
+    async (force = true) => {
+      await fetchStoreData(force);
     },
-    []
+    [fetchStoreData]
   );
-
-  const refreshStoreData = useCallback(() => {
-    return fetchStoreData(true);
-  }, [fetchStoreData]);
 
   const clearStoreData = useCallback(() => {
     storeCache.data = null;
     storeCache.lastFetch = null;
     storeCache.isLoading = false;
-
-    setStoreData({
-      nome: 'Carregando...',
-      email: 'Carregando...',
-      cnpj: 'Carregando...',
-      endereco: 'Carregando...',
-      telefone: 'Carregando ...',
-      subTitle: 'Carregando...',
-      lojaId: localStorage.getItem('storeId'),
-    });
-    setLoading(true);
-    setError(false);
+    setState({ data: null, loading: true, error: false });
   }, []);
 
-  // Fetch inicial apenas se não tem dados válidos no cache
+  // Carrega os dados inicialmente
   useEffect(() => {
-    const now = Date.now();
     const hasValidCache =
       storeCache.data &&
       storeCache.lastFetch &&
-      now - storeCache.lastFetch < CACHE_DURATION;
+      Date.now() - storeCache.lastFetch < CACHE_DURATION;
 
     if (!hasValidCache && !storeCache.isLoading) {
       fetchStoreData();
     }
   }, [fetchStoreData]);
 
-  // Escuta mudanças no storeId do localStorage
+  // Escuta mudanças no storeId
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'storeId') {
-        // Limpa cache e recarrega dados
         clearStoreData();
         fetchStoreData();
       }
@@ -181,9 +127,9 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   }, [clearStoreData, fetchStoreData]);
 
   const contextValue: StoreContextType = {
-    storeData,
-    loading,
-    error,
+    storeData: state.data,
+    loading: state.loading,
+    error: state.error,
     refreshStoreData,
     clearStoreData,
   };
@@ -195,4 +141,10 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   );
 };
 
-export { StoreContext };
+export const useStore = (): StoreContextType => {
+  const context = useContext(StoreContext);
+  if (context === undefined) {
+    throw new Error('useStore deve ser usado dentro de um StoreProvider');
+  }
+  return context;
+};
