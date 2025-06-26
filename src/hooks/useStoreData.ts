@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { api } from '@/services/api';
 
 const useStoreData = () => {
-  const [nameStore, setNameStore] = useState('Carregando...');
-  const [emailStore, setEmailStore] = useState('Carregando...');
-  const [cnpjStore, setCnpjStore] = useState('Carregando...');
-  const [enderecoStore, setEnderecoStore] = useState('Carregando...');
-  const [subTitleStore, setSubTitleStore] = useState('Carregando ...');
+  const [nome, setNome] = useState('Carregando...');
+  const [email, setEmail] = useState('Carregando...');
+  const [cnpj, setCnpj] = useState('Carregando...');
+  const [endereco, setEndereco] = useState('Carregando...');
+  const [subTitle, setSubTitle] = useState('Carregando ...');
+  const [telefone, setTelefone] = useState('Carregando ...');
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -15,21 +16,22 @@ const useStoreData = () => {
 
     const fetchStoreData = async () => {
       try {
-        const storeId = localStorage.getItem('storeId');
-        if (storeId) {
-          const response = await api.get(`/lojas/${storeId}`, {
+        const lojaId = localStorage.getItem('storeId');
+        if (lojaId) {
+          const response = await api.get(`/lojas/${lojaId}`, {
             signal: abortController.signal,
           });
           console.log('Resposta:', response.data);
-          setNameStore(response.data.nome);
-          setEmailStore(response.data.email);
-          setCnpjStore(response.data.cnpj);
-          setEnderecoStore(response.data.endereco);
-          setSubTitleStore(response.data.subTitulo);
+          setNome(response.data.nome);
+          setEmail(response.data.email);
+          setCnpj(response.data.cnpj);
+          setTelefone(response.data.telefone);
+          setEndereco(response.data.endereco);
+          setSubTitle(response.data.subTitulo);
           setError(false);
         } else {
           setError(true);
-          setNameStore('ID Not found');
+          setNome('ID Not found');
         }
       } catch (error: unknown) {
         // ✅ Ignora erros de abort - são intencionais
@@ -47,7 +49,7 @@ const useStoreData = () => {
 
         console.error('Erro ao buscar o nome da loja:', error);
         setError(true);
-        setNameStore('Erro ao carregar');
+        setNome('Erro ao carregar');
       } finally {
         // ✅ Só atualiza loading se a requisição não foi abortada
         if (!abortController.signal.aborted) {
@@ -65,11 +67,12 @@ const useStoreData = () => {
   }, []);
 
   return {
-    nameStore,
-    emailStore,
-    cnpjStore,
-    enderecoStore,
-    subTitleStore,
+    nome,
+    email,
+    cnpj,
+    endereco,
+    subTitle,
+    telefone,
     error,
     loading,
   };

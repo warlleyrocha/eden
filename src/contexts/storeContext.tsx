@@ -4,12 +4,13 @@ import type { ReactNode } from 'react';
 import { api } from '@/services/api';
 
 interface StoreData {
-  nameStore: string;
-  emailStore: string;
-  cnpjStore: string;
-  enderecoStore: string;
-  subTitleStore: string;
-  storeId: string | null;
+  nome: string;
+  email: string;
+  cnpj: string;
+  endereco: string;
+  telefone: string;
+  subTitle: string;
+  lojaId: string | null;
 }
 
 interface StoreContextType {
@@ -43,12 +44,13 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
     // Inicializa com dados do cache se disponível
     return (
       storeCache.data || {
-        nameStore: 'Carregando...',
-        emailStore: 'Carregando...',
-        cnpjStore: 'Carregando...',
-        enderecoStore: 'Carregando...',
-        subTitleStore: 'Carregando...',
-        storeId: localStorage.getItem('storeId'),
+        nome: 'Carregando...',
+        email: 'Carregando...',
+        cnpj: 'Carregando...',
+        telefone: 'Carregadno...',
+        endereco: 'Carregando...',
+        subTitle: 'Carregando...',
+        lojaId: localStorage.getItem('storeId'),
       }
     );
   });
@@ -63,11 +65,11 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
   const fetchStoreData = useCallback(
     async (forceRefresh = false): Promise<void> => {
       const now = Date.now();
-      const storeId = localStorage.getItem('storeId');
+      const lojaId = localStorage.getItem('storeId');
 
-      if (!storeId) {
+      if (!lojaId) {
         setError(true);
-        setStoreData((prev) => ({ ...prev, nameStore: 'ID Not found' }));
+        setStoreData((prev) => ({ ...prev, nome: 'ID Not found' }));
         setLoading(false);
         return;
       }
@@ -96,15 +98,16 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
       setError(false);
 
       try {
-        const response = await api.get(`/lojas/${storeId}`);
+        const response = await api.get(`/lojas/${lojaId}`);
 
         const newStoreData: StoreData = {
-          nameStore: response.data.nome,
-          emailStore: response.data.email,
-          cnpjStore: response.data.cnpj,
-          enderecoStore: response.data.endereco,
-          subTitleStore: response.data.subTitulo,
-          storeId,
+          nome: response.data.nome,
+          email: response.data.email,
+          cnpj: response.data.cnpj,
+          endereco: response.data.endereco,
+          telefone: response.data.telefone,
+          subTitle: response.data.subTitulo,
+          lojaId: response.data.lojaId,
         };
 
         // Atualiza cache e estado
@@ -118,7 +121,7 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
         setError(true);
         setStoreData((prev) => ({
           ...prev,
-          nameStore: 'Erro ao carregar',
+          nome: 'Erro ao carregar',
         }));
       } finally {
         storeCache.isLoading = false;
@@ -138,12 +141,13 @@ export const StoreProvider: React.FC<StoreProviderProps> = ({ children }) => {
     storeCache.isLoading = false;
 
     setStoreData({
-      nameStore: 'Carregando...',
-      emailStore: 'Carregando...',
-      cnpjStore: 'Carregando...',
-      enderecoStore: 'Carregando...',
-      subTitleStore: 'Carregando...',
-      storeId: localStorage.getItem('storeId'),
+      nome: 'Carregando...',
+      email: 'Carregando...',
+      cnpj: 'Carregando...',
+      endereco: 'Carregando...',
+      telefone: 'Carregando ...',
+      subTitle: 'Carregando...',
+      lojaId: localStorage.getItem('storeId'),
     });
     setLoading(true);
     setError(false);

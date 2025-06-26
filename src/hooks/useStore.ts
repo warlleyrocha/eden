@@ -3,12 +3,13 @@ import { useContext } from 'react';
 import { StoreContext } from '@/contexts/storeContext';
 
 interface StoreData {
-  nameStore: string;
-  emailStore: string;
-  cnpjStore: string;
-  enderecoStore: string;
-  subTitleStore: string;
-  storeId: string | null;
+  nome: string;
+  email: string;
+  cnpj: string;
+  endereco: string;
+  subTitle: string;
+  telefone: string;
+  lojaId: string | null;
 }
 
 interface StoreContextType {
@@ -35,11 +36,12 @@ export const useStoreData = () => {
   const { storeData, loading, error } = useStore();
 
   return {
-    nameStore: storeData.nameStore,
-    emailStore: storeData.emailStore,
-    cnpjStore: storeData.cnpjStore,
-    enderecoStore: storeData.enderecoStore,
-    subTitleStore: storeData.subTitleStore,
+    nome: storeData.nome,
+    email: storeData.email,
+    cnpj: storeData.cnpj,
+    endereco: storeData.endereco,
+    telefone: storeData.telefone,
+    subTitle: storeData.subTitle,
     loading,
     error,
   };

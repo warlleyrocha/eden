@@ -35,11 +35,12 @@ interface TableProps {
   // Novos props para evitar requisições desnecessárias
   products?: ProductType[];
   storeData?: {
-    nameStore: string;
-    emailStore: string;
-    cnpjStore: string;
-    enderecoStore: string;
-    subTitleStore: string;
+    nome: string;
+    email: string;
+    cnpj: string;
+    endereco: string;
+    telefone: string;
+    subTitle: string;
   };
 }
 
@@ -376,31 +377,32 @@ function TableOrcamento({
     // Fallback: usar hook apenas se não tiver dados externos
     // IMPORTANTE: Mova esta lógica para o componente pai
     return {
-      nameStore: '',
-      emailStore: '',
-      cnpjStore: '',
-      enderecoStore: '',
-      subTitleStore: '',
+      nome: '',
+      email: '',
+      cnpj: '',
+      endereco: '',
+      subTitle: '',
+      telefone: '',
     };
   }, [externalStoreData]);
 
   // Memoriza as informações da empresa
   const empresaInfo = useMemo(
     () => ({
-      nome: storeData.nameStore,
-      cnpj: formatCpfCnpj(storeData.cnpjStore),
-      endereco: storeData.enderecoStore,
-      subTitle: storeData.subTitleStore,
+      nome: storeData.nome,
+      cnpj: formatCpfCnpj(storeData.cnpj),
+      endereco: storeData.endereco,
+      subTitle: storeData.subTitle,
       telefone: '00 00000-0000',
-      email: storeData.emailStore,
+      email: storeData.email,
       data: '2023-10-01',
     }),
     [
-      storeData.nameStore,
-      storeData.emailStore,
-      storeData.cnpjStore,
-      storeData.enderecoStore,
-      storeData.subTitleStore,
+      storeData.nome,
+      storeData.email,
+      storeData.cnpj,
+      storeData.endereco,
+      storeData.subTitle,
     ]
   );
 

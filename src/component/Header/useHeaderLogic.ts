@@ -21,7 +21,7 @@ export function useHeaderLogic() {
   const navigate = useNavigate();
 
   const { storeData } = useStore();
-  const nameStore = storeData.nameStore;
+  const nameStore = storeData.nome;
 
   const {
     orcamentos,
