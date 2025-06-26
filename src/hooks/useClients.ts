@@ -198,18 +198,18 @@ export function useClients() {
         const status = error.response?.status;
 
         switch (status) {
-          case 400:
-            alert('ID inválido');
-            break;
-          case 404:
-            alert('Cliente não encontrado');
-            break;
-          case 500:
-            alert('Erro interno do servidor');
-            break;
-          default:
-            alert('Erro desconhecido ao remover cliente');
-            break;
+        case 400:
+          alert('ID inválido');
+          break;
+        case 404:
+          alert('Cliente não encontrado');
+          break;
+        case 500:
+          alert('Erro interno do servidor');
+          break;
+        default:
+          alert('Erro desconhecido ao remover cliente');
+          break;
         }
 
         setError({
