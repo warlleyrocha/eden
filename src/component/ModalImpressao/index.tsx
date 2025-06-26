@@ -1,7 +1,14 @@
 // src/components/modals/ModalImpressao.tsx
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useModalImpressao } from '@/hooks/useModalOrcamento';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { OrcamentoModelDetals } from '@/component/TableOrcamento/EmpresaInfo';
+
+import { useModalImpressao } from '@/hooks/useModalOrcamento';
 import { useStore } from '@/hooks/useStore';
 
 export function ModalImpressao() {
@@ -12,11 +19,13 @@ export function ModalImpressao() {
 
   if (!modalAberto || !dados) return null;
 
-  console.log('Dados:', dados);
-
   return (
     <Dialog open={modalAberto} onOpenChange={fecharModalImpressao}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <VisuallyHidden>
+          <DialogTitle>Orçamento</DialogTitle>
+          <DialogDescription>Detalhes do orçamento</DialogDescription>
+        </VisuallyHidden>
         <OrcamentoModelDetals empresaInfo={storeData} orcamentoInfo={dados} />
       </DialogContent>
     </Dialog>
