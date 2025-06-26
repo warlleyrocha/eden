@@ -11,15 +11,17 @@ import Forms from '../Forms';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { DynamicSheet } from '@/component/Sheet';
 import { useHeaderLogic } from './useHeaderLogic';
-import { useState } from 'react';
+import { useOrcamentoSequencia } from '@/contexts/orcamentoContext';
+import { useEffect, useState } from 'react';
 
-type HeaderProps = {
+type HeaderProps = Readonly<{
   name?: string;
-};
+}>;
 
 export function Header({ name }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { setOrcamentos, getNumeroSequencial } = useOrcamentoSequencia();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -39,6 +41,13 @@ export function Header({ name }: HeaderProps) {
     removerOrcamento,
     refreshOrcamentos,
   } = useHeaderLogic();
+
+  // Sincronizar orçamentos com o context sempre que os dados mudarem
+  useEffect(() => {
+    if (orcamentos.length > 0) {
+      setOrcamentos(orcamentos);
+    }
+  }, [orcamentos, setOrcamentos]);
 
   const handleOpenChange = (open: boolean) => {
     setIsSheetOpen(open);
@@ -106,33 +115,43 @@ export function Header({ name }: HeaderProps) {
                     return dateB - dateA;
                   })
 
-                  .map((orcamento) => (
-                    <div
-                      key={orcamento.id}
-                      className="border rounded-lg p-2 bg-gray-50 shadow-sm"
-                    >
-                      <p className="font-semibold">
-                        Status: {orcamento.status}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        {orcamento.criadoEm
-                          ? new Date(orcamento.criadoEm).toLocaleString('pt-BR')
-                          : 'Sem data'}
-                      </p>
+                  .map((orcamento) => {
+                    const numeroSequencial = getNumeroSequencial(orcamento.id);
+                    return (
+                      <div
+                        key={orcamento.id}
+                        className="border rounded-lg p-2 bg-gray-50 shadow-sm"
+                      >
+                        <div className="bg-gray-50 flex justify-between">
+                          <h1 className="font-bold">
+                            {orcamento.cliente.nome}{' '}
+                          </h1>
+                          <p>Orçamento #{numeroSequencial}</p>
+                        </div>
+                        <p className="font-semibold">
+                          Status: {orcamento.status}
+                        </p>
+                        <p className="text-xs text-gray-600">
+                          {orcamento.criadoEm
+                            ? new Date(orcamento.criadoEm).toLocaleString(
+                                'pt-BR'
+                              )
+                            : 'Sem data'}
+                        </p>
 
-                      {orcamento.status === 'ABERTO' && (
-                        <div className="mt-2 flex gap-2">
-                          <Button
-                            onClick={() =>
-                              atualizarStatus(orcamento.id, 'APROVADO')
-                            }
-                            disabled={!!processingActionId}
-                            variant="default"
-                            size="sm"
-                            className="text-xs px-3 py-1"
-                          >
-                            {processingActionId ===
-                            `approve-${orcamento.id}` ? (
+                        {orcamento.status === 'ABERTO' && (
+                          <div className="mt-2 flex gap-2">
+                            <Button
+                              onClick={() =>
+                                atualizarStatus(orcamento.id, 'APROVADO')
+                              }
+                              disabled={!!processingActionId}
+                              variant="default"
+                              size="sm"
+                              className="text-xs px-3 py-1"
+                            >
+                              {processingActionId ===
+                              `approve-${orcamento.id}` ? (
                                 <span className="flex items-center gap-1">
                                   <svg
                                     className="animate-spin h-3 w-3"
@@ -152,64 +171,64 @@ export function Header({ name }: HeaderProps) {
                                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                                     ></path>
                                   </svg>
-                                Processando...
+                                  Processando...
                                 </span>
                               ) : (
                                 'Aprovar'
                               )}
-                          </Button>
-                          <Button
-                            onClick={() => removerOrcamento(orcamento.id)}
-                            disabled={!!processingActionId}
-                            variant="destructive"
-                            size="sm"
-                            className="text-xs px-3 py-1"
-                          >
-                            {processingActionId === `reject-${orcamento.id}` ? (
-                              <span className="flex items-center gap-1">
-                                <svg
-                                  className="animate-spin h-3 w-3"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <circle
-                                    className="opacity-25"
-                                    cx="12"
-                                    cy="12"
-                                    r="10"
-                                    stroke="currentColor"
-                                    strokeWidth="4"
-                                  ></circle>
-                                  <path
-                                    className="opacity-75"
-                                    fill="currentColor"
-                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                  ></path>
-                                </svg>
-                                Processando...
-                              </span>
-                            ) : (
-                              'Rejeitar'
-                            )}
-                          </Button>
-                        </div>
-                      )}
+                            </Button>
+                            <Button
+                              onClick={() => removerOrcamento(orcamento.id)}
+                              disabled={!!processingActionId}
+                              variant="destructive"
+                              size="sm"
+                              className="text-xs px-3 py-1"
+                            >
+                              {processingActionId ===
+                              `reject-${orcamento.id}` ? (
+                                <span className="flex items-center gap-1">
+                                  <svg
+                                    className="animate-spin h-3 w-3"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <circle
+                                      className="opacity-25"
+                                      cx="12"
+                                      cy="12"
+                                      r="10"
+                                      stroke="currentColor"
+                                      strokeWidth="4"
+                                    ></circle>
+                                    <path
+                                      className="opacity-75"
+                                      fill="currentColor"
+                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
+                                  </svg>
+                                  Processando...
+                                </span>
+                              ) : (
+                                'Rejeitar'
+                              )}
+                            </Button>
+                          </div>
+                        )}
 
-                      {orcamento.status === 'APROVADO' && (
-                        <div className="mt-2 flex gap-2">
-                          <Button
-                            onClick={() =>
-                              navigate(`/orcamento/${orcamento.id}`)
-                            }
-                            variant="outline"
-                            size="sm"
-                            className="text-xs px-3 py-1"
-                          >
-                            Ver Detalhes
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                        {orcamento.status === 'APROVADO' && (
+                          <div className="mt-2 flex gap-2">
+                            <Button
+                              onClick={() => navigate(`/`)}
+                              variant="outline"
+                              size="sm"
+                              className="text-xs px-3 py-1"
+                            >
+                              Ver Detalhes
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
             </div>
           </div>
         </DynamicSheet>
