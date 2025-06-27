@@ -35,7 +35,7 @@ export const useStore = (): UseStoreReturn => {
     email: context.storeData?.email ?? 'Carregando...',
     cnpj: context.storeData?.cnpj ?? 'Carregando...',
     endereco: context.storeData?.endereco ?? 'Carregando...',
-    subTitle: context.storeData?.subTitulo ?? 'Carregando...',
+    subTitle: context.storeData?.subTitle ?? 'Carregando...',
     telefone: context.storeData?.telefone ?? 'Carregando...',
     lojaId: context.storeData?.id ?? null,
   };

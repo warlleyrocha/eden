@@ -5,5 +5,5 @@ export interface StoreData {
   cnpj: string;
   endereco: string;
   telefone: string;
-  subTitulo: string;
+  subTitle: string;
 }

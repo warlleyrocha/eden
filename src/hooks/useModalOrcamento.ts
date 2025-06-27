@@ -1,6 +1,6 @@
 // Hook específico para controle do modal
 import { useCallback } from 'react';
-import { useOrcamentoContext } from '@/contexts/orcamentoContext';
+import { useOrcamentoContext } from '@/hooks/useOrcamento';
 
 export const useModalImpressao = () => {
   const {
@@ -36,16 +36,27 @@ export const useModalImpressao = () => {
         ? new Date(orcamentoParaImprimir.criadoEm).toLocaleDateString('pt-BR')
         : 'Data não informada',
       itens:
-        orcamentoParaImprimir.itens?.map((item) => ({
-          produtoId: item.produtoId,
-          nome: item.nomeProduto ?? 'Produto não especificado',
-          precoUnitario: item.precoUnitario,
-          quantidade: item.quantidade,
-          valorTotal: item.precoUnitario * item.quantidade,
-        })) || [],
+        orcamentoParaImprimir.itens?.map((item) => {
+          // Obter o nome do produto de diferentes possíveis campos
+          const nomeProduto = item.nomeProduto ?? 'Produto não especificado';
+
+          const itemFormatado = {
+            produtoId: item.produtoId,
+            // CORREÇÃO: Usar 'nome' em vez de 'nomeProduto' para compatibilidade com o componente
+            nome: nomeProduto.startsWith('Produto:')
+              ? nomeProduto
+              : `Produto: ${nomeProduto}`,
+            precoUnitario: item.precoUnitario,
+            quantidade: item.quantidade,
+            valorTotal: item.precoUnitario * item.quantidade,
+          };
+          return itemFormatado;
+        }) || [],
       servicos:
         orcamentoParaImprimir.servicos?.map((servico) => ({
-          descricao: servico.descricao,
+          descricao: servico.descricao.startsWith('Serviço:')
+            ? servico.descricao
+            : `Serviço: ${servico.descricao}`,
           valor: servico.valor,
         })) || [],
       total: orcamentoParaImprimir.total ?? 0,

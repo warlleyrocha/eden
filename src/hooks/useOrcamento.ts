@@ -1,5 +1,9 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useContext } from 'react';
 import { orcamentoAPI } from '@/services/orcamento.api';
+import {
+  OrcamentoSequenciaContext,
+  type OrcamentoContextData,
+} from '@/contexts/OrcamentoSequenciaContext';
 import type { Orcamento, CreateOrcamento } from '@/@types/orcamento';
 import type { ApiError } from '@/utils/errorHandler';
 
@@ -154,3 +158,22 @@ export function useOrcamento() {
     refetch: fetchOrcamentos,
   };
 }
+
+// Hook personalizado para usar o contexto
+export const useOrcamentoContext = (): OrcamentoContextData => {
+  const context = useContext(OrcamentoSequenciaContext);
+
+  if (context === undefined) {
+    throw new Error(
+      'useOrcamento deve ser usado dentro de um OrcamentoSequenciaProvider'
+    );
+  }
+
+  return context;
+};
+
+// Hook específico para obter apenas o número sequencial
+export const useNumeroSequencial = (orcamentoId: string): number | null => {
+  const { getNumeroSequencial } = useOrcamentoContext();
+  return getNumeroSequencial(orcamentoId);
+};

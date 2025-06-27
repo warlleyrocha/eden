@@ -1,37 +1,22 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
-} from 'react';
+import React, { useState, useCallback, type ReactNode } from 'react';
 
 import type { Orcamento } from '@/@types/orcamento';
-
-interface OrcamentoContextData {
-  orcamentos: Orcamento[];
-  setOrcamentos: (orcamentos: Orcamento[]) => void;
-  adicionarOrcamento: (orcamento: Orcamento) => void;
-  getNumeroSequencial: (orcamentoId: string) => number | null;
-  getOrcamentosOrdenados: () => Orcamento[];
-  modalAberto: boolean;
-  orcamentoParaImprimir: Orcamento | null;
-  abrirModalImpressao: (orcamento: Orcamento) => void;
-  fecharModalImpressao: () => void;
-}
+import { tratarOrcamento, tratarOrcamentos } from '@/utils/orcamentoUtils';
+import {
+  OrcamentoSequenciaContext,
+  type OrcamentoContextData,
+} from './OrcamentoSequenciaContext';
+import { useMemo } from 'react';
 
 interface OrcamentoSequenciaProviderProps {
   children: ReactNode;
 }
 
-const OrcamentoSequenciaContext = createContext<
-  OrcamentoContextData | undefined
->(undefined);
-
 export const OrcamentoSequenciaProvider: React.FC<
   OrcamentoSequenciaProviderProps
 > = ({ children }) => {
-  const [orcamentos, setOrcamentosState] = useState<Orcamento[]>([]);
+  const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
+
   // Estados do modal
   const [modalAberto, setModalAberto] = useState(false);
   const [orcamentoParaImprimir, setOrcamentoParaImprimir] =
@@ -48,12 +33,14 @@ export const OrcamentoSequenciaProvider: React.FC<
     setOrcamentoParaImprimir(null);
   }, []);
 
-  // Função para ordenar orçamentos por data de criação (mais antigo primeiro)
   const getOrcamentosOrdenados = useCallback((): Orcamento[] => {
-    return [...orcamentos].sort(
-      (a, b) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-    );
+    return [...orcamentos].sort((a, b) => {
+      // Se a data não existir, usar Date.now() para colocar no final
+      const dataA = a.criadoEm ? new Date(a.criadoEm).getTime() : Date.now();
+      const dataB = b.criadoEm ? new Date(b.criadoEm).getTime() : Date.now();
+
+      return dataA - dataB;
+    });
   }, [orcamentos]);
 
   // Função principal: obter o número sequencial do orçamento baseado na ordem de criação
@@ -68,65 +55,66 @@ export const OrcamentoSequenciaProvider: React.FC<
     [getOrcamentosOrdenados]
   );
 
-  // Função para definir lista de orçamentos
-  const setOrcamentos = useCallback((novosOrcamentos: Orcamento[]) => {
-    const orcamentosTratados = novosOrcamentos.map((orcamento) => ({
-      ...orcamento,
-      itens: orcamento.itens.map((item) => ({
-        ...item,
-        nomeProduto:
-          item.nomeProduto ?? `Produto ${item.produtoId.slice(0, 8)}`,
-      })),
-    }));
-    setOrcamentosState(orcamentosTratados);
+  // Função para definir lista de orçamentos (com tratamento automático)
+  const definirLista = useCallback((novosOrcamentos: Orcamento[]) => {
+    const orcamentosTratados = tratarOrcamentos(novosOrcamentos);
+    setOrcamentos(orcamentosTratados);
   }, []);
 
+  // Função para adicionar orçamento (com tratamento automático)
   const adicionarOrcamento = useCallback((novoOrcamento: Orcamento) => {
-    const orcamentoCompleto = {
-      ...novoOrcamento,
-      itens: novoOrcamento.itens.map((item) => ({
-        ...item,
-        nomeProduto:
-          item.nomeProduto ?? `Produto ${item.produtoId.slice(0, 8)}`,
-      })),
-    };
-    setOrcamentosState((prev) => [...prev, orcamentoCompleto]);
+    const orcamentoTratado = tratarOrcamento(novoOrcamento);
+    setOrcamentos((prev) => [...prev, orcamentoTratado]);
   }, []);
 
-  const value: OrcamentoContextData = {
-    orcamentos,
-    setOrcamentos,
-    adicionarOrcamento,
-    getNumeroSequencial,
-    getOrcamentosOrdenados,
-    modalAberto,
-    orcamentoParaImprimir,
-    abrirModalImpressao,
-    fecharModalImpressao,
-  };
+  // Nova função para atualizar orçamento existente
+  const atualizarOrcamento = useCallback(
+    (orcamentoId: string, orcamentoAtualizado: Orcamento) => {
+      const orcamentoTratado = tratarOrcamento(orcamentoAtualizado);
+      setOrcamentos((prev) =>
+        prev.map((orc) => (orc.id === orcamentoId ? orcamentoTratado : orc))
+      );
+    },
+    []
+  );
+
+  // Função para reprocessar orçamentos existentes (útil para dados já salvos)
+  const reprocessarOrcamentos = useCallback(() => {
+    setOrcamentos((prev) => tratarOrcamentos(prev));
+  }, []);
+
+  const value: OrcamentoContextData = useMemo(
+    () => ({
+      orcamentos,
+      definirLista,
+      adicionarOrcamento,
+      atualizarOrcamento,
+      getNumeroSequencial,
+      getOrcamentosOrdenados,
+      modalAberto,
+      orcamentoParaImprimir,
+      abrirModalImpressao,
+      fecharModalImpressao,
+      reprocessarOrcamentos,
+    }),
+    [
+      orcamentos,
+      definirLista,
+      adicionarOrcamento,
+      atualizarOrcamento,
+      getNumeroSequencial,
+      getOrcamentosOrdenados,
+      modalAberto,
+      orcamentoParaImprimir,
+      abrirModalImpressao,
+      fecharModalImpressao,
+      reprocessarOrcamentos,
+    ]
+  );
 
   return (
     <OrcamentoSequenciaContext.Provider value={value}>
       {children}
     </OrcamentoSequenciaContext.Provider>
   );
-};
-
-// Hook personalizado para usar o contexto
-export const useOrcamentoContext = (): OrcamentoContextData => {
-  const context = useContext(OrcamentoSequenciaContext);
-
-  if (context === undefined) {
-    throw new Error(
-      'useOrcamento deve ser usado dentro de um OrcamentoSequenciaProvider'
-    );
-  }
-
-  return context;
-};
-
-// Hook específico para obter apenas o número sequencial
-export const useNumeroSequencial = (orcamentoId: string): number | null => {
-  const { getNumeroSequencial } = useOrcamentoContext();
-  return getNumeroSequencial(orcamentoId);
 };

@@ -17,7 +17,7 @@ import Forms from '../Forms';
 import { useModalImpressao } from '@/hooks/useModalOrcamento';
 import { useHeaderLogic } from './useHeaderLogic';
 
-import { useOrcamentoContext } from '@/contexts/orcamentoContext';
+import { useOrcamentoContext } from '@/hooks/useOrcamento';
 
 type HeaderProps = Readonly<{
   name?: string;
@@ -27,7 +27,7 @@ export function Header({ name }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { setOrcamentos, getNumeroSequencial } = useOrcamentoContext();
+  const { definirLista, getNumeroSequencial } = useOrcamentoContext();
   const { abrirModalImpressao } = useModalImpressao();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -52,9 +52,9 @@ export function Header({ name }: HeaderProps) {
   // Sincronizar orçamentos com o context sempre que os dados mudarem
   useEffect(() => {
     if (orcamentos.length > 0) {
-      setOrcamentos(orcamentos);
+      definirLista(orcamentos);
     }
-  }, [orcamentos, setOrcamentos]);
+  }, [orcamentos, definirLista]);
 
   const handleOpenChange = (open: boolean) => {
     setIsSheetOpen(open);

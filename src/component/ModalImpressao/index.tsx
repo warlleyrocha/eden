@@ -26,7 +26,10 @@ export function ModalImpressao() {
           <DialogTitle>Orçamento</DialogTitle>
           <DialogDescription>Detalhes do orçamento</DialogDescription>
         </VisuallyHidden>
-        <OrcamentoModelDetals empresaInfo={storeData} orcamentoInfo={dados} />
+        <OrcamentoModelDetals
+          empresaInfo={storeData ?? undefined}
+          orcamentoInfo={dados}
+        />
       </DialogContent>
     </Dialog>
   );
