@@ -13,6 +13,11 @@ interface CreateSaidaParams {
   signal?: AbortSignal;
 }
 
+interface CreateEntradaParams {
+  payload: SaidaFinanceiraPayload;
+  signal?: AbortSignal;
+}
+
 type ApiError = {
   message: string;
   status?: number;
@@ -77,6 +82,33 @@ export function useFinanceiro() {
     []
   );
 
+  // Criar entrada
+  const createEntrada = useCallback(
+    async ({ payload, signal }: CreateEntradaParams) => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const result = await financeiroAPI.createEntrada({ payload, signal });
+
+        // Recarregar dados após criar
+        await Promise.all([
+          fetchMovimentacoes(signal),
+          fetchRelatorioHoje(signal),
+        ]);
+
+        return result;
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          setError(err as ApiError); // A API já retorna ApiError
+        }
+        throw err;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMovimentacoes, fetchRelatorioHoje]
+  );
   // Criar saída
   const createSaida = useCallback(
     async ({ payload, signal }: CreateSaidaParams) => {
@@ -121,6 +153,7 @@ export function useFinanceiro() {
     error,
     // Actions
     createSaida,
+    createEntrada,
     setMovimentacoes,
     fetchMovimentacoes,
     fetchRelatorioHoje,

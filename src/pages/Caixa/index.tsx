@@ -20,6 +20,7 @@ export default function Caixa() {
     error,
     showCashClosureModal,
     showSaidaModal,
+    showEntradaModal,
     totalEntradas,
     totalSaidas,
     saldoFinal,
@@ -34,6 +35,8 @@ export default function Caixa() {
     metodoPagamento,
     valorSaida,
     descricaoSaida,
+    valorEntrada,
+    descricaoEntrada,
     parcelas,
     juros,
     movimentacoes,
@@ -45,6 +48,8 @@ export default function Caixa() {
     setMetodoPagamento,
     setValorSaida,
     setDescricaoSaida,
+    setValorEntrada,
+    setDescricaoEntrada,
     setParcelas,
     setJuros,
 
@@ -53,6 +58,7 @@ export default function Caixa() {
     formatarMoeda,
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
+    handleEntradaSubmit,
     handleDateChange,
     downloadPDF,
   } = useCaixa();
@@ -259,16 +265,16 @@ export default function Caixa() {
       )}
 
       {/* Modal de Registro de Entrada */}
-      {/*{showEntradaModal && (
+      {showEntradaModal && (
         <RegistroModal
           isOpen={showEntradaModal}
           onClose={() => setShowEntradaModal(false)}
-          tipo='entrada'
+          tipo="entrada"
           isSubmitting={isSubmitting}
           onSubmit={handleEntradaSubmit}
           error={error}
           valor={valorEntrada}
-          setValor={setValorEntarda}
+          setValor={setValorEntrada}
           descricao={descricaoEntrada}
           setDescricao={setDescricaoEntrada}
           metodoPagamento={metodoPagamento}
@@ -278,7 +284,7 @@ export default function Caixa() {
           juros={juros}
           setJuros={setJuros}
         />
-      )}*/}
+      )}
 
       {/* Modal de Registro de Saída */}
       {showSaidaModal && (

@@ -15,10 +15,16 @@ import type {
   MovimentoFinanceiro,
   RelatorioFinanceiro,
   SaidaFinanceiraPayload,
+  EntradaFinanceiraPayload,
 } from '@/@types/financeiro';
 
 interface CreateSaidaParams {
   payload: SaidaFinanceiraPayload;
+  signal?: AbortSignal;
+}
+
+interface CreateEntradaParams {
+  payload: EntradaFinanceiraPayload;
   signal?: AbortSignal;
 }
 
@@ -191,5 +197,39 @@ export const financeiroAPI = {
     }
   },
 
-  // Registrar entrada {...}
+  // Registrar entrada
+  async createEntrada({ payload, signal }: CreateEntradaParams) {
+    try {
+      const token = getAuthToken();
+
+      const response = await api.post(
+        '/financeiro/entrada',
+        {
+          ...payload,
+          metodoPagamento: payload.metodoPagamento.toUpperCase(),
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          signal,
+        }
+      );
+
+      if (response.status === 201) {
+        console.log(
+          'Entrada financeira registrada com sucesso:',
+          response.data
+        );
+        return response.data;
+      } else {
+        throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
+      }
+    } catch (error) {
+      const apiError = handleApiError(error, outflowErrorHandler);
+      console.error('Erro ao criar entrada financeira:', apiError);
+      throw apiError;
+    }
+  },
 };

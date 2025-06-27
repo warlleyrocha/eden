@@ -17,6 +17,7 @@ const METODOS_PAGAMENTO_LABELS = {
 export const useCaixa = () => {
   const {
     createSaida,
+    createEntrada,
     fetchMovimentacoes,
     fetchRelatorioHoje,
     fetchRelatorioPorPeriodo,
@@ -34,7 +35,9 @@ export const useCaixa = () => {
   const [showSaidaModal, setShowSaidaModal] = useState(false);
   const [metodoPagamento, setMetodoPagamento] = useState('pix');
   const [valorSaida, setValorSaida] = useState('');
+  const [valorEntrada, setValorEntrada] = useState('');
   const [descricaoSaida, setDescricaoSaida] = useState('');
+  const [descricaoEntrada, setDescricaoEntrada] = useState('');
   const [parcelas, setParcelas] = useState(1);
   const [juros, setJuros] = useState(0);
   // Estados para controlar o período do relatório
@@ -244,7 +247,7 @@ export const useCaixa = () => {
   );
 
   //Manipulador de envio de entrada
-  /*const handleEntradaSubmit = useCallback(
+  const handleEntradaSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
 
@@ -269,13 +272,13 @@ export const useCaixa = () => {
             metodoPagamento === 'credito' ? parcelas : undefined
           ),
           valor: valorFinal,
-          descricao: descricaoSaida,
+          descricao: descricaoEntrada,
           ...(metodoPagamento === 'credito' && {
             parcelas: Number(parcelas),
             juros: Number(juros),
           }),
         };
-
+        console.log('Payload', payload);
         await createEntrada({ payload });
 
         // Reset dos campos após sucesso
@@ -305,7 +308,7 @@ export const useCaixa = () => {
       formatarTipoMetodo,
       createEntrada,
     ]
-  );*/
+  );
 
   // Download do PDF com período selecionado
   const downloadPDF = useCallback(() => {
@@ -448,6 +451,8 @@ export const useCaixa = () => {
     metodoPagamento,
     valorSaida,
     descricaoSaida,
+    valorEntrada,
+    descricaoEntrada,
     parcelas,
     juros,
     startDate,
@@ -460,6 +465,8 @@ export const useCaixa = () => {
     setMetodoPagamento,
     setValorSaida,
     setDescricaoSaida,
+    setValorEntrada,
+    setDescricaoEntrada,
     setParcelas,
     setJuros,
     setStartDate,
@@ -474,6 +481,7 @@ export const useCaixa = () => {
     formatarMetodoPagamento,
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
+    handleEntradaSubmit,
     handleDateChange,
     downloadPDF,
     gerarPDFComPeriodo,
