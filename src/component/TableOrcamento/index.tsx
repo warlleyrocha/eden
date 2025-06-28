@@ -66,14 +66,12 @@ interface ProductType {
 const TableRowOrcamento = memo(
   ({
     orcamento,
-    index,
-    totalLength,
+    numeroSequencial,
     onOpenModalDetails,
     onDeleteOrcamento,
   }: {
     orcamento: OrcamentoRenderDetails;
-    index: number;
-    totalLength: number;
+    numeroSequencial: number;
     onOpenModalDetails: (id: string) => void;
     onDeleteOrcamento: (id: string) => void;
   }) => {
@@ -94,7 +92,7 @@ const TableRowOrcamento = memo(
 
     return (
       <TableRow className="hover:bg-gray-50 text-center">
-        <TableCell className="py-2 px-4">{totalLength - index}</TableCell>
+        <TableCell className="py-2 px-4">{numeroSequencial}</TableCell>
         <TableCell className="py-2 px-4">
           {orcamento.cliente?.nome ?? 'Sem nome'}
         </TableCell>
@@ -569,12 +567,11 @@ function TableOrcamento({
         </TableHeader>
 
         <TableBody>
-          {filteredOrcamentos.map((orcamento, index) => (
+          {filteredOrcamentos.map((orcamento) => (
             <TableRowOrcamento
               key={orcamento.id}
               orcamento={orcamento}
-              index={index}
-              totalLength={filteredOrcamentos.length}
+              numeroSequencial={orcamento.numeroSequencial}
               onOpenModalDetails={handleOpenModalDetails}
               onDeleteOrcamento={onDeleteOrcamento}
             />

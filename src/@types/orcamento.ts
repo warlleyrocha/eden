@@ -56,4 +56,5 @@ export interface OrcamentoRenderDetails {
   criadoEm: string;
   total: number;
   status: string;
+  numeroSequencial?: number;
 }
