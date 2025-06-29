@@ -206,6 +206,22 @@ export default function Orcamento() {
     setActiveTab('Orçamentos');
   }, []);
 
+  // Formatação dos dados da loja com verificações
+  const formattedStoreData = useMemo(() => {
+    if (!storeData) {
+      return undefined;
+    }
+
+    return {
+      nome: storeData.nome || '',
+      email: storeData.email || '',
+      cnpj: storeData.cnpj || '',
+      endereco: storeData.endereco || '',
+      telefone: storeData.telefone || '',
+      subTitulo: storeData.subTitulo || '',
+    };
+  }, [storeData]);
+
   // Renderização condicional otimizada
   const renderContent = useMemo(() => {
     switch (activeTab) {
@@ -226,23 +242,24 @@ export default function Orcamento() {
           onDeleteOrcamento={handleDeleteOrcamento}
           onSubmitOrcamento={handleOrcamentoSubmit}
           products={products}
-          storeData={storeData}
+          storeData={formattedStoreData}
         />
       );
     default:
       return null;
     }
   }, [
+    products,
     activeTab,
+    tableClientKey,
     formattedClients,
     formattedOrcamentos,
+    formattedStoreData,
+
     deleteClient,
     handleSelectClientForEdit,
-    tableClientKey,
     handleDeleteOrcamento,
     handleOrcamentoSubmit,
-    products,
-    storeData,
   ]);
 
   return (

@@ -46,6 +46,16 @@ export interface CreateOrcamento {
   status: string;
 }
 
+export interface ItemOrcamento {
+  produtoId: string;
+  nome?: string;
+  quantidade: number;
+  precoUnitario: number;
+  precoTotal?: number;
+  descricao?: string;
+  unidade?: string;
+}
+
 export interface OrcamentoRenderDetails {
   id: string;
   cliente?: {
