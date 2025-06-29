@@ -15,7 +15,7 @@ type OrcamentoModelDetalsProps = Readonly<{
     nome: string;
     cnpj: string;
     endereco: string;
-    subTitle: string;
+    subTitulo: string;
     telefone: string;
     email: string;
   }>;
@@ -224,7 +224,7 @@ export function OrcamentoModelDetals({
           <div className="text-center text-xs text-gray-500 pt-1 pb-0.5">
             <p>Este orçamento tem validade de 7 dias.</p>
             <p className="font-semibold">
-              {empresaInfo.nome} - {empresaInfo.subTitle}
+              {empresaInfo.nome} - {empresaInfo.subTitulo}
             </p>
           </div>
           <div className="border-b border-dashed my-1"></div>

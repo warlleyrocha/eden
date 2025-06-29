@@ -17,7 +17,7 @@ interface UseStoreReturn {
   email: string;
   cnpj: string;
   endereco: string;
-  subTitle: string;
+  subTitulo: string;
   telefone: string;
   lojaId: string | null;
 }
@@ -35,7 +35,7 @@ export const useStore = (): UseStoreReturn => {
     email: context.storeData?.email ?? 'Carregando...',
     cnpj: context.storeData?.cnpj ?? 'Carregando...',
     endereco: context.storeData?.endereco ?? 'Carregando...',
-    subTitle: context.storeData?.subTitle ?? 'Carregando...',
+    subTitulo: context.storeData?.subTitulo ?? 'Carregando...',
     telefone: context.storeData?.telefone ?? 'Carregando...',
     lojaId: context.storeData?.id ?? null,
   };
@@ -43,7 +43,7 @@ export const useStore = (): UseStoreReturn => {
 
 // Versão simplificada (para compatibilidade)
 export const useStoreData = () => {
-  const { nome, email, cnpj, endereco, subTitle, telefone, loading, error } =
+  const { nome, email, cnpj, endereco, subTitulo, telefone, loading, error } =
     useStore();
-  return { nome, email, cnpj, endereco, subTitle, telefone, loading, error };
+  return { nome, email, cnpj, endereco, subTitulo, telefone, loading, error };
 };

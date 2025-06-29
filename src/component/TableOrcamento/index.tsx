@@ -40,7 +40,7 @@ interface TableProps {
     cnpj: string;
     endereco: string;
     telefone: string;
-    subTitle: string;
+    subTitulo: string;
   };
 }
 
@@ -379,7 +379,7 @@ function TableOrcamento({
       email: '',
       cnpj: '',
       endereco: '',
-      subTitle: '',
+      subTitulo: '',
       telefone: '',
     };
   }, [externalStoreData]);
@@ -390,7 +390,7 @@ function TableOrcamento({
       nome: storeData.nome,
       cnpj: formatCpfCnpj(storeData.cnpj),
       endereco: storeData.endereco,
-      subTitle: storeData.subTitle,
+      subTitulo: storeData.subTitulo,
       telefone: '00 00000-0000',
       email: storeData.email,
       data: '2023-10-01',
@@ -400,7 +400,7 @@ function TableOrcamento({
       storeData.email,
       storeData.cnpj,
       storeData.endereco,
-      storeData.subTitle,
+      storeData.subTitulo,
     ]
   );
 
