@@ -12,7 +12,6 @@ import { useClients } from '@/hooks/useCliente';
 import { useOrcamento } from '@/hooks/useOrcamento';
 import { useEstoque } from '@/hooks/useEstoque';
 import { useStore } from '@/hooks/useLoja';
-import { useClientContext } from '@/contexts/client';
 
 import type {
   Orcamento,
@@ -50,7 +49,6 @@ export default function Orcamento() {
   const [activeTab, setActiveTab] = useState('Clientes');
   const [showEditClientModal, setShowEditClientModal] = useState(false);
   const [tableClientKey, setTableClientKey] = useState(0);
-  const { setSelectedClient } = useClientContext();
   const { products } = useEstoque();
   const { storeData } = useStore();
 
@@ -59,8 +57,13 @@ export default function Orcamento() {
   const orcamentosLoadedRef = useRef(false);
   const isMountedRef = useRef(true);
 
-  const { clients, deleteClient, fetchClients, fetchClientsById } =
-    useClients();
+  const {
+    clients,
+    deleteClient,
+    fetchClients,
+    fetchClientsById,
+    setSelectedClient,
+  } = useClients();
   const { orcamentos, fetchOrcamentos, createOrcamento, deleteOrcamento } =
     useOrcamento();
 

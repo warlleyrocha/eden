@@ -5,7 +5,7 @@ import { tratarOrcamento, tratarOrcamentos } from '@/utils/orcamentoUtils';
 import {
   OrcamentoSequenciaContext,
   type OrcamentoContextData,
-} from './OrcamentoSequenciaContext';
+} from '@/contexts/OrcamentoSequenciaContext';
 import { useMemo } from 'react';
 
 interface OrcamentoSequenciaProviderProps {

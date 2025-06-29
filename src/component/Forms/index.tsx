@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 
 import { clientsAPI } from '@/services/cliente.api';
 
-import { useClientContext } from '@/contexts/client';
 import { useClients } from '@/hooks/useCliente';
 
 type FormsProps = Readonly<{
@@ -15,8 +14,7 @@ type FormsProps = Readonly<{
 }>;
 
 export default function Forms({ showModal, setShowModal }: FormsProps) {
-  const { selectedClient, setSelectedClient } = useClientContext();
-  const { fetchClients } = useClients();
+  const { fetchClients, selectedClient, setSelectedClient } = useClients();
 
   const [formData, setFormData] = useState({
     name: '',

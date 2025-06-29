@@ -1,9 +1,17 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useContext } from 'react';
 import { clientsAPI } from '@/services/cliente.api';
+import { ClientContext } from '@/contexts/client/client.context';
 import { toast } from 'sonner';
 import type { Client } from '@/@types/clients';
 
 export function useClients() {
+  const context = useContext(ClientContext);
+
+  if (!context)
+    throw new Error('useClientContext must be used within ClientProvider');
+
+  const { selectedClient, setSelectedClient } = context;
+
   const [loading, setLoading] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState<Error | null>(null);
@@ -46,6 +54,25 @@ export function useClients() {
     []
   );
 
+  const selectClient = useCallback(
+    (client: Client | null) => {
+      setSelectedClient(client);
+    },
+    [setSelectedClient]
+  );
+
+  // Buscar e selecionar cliente por ID
+  const selectClientById = useCallback(
+    async (id: string, signal?: AbortSignal) => {
+      const client = await fetchClientsById(id, signal);
+      if (client) {
+        selectClient(client);
+      }
+      return client;
+    },
+    [fetchClientsById, selectClient]
+  );
+
   // Atualizar cliente
   const updateClient = useCallback(
     async (id: string, data: Partial<Client>) => {
@@ -56,6 +83,10 @@ export function useClients() {
           payload: data,
         });
         await fetchClients(); // Atualiza a lista
+        // Se o cliente atualizado é o selecionado, atualiza o contexto
+        if (selectedClient?.id === id) {
+          setSelectedClient(updatedClient);
+        }
         toast.success('Cliente atualizado com sucesso!');
         return updatedClient;
       } catch (error) {
@@ -66,7 +97,7 @@ export function useClients() {
         setLoading(false);
       }
     },
-    [fetchClients]
+    [fetchClients, selectedClient, setSelectedClient]
   );
 
   // Deletar cliente
@@ -75,7 +106,11 @@ export function useClients() {
       setLoading(true);
       try {
         await clientsAPI.deleteClient({ id });
+        if (selectedClient?.id === id) {
+          setSelectedClient(null);
+        }
         await fetchClients(); // Atualiza a lista
+
         toast.success('Cliente removido com sucesso!');
       } catch (error) {
         setError(error as Error);
@@ -85,7 +120,7 @@ export function useClients() {
         setLoading(false);
       }
     },
-    [fetchClients]
+    [fetchClients, selectedClient, setSelectedClient]
   );
 
   // Carrega os clientes inicialmente
@@ -103,5 +138,10 @@ export function useClients() {
     fetchClientsById,
     updateClient,
     deleteClient,
+    selectedClient,
+    setSelectedClient,
+    selectClient,
+    selectClientById,
+    clearSelection: () => setSelectedClient(null),
   };
 }

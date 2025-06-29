@@ -1,6 +1,6 @@
 // hooks/useStore.ts
 import { useContext } from 'react';
-import { StoreContext } from '@/contexts/storeContext';
+import { StoreContext } from '@/contexts/store/store.context';
 import type { StoreData } from '@/@types/loja';
 
 interface UseStoreReturn {
