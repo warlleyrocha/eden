@@ -29,6 +29,7 @@ export function ModalImpressao() {
         <OrcamentoModelDetals
           empresaInfo={storeData ?? undefined}
           orcamentoInfo={dados}
+          autoPrint={false}
         />
       </DialogContent>
     </Dialog>

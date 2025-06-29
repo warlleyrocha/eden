@@ -53,19 +53,25 @@ type OrcamentoModelDetalsProps = Readonly<{
     status: string;
     total: number;
   }>;
+
+  autoPrint?: boolean;
 }>;
 
 export function OrcamentoModelDetals({
   empresaInfo,
   orcamentoInfo,
+  autoPrint = false,
 }: OrcamentoModelDetalsProps) {
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      window.print();
-    }, 300); // pequeno delay para garantir renderização
+    // Só executa o print se autoPrint for true
+    if (autoPrint) {
+      const timeout = setTimeout(() => {
+        window.print();
+      }, 450); // pequeno delay para garantir renderização
 
-    return () => clearTimeout(timeout);
-  }, []);
+      return () => clearTimeout(timeout);
+    }
+  }, [autoPrint]);
 
   if (!empresaInfo || !orcamentoInfo) return null;
 

@@ -524,6 +524,7 @@ function TableOrcamento({
           numeroParcelas: selectedOrcamento.numeroParcelas ?? 1,
           status: selectedOrcamento.status ?? 'pendente',
         }}
+        autoPrint={true}
       />
     );
   }, [selectedOrcamento, empresaInfo, filteredOrcamentos]);
