@@ -40,6 +40,10 @@ export default function Caixa() {
     parcelas,
     juros,
     movimentacoes,
+    produtosSelecionados,
+    products,
+    produtoParaAdicionar,
+    quantidadeParaAdicionar,
 
     // Setters
     setShowCashClosureModal,
@@ -52,6 +56,8 @@ export default function Caixa() {
     setDescricaoEntrada,
     setParcelas,
     setJuros,
+    setProdutoParaAdicionar,
+    setQuantidadeParaAdicionar,
 
     // Funções
     formatarData,
@@ -61,6 +67,9 @@ export default function Caixa() {
     handleEntradaSubmit,
     handleDateChange,
     downloadPDF,
+    handleCloseEntradaModal,
+    adicionarProduto,
+    removerProduto,
   } = useCaixa();
 
   return (
@@ -268,7 +277,7 @@ export default function Caixa() {
       {showEntradaModal && (
         <RegistroModal
           isOpen={showEntradaModal}
-          onClose={() => setShowEntradaModal(false)}
+          onClose={handleCloseEntradaModal}
           tipo="entrada"
           isSubmitting={isSubmitting}
           onSubmit={handleEntradaSubmit}
@@ -283,6 +292,14 @@ export default function Caixa() {
           setParcelas={setParcelas}
           juros={juros}
           setJuros={setJuros}
+          products={products}
+          produtosSelecionados={produtosSelecionados}
+          produtoParaAdicionar={produtoParaAdicionar}
+          quantidadeParaAdicionar={quantidadeParaAdicionar}
+          setProdutoParaAdicionar={setProdutoParaAdicionar}
+          setQuantidadeParaAdicionar={setQuantidadeParaAdicionar}
+          adicionarProduto={adicionarProduto}
+          removerProduto={removerProduto}
         />
       )}
 

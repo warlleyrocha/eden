@@ -2,6 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useFinanceiro } from '@/hooks/useFinanceiro';
+import { useEstoque } from '@/hooks/useEstoque';
 import { useRelatorioFechamento } from '@/hooks/useRelatorioFechamento';
 import type { MovimentoFinanceiro } from '@/@types/financeiro';
 
@@ -27,6 +28,8 @@ export const useCaixa = () => {
 
   const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
 
+  const { products } = useEstoque();
+
   // Estados do hook
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +46,14 @@ export const useCaixa = () => {
   // Estados para controlar o período do relatório
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [produtosSelecionados, setProdutosSelecionados] = useState<
+    Array<{
+      produtoId: string;
+      quantidade: number;
+    }>
+  >([]);
+  const [produtoParaAdicionar, setProdutoParaAdicionar] = useState('');
+  const [quantidadeParaAdicionar, setQuantidadeParaAdicionar] = useState(1);
 
   // Carrega as saídas financeiras
   useEffect(() => {
@@ -50,6 +61,29 @@ export const useCaixa = () => {
     fetchRelatorioHoje();
   }, [fetchMovimentacoes, fetchRelatorioHoje]);
 
+  // Função para limpar os produtos selecionados quando fechar o modal de entrada
+  const handleCloseEntradaModal = useCallback(() => {
+    setShowEntradaModal(false);
+    setProdutosSelecionados([]); // Limpa o array de produtos selecionados
+  }, []);
+
+  const adicionarProduto = useCallback(() => {
+    if (produtoParaAdicionar && quantidadeParaAdicionar > 0) {
+      setProdutosSelecionados((prev) => [
+        ...prev,
+        {
+          produtoId: produtoParaAdicionar,
+          quantidade: quantidadeParaAdicionar,
+        },
+      ]);
+      setProdutoParaAdicionar('');
+      setQuantidadeParaAdicionar(1);
+    }
+  }, [produtoParaAdicionar, quantidadeParaAdicionar]);
+
+  const removerProduto = useCallback((index: number) => {
+    setProdutosSelecionados((prev) => prev.filter((_, i) => i !== index));
+  }, []);
   // Formatação de data
   const formatarData = useCallback((dataString: string) => {
     const data = new Date(dataString);
@@ -277,7 +311,13 @@ export const useCaixa = () => {
             parcelas: Number(parcelas),
             juros: Number(juros),
           }),
+          // Adicionar os arrays de produtos e quantidades
+          ...(produtosSelecionados.length > 0 && {
+            produtosIds: produtosSelecionados.map((p) => p.produtoId),
+            quantidades: produtosSelecionados.map((p) => p.quantidade),
+          }),
         };
+
         console.log('Payload', payload);
         await createEntrada({ payload });
 
@@ -288,6 +328,7 @@ export const useCaixa = () => {
         setParcelas(1);
         setJuros(0);
         setShowEntradaModal(false);
+        setProdutosSelecionados([]);
 
         toast.success('Venda registrada com sucesso!');
       } catch (err) {
@@ -305,6 +346,7 @@ export const useCaixa = () => {
       juros,
       descricaoEntrada,
       parcelas,
+      produtosSelecionados,
       formatarTipoMetodo,
       createEntrada,
     ]
@@ -419,6 +461,10 @@ export const useCaixa = () => {
     showCashClosureModal,
     showSaidaModal,
     showEntradaModal,
+    produtosSelecionados,
+    produtoParaAdicionar,
+    quantidadeParaAdicionar,
+    products,
 
     // Referente ao estado *relatorio¹* do hook useFinanceiro
     totalEntradas,
@@ -471,6 +517,9 @@ export const useCaixa = () => {
     setJuros,
     setStartDate,
     setEndDate,
+    setProdutosSelecionados,
+    setProdutoParaAdicionar,
+    setQuantidadeParaAdicionar,
 
     // Funções
     filtrarEntradas,
@@ -482,8 +531,11 @@ export const useCaixa = () => {
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
     handleEntradaSubmit,
+    handleCloseEntradaModal,
     handleDateChange,
     downloadPDF,
     gerarPDFComPeriodo,
+    adicionarProduto,
+    removerProduto,
   };
 };
