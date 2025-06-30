@@ -44,8 +44,10 @@ export default function Caixa() {
     products,
     produtoParaAdicionar,
     quantidadeParaAdicionar,
+    valorParaAdicionar,
 
     // Setters
+    setValorParaAdicionar,
     setShowCashClosureModal,
     setShowSaidaModal,
     setShowEntradaModal,
@@ -77,6 +79,7 @@ export default function Caixa() {
       <div className="flex flex-row">
         <Header name="" />
       </div>
+
       <div className="flex flex-col lg:flex-row min-h-screen bg-[#F5F5F5] text-[#333] p-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 rounded-xl p-16 sm:p-8 w-full max-w-7xl">
           <div className="rounded-xl p-6 sm:p-8 glow-shadow">
@@ -298,6 +301,8 @@ export default function Caixa() {
           quantidadeParaAdicionar={quantidadeParaAdicionar}
           setProdutoParaAdicionar={setProdutoParaAdicionar}
           setQuantidadeParaAdicionar={setQuantidadeParaAdicionar}
+          setValorParaAdicionar={setValorParaAdicionar}
+          valorParaAdicionar={valorParaAdicionar}
           adicionarProduto={adicionarProduto}
           removerProduto={removerProduto}
         />

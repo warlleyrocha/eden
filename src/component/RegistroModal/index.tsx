@@ -26,11 +26,14 @@ interface RegistroModalProps {
   produtosSelecionados?: Array<{
     produtoId: string;
     quantidade: number;
+    valorUnitario: number; // Adicionado campo de valor unitário
   }>;
   produtoParaAdicionar?: string;
   quantidadeParaAdicionar?: number;
+  valorParaAdicionar?: number; // Adicionado campo de valor para adicionar
   setProdutoParaAdicionar?: (produto: string) => void;
   setQuantidadeParaAdicionar?: (quantidade: number) => void;
+  setValorParaAdicionar?: (valor: number) => void; // Adicionado setter para valor
   adicionarProduto?: () => void;
   removerProduto?: (index: number) => void;
 }
@@ -56,8 +59,10 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
   produtosSelecionados,
   produtoParaAdicionar,
   quantidadeParaAdicionar,
+  valorParaAdicionar,
   setProdutoParaAdicionar,
   setQuantidadeParaAdicionar,
+  setValorParaAdicionar,
   adicionarProduto,
   removerProduto,
 }) => {
@@ -71,6 +76,22 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
   const loadingTexto =
     tipo === 'entrada' ? 'Registrando entrada...' : 'Registrando saída...';
 
+  // Calcula o valor total dos produtos selecionados
+  const valorTotalProdutos = (produtosSelecionados ?? []).reduce(
+    (total, item) => {
+      return total + item.quantidade * item.valorUnitario;
+    },
+    0
+  );
+
+  // Função para formatar valor em moeda
+  const formatarMoeda = (valor: number) => {
+    return valor.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    });
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
       <button
@@ -79,7 +100,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
         disabled={isSubmitting}
       ></button>
 
-      <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg">
+      <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg max-h-[90vh] overflow-y-auto">
         <h2 className="text-xl font-semibold text-[#1E3A8A] mb-4">{titulo}</h2>
 
         {isSubmitting && (
@@ -92,83 +113,119 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
         )}
 
         <form className="space-y-4 justify-between">
-          <div>
-            <label
-              htmlFor="value"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
-              Valor
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              min="0.01"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="0,00"
-              value={valor}
-              onChange={(e) => setValor(e.target.value)}
-              disabled={isSubmitting}
-              required
-            />
-          </div>
+          {/* Campo de valor para saídas ou quando não há produtos selecionados */}
+          {(tipo === 'saida' ||
+            (tipo === 'entrada' &&
+              (produtosSelecionados ?? []).length === 0)) && (
+            <div>
+              <label
+                htmlFor="value"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Valor
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                min="0.01"
+                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                placeholder="0,00"
+                value={valor}
+                onChange={(e) => setValor(e.target.value)}
+                disabled={isSubmitting}
+                required
+              />
+            </div>
+          )}
 
           {tipo === 'entrada' && (
             <div className="flex-1 min-w-[200px]">
               {/* Seção para adicionar produto */}
-              <div className="flex flex-col md:flex-row gap-4 mb-4">
-                {/* Campo Produto */}
-                <div className="flex-1">
-                  <Label className="block text-sm font-medium text-gray-700 mb-1">
-                    Produto
-                  </Label>
-                  <select
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    value={produtoParaAdicionar} // Estado temporário para o produto sendo adicionado
-                    onChange={(e) => setProdutoParaAdicionar?.(e.target.value)}
-                    disabled={isSubmitting}
-                    aria-label="Produto"
-                  >
-                    <option value="" disabled>
-                      Selecione um produto
-                    </option>
-                    {products?.map((produto) => (
-                      <option key={produto.id} value={produto.id}>
-                        {produto.nome}
+              <div className="space-y-4 mb-4">
+                <h3 className="text-sm font-medium text-gray-700">
+                  Adicionar Produto
+                </h3>
+
+                {/* Linha 1: Produto e Quantidade */}
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Campo Produto */}
+                  <div className="flex-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                      Produto
+                    </Label>
+                    <select
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      value={produtoParaAdicionar}
+                      onChange={(e) =>
+                        setProdutoParaAdicionar?.(e.target.value)
+                      }
+                      disabled={isSubmitting}
+                      aria-label="Produto"
+                    >
+                      <option value="" disabled>
+                        Selecione um produto
                       </option>
-                    ))}
-                  </select>
+                      {products?.map((produto) => (
+                        <option key={produto.id} value={produto.id}>
+                          {produto.nome}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Campo Quantidade */}
+                  <div className="flex-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                      Quantidade
+                    </Label>
+                    <Input
+                      type="number"
+                      placeholder="Quantidade"
+                      className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={quantidadeParaAdicionar ?? ''}
+                      onChange={(e) => {
+                        setQuantidadeParaAdicionar?.(Number(e.target.value));
+                      }}
+                      min="1"
+                    />
+                  </div>
                 </div>
 
-                {/* Campo Quantidade */}
-                <div className="flex-1">
-                  <Label className="block text-sm font-medium text-gray-700 mb-1">
-                    Quantidade
-                  </Label>
-                  <Input
-                    type="number"
-                    placeholder="Quantidade"
-                    className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    value={quantidadeParaAdicionar} // Estado temporário para quantidade
-                    onChange={(e) => {
-                      setQuantidadeParaAdicionar?.(Number(e.target.value));
-                    }}
-                    min="1"
-                  />
-                </div>
+                {/* Linha 2: Valor Unitário e Botão Adicionar */}
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Campo Valor Unitário */}
+                  <div className="flex-1">
+                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                      Valor Unitário (R$)
+                    </Label>
+                    <Input
+                      type="number"
+                      step="0.01"
+                      min="0.01"
+                      placeholder="0,00"
+                      className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      value={valorParaAdicionar ?? ''}
+                      onChange={(e) => {
+                        setValorParaAdicionar?.(Number(e.target.value));
+                      }}
+                    />
+                  </div>
 
-                {/* Botão Adicionar */}
-                <div className="flex items-end">
-                  <Button
-                    type="button"
-                    onClick={adicionarProduto}
-                    disabled={
-                      !produtoParaAdicionar ||
-                      (quantidadeParaAdicionar ?? 0) <= 0
-                    }
-                    className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  >
-                    Adicionar
-                  </Button>
+                  {/* Botão Adicionar */}
+                  <div className="flex items-end">
+                    <Button
+                      type="button"
+                      onClick={adicionarProduto}
+                      disabled={
+                        !produtoParaAdicionar ||
+                        (quantidadeParaAdicionar ?? 0) <= 0 ||
+                        (valorParaAdicionar ?? 0) <= 0
+                      }
+                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -183,14 +240,22 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                       const produto = products?.find(
                         (p) => p.id === item.produtoId
                       );
+                      const valorTotal = item.quantidade * item.valorUnitario;
                       return (
                         <div
                           key={`produto-${item.produtoId}-${index}`}
-                          className="flex items-center justify-between bg-white p-2 rounded border"
+                          className="flex items-center justify-between bg-white p-3 rounded border"
                         >
-                          <span className="text-sm">
-                            {produto?.nome} - Qtd: {item.quantidade}
-                          </span>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium">
+                              {produto?.nome}
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              Qtd: {item.quantidade} ×{' '}
+                              {formatarMoeda(item.valorUnitario)} ={' '}
+                              {formatarMoeda(valorTotal)}
+                            </div>
+                          </div>
                           <Button
                             type="button"
                             onClick={() => removerProduto?.(index)}
@@ -201,6 +266,18 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                         </div>
                       );
                     })}
+                  </div>
+
+                  {/* Valor Total */}
+                  <div className="mt-3 pt-3 border-t border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-medium text-gray-700">
+                        Valor Total:
+                      </span>
+                      <span className="text-lg font-bold text-[#1E3A8A]">
+                        {formatarMoeda(valorTotalProdutos)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -316,19 +393,40 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                   disabled={isSubmitting}
                 />
               </div>
-              {juros > 0 && valor && (
+              {juros > 0 && (
                 <div className="text-sm text-gray-600">
-                  <p>Valor Original: R$ {Number(valor).toFixed(2)}</p>
-                  <p>
-                    Valor com Juros: R${' '}
-                    {(Number(valor) * (1 + juros / 100)).toFixed(2)}
-                  </p>
-                  <p>
-                    Valor por Parcela: R${' '}
-                    {((Number(valor) * (1 + juros / 100)) / parcelas).toFixed(
-                      2
-                    )}
-                  </p>
+                  {tipo === 'entrada' && valorTotalProdutos > 0 ? (
+                    <>
+                      <p>Valor Original: {formatarMoeda(valorTotalProdutos)}</p>
+                      <p>
+                        Valor com Juros:{' '}
+                        {formatarMoeda(valorTotalProdutos * (1 + juros / 100))}
+                      </p>
+                      <p>
+                        Valor por Parcela:{' '}
+                        {formatarMoeda(
+                          (valorTotalProdutos * (1 + juros / 100)) / parcelas
+                        )}
+                      </p>
+                    </>
+                  ) : (
+                    valor && (
+                      <>
+                        <p>Valor Original: R$ {Number(valor).toFixed(2)}</p>
+                        <p>
+                          Valor com Juros: R${' '}
+                          {(Number(valor) * (1 + juros / 100)).toFixed(2)}
+                        </p>
+                        <p>
+                          Valor por Parcela: R${' '}
+                          {(
+                            (Number(valor) * (1 + juros / 100)) /
+                            parcelas
+                          ).toFixed(2)}
+                        </p>
+                      </>
+                    )
+                  )}
                 </div>
               )}
             </div>

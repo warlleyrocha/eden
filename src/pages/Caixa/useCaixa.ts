@@ -50,10 +50,12 @@ export const useCaixa = () => {
     Array<{
       produtoId: string;
       quantidade: number;
+      valorUnitario: number;
     }>
   >([]);
   const [produtoParaAdicionar, setProdutoParaAdicionar] = useState('');
   const [quantidadeParaAdicionar, setQuantidadeParaAdicionar] = useState(1);
+  const [valorParaAdicionar, setValorParaAdicionar] = useState(0);
 
   // Carrega as saídas financeiras
   useEffect(() => {
@@ -68,22 +70,36 @@ export const useCaixa = () => {
   }, []);
 
   const adicionarProduto = useCallback(() => {
-    if (produtoParaAdicionar && quantidadeParaAdicionar > 0) {
+    if (
+      produtoParaAdicionar &&
+      quantidadeParaAdicionar > 0 &&
+      valorParaAdicionar > 0
+    ) {
       setProdutosSelecionados((prev) => [
         ...prev,
         {
           produtoId: produtoParaAdicionar,
           quantidade: quantidadeParaAdicionar,
+          valorUnitario: valorParaAdicionar,
         },
       ]);
       setProdutoParaAdicionar('');
       setQuantidadeParaAdicionar(1);
+      setValorParaAdicionar(0);
     }
-  }, [produtoParaAdicionar, quantidadeParaAdicionar]);
+  }, [produtoParaAdicionar, quantidadeParaAdicionar, valorParaAdicionar]);
 
   const removerProduto = useCallback((index: number) => {
     setProdutosSelecionados((prev) => prev.filter((_, i) => i !== index));
   }, []);
+
+  // Função para calcular o valor total dos produtos selecionados
+  const calcularValorTotalProdutos = useCallback(() => {
+    return produtosSelecionados.reduce((total, item) => {
+      return total + item.quantidade * item.valorUnitario;
+    }, 0);
+  }, [produtosSelecionados]);
+
   // Formatação de data
   const formatarData = useCallback((dataString: string) => {
     const data = new Date(dataString);
@@ -285,8 +301,21 @@ export const useCaixa = () => {
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (!valorEntrada || isNaN(Number(valorEntrada))) {
+      const valorTotalProdutos = calcularValorTotalProdutos();
+      const temProdutos = produtosSelecionados.length > 0;
+
+      // Se tem produtos, usa o valor total dos produtos; senão, usa o valor manual
+      const valorParaEnvio = temProdutos
+        ? valorTotalProdutos
+        : Number(valorEntrada);
+
+      if (!temProdutos && (!valorEntrada || isNaN(Number(valorEntrada)))) {
         setError('Valor inválido');
+        return;
+      }
+
+      if (temProdutos && valorTotalProdutos <= 0) {
+        setError('Adicione produtos com valores válidos');
         return;
       }
 
@@ -295,7 +324,7 @@ export const useCaixa = () => {
 
       try {
         // Calcula valor final (com juros se for crédito)
-        let valorFinal = Number(valorEntrada);
+        let valorFinal = valorParaEnvio;
         if (metodoPagamento === 'credito' && juros > 0) {
           valorFinal = valorFinal * (1 + juros / 100);
         }
@@ -315,6 +344,7 @@ export const useCaixa = () => {
           ...(produtosSelecionados.length > 0 && {
             produtosIds: produtosSelecionados.map((p) => p.produtoId),
             quantidades: produtosSelecionados.map((p) => p.quantidade),
+            valoresUnitarios: produtosSelecionados.map((p) => p.valorUnitario),
           }),
         };
 
@@ -329,6 +359,9 @@ export const useCaixa = () => {
         setJuros(0);
         setShowEntradaModal(false);
         setProdutosSelecionados([]);
+        setProdutoParaAdicionar('');
+        setQuantidadeParaAdicionar(1);
+        setValorParaAdicionar(0);
 
         toast.success('Venda registrada com sucesso!');
       } catch (err) {
@@ -347,6 +380,7 @@ export const useCaixa = () => {
       descricaoEntrada,
       parcelas,
       produtosSelecionados,
+      calcularValorTotalProdutos,
       formatarTipoMetodo,
       createEntrada,
     ]
@@ -464,6 +498,7 @@ export const useCaixa = () => {
     produtosSelecionados,
     produtoParaAdicionar,
     quantidadeParaAdicionar,
+    valorParaAdicionar,
     products,
 
     // Referente ao estado *relatorio¹* do hook useFinanceiro
@@ -520,6 +555,7 @@ export const useCaixa = () => {
     setProdutosSelecionados,
     setProdutoParaAdicionar,
     setQuantidadeParaAdicionar,
+    setValorParaAdicionar,
 
     // Funções
     filtrarEntradas,
@@ -537,5 +573,6 @@ export const useCaixa = () => {
     gerarPDFComPeriodo,
     adicionarProduto,
     removerProduto,
+    calcularValorTotalProdutos,
   };
 };
