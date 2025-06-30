@@ -146,7 +146,7 @@ export default function Caixa() {
                   movimentacoes={movimentacoes}
                   tipoMovimento="ENTRADA"
                   totalValue={totalEntradas}
-                  emptyMessage="Nenhuma venda registrada"
+                  emptyMessage="Não foram registradas entradas financeiras para a data de hoje."
                   // Dados do resumo final
                   totalEntradas={totalEntradas}
                   totalSaidas={totalSaidas}
@@ -181,7 +181,7 @@ export default function Caixa() {
                   movimentacoes={movimentacoes}
                   tipoMovimento="SAIDA"
                   totalValue={totalSaidas}
-                  emptyMessage="Nenhuma saída registrada"
+                  emptyMessage="Não foram registradas saídas financeiras para a data de hoje."
                   // Dados do resumo final
                   totalEntradas={totalEntradas}
                   totalSaidas={totalSaidas}

@@ -68,6 +68,17 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
   const textColor = isEntrada ? 'text-green-600' : 'text-red-600';
   const totalColor = isEntrada ? 'text-green-600' : 'text-red-500';
 
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const movimentacoesDoDia = movimentacoes
+    .filter((m) => m.tipo === tipoMovimento)
+    .filter((m) => {
+      const dataMov = new Date(m.criadoEm);
+      dataMov.setHours(0, 0, 0, 0);
+      return dataMov.getTime() === hoje.getTime();
+    });
+
   return (
     <div className="flex-1">
       {/* Cards de resumo por método de pagamento */}
@@ -106,8 +117,8 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
         </h2>
 
         <div className="space-y-4">
-          {movimentacoes.length === 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {movimentacoesDoDia.length === 0 ? (
+            <div className="flex flex-col">
               <div className="flex justify-between text-[#1E3A8A]">
                 <span>{emptyMessage}</span>
                 <span>R$ 0,00</span>
@@ -116,7 +127,7 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
           ) : (
             <>
               <div className="space-y-4 max-h-60 overflow-y-auto">
-                {movimentacoes
+                {movimentacoesDoDia
                   .filter((m) => m.tipo === tipoMovimento)
                   .slice()
                   .map((movimento) => (
