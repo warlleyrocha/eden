@@ -114,9 +114,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
 
         <form className="space-y-4 justify-between">
           {/* Campo de valor para saídas ou quando não há produtos selecionados */}
-          {(tipo === 'saida' ||
-            (tipo === 'entrada' &&
-              (produtosSelecionados ?? []).length === 0)) && (
+          {tipo !== 'entrada' && (
             <div>
               <label
                 htmlFor="value"
