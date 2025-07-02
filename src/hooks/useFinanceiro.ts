@@ -154,6 +154,7 @@ export function useFinanceiro() {
     try {
       await financeiroAPI.patchFinanceiro({ id, payload: updates });
       await fetchMovimentacoes();
+      await fetchRelatorioHoje();
     } catch (err: unknown) {
       console.error('Erro ao atualizar movimentação:', err);
       setError(err as ApiError);
@@ -170,6 +171,7 @@ export function useFinanceiro() {
       try {
         await financeiroAPI.deleteFinanceiro({ id });
         await fetchMovimentacoes();
+        await fetchRelatorioHoje();
         toast.success('Movimentação excluída com sucesso!');
       } catch (error) {
         setError(error as Error);
@@ -179,7 +181,7 @@ export function useFinanceiro() {
         setLoading(false);
       }
     },
-    [fetchMovimentacoes]
+    [fetchMovimentacoes, fetchRelatorioHoje]
   );
 
   // Auto-fetch inicial
