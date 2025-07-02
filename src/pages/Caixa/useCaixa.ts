@@ -19,6 +19,7 @@ export const useCaixa = () => {
   const {
     createSaida,
     createEntrada,
+    deleteFinanceiro,
     fetchMovimentacoes,
     fetchRelatorioHoje,
     fetchRelatorioPorPeriodo,
@@ -573,6 +574,7 @@ export const useCaixa = () => {
     gerarPDFComPeriodo,
     adicionarProduto,
     removerProduto,
+    deleteFinanceiro,
     calcularValorTotalProdutos,
   };
 };

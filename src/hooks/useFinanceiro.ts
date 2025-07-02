@@ -7,6 +7,7 @@ import type {
   RelatorioFinanceiro,
   SaidaFinanceiraPayload,
 } from '@/@types/financeiro';
+import { toast } from 'sonner';
 
 interface CreateSaidaParams {
   payload: SaidaFinanceiraPayload;
@@ -137,6 +138,25 @@ export function useFinanceiro() {
     [fetchMovimentacoes, fetchRelatorioHoje]
   );
 
+  // Deletar mov. financeira
+  const deleteFinanceiro = useCallback(
+    async (id: string) => {
+      setLoading(true);
+      try {
+        await financeiroAPI.deleteFinanceiro({ id });
+        await fetchMovimentacoes();
+        toast.success('Movimentação excluída com sucesso!');
+      } catch (error) {
+        setError(error as Error);
+        toast.error('Erro ao excluir movimentação');
+        throw error; // Permite tratamento adicional no componente
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchMovimentacoes]
+  );
+
   // Auto-fetch inicial
   useEffect(() => {
     const controller = new AbortController();
@@ -154,6 +174,7 @@ export function useFinanceiro() {
     // Actions
     createSaida,
     createEntrada,
+    deleteFinanceiro,
     setMovimentacoes,
     fetchMovimentacoes,
     fetchRelatorioHoje,

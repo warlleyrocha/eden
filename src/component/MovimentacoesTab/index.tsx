@@ -26,6 +26,7 @@ interface MovimentacoesTabProps {
 
   // Handlers
   onAddClick: () => void;
+  onClick: (id: string) => void;
 
   // Funções de formatação
   formatarMoeda: (valor: number) => string;
@@ -58,6 +59,7 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
 
   // Handlers
   onAddClick,
+  onClick,
 
   // Funções de formatação
   formatarMoeda,
@@ -149,10 +151,33 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                           )}
                         </p>
                       </div>
-                      <p className={`font-medium ${textColor}`}>
-                        {isEntrada ? '' : '-'}
-                        {formatarMoeda(movimento.valor)}
-                      </p>
+                      <div className="flex gap-2 items-center">
+                        <p className={`font-medium ${textColor}`}>
+                          {isEntrada ? '' : '-'}
+                          {formatarMoeda(movimento.valor)}
+                        </p>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors duration-200 group"
+                          onClick={() => onClick(movimento.id)}
+                          title="Excluir movimento"
+                        >
+                          <svg
+                            className="h-4 w-4 group-hover:scale-110 transition-transform duration-200"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
+                          </svg>
+                        </Button>
+                      </div>
                     </div>
                   ))}
               </div>

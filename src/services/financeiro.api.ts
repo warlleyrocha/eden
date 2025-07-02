@@ -8,6 +8,7 @@ import {
   FETCH_MOVEMENTS_ERRORS,
   FETCH_REPORT_ERRORS,
   CREATE_OUTFLOW_ERRORS,
+  DELETE_MOVEMENTS_ERRORS,
   ERROR_MESSAGES,
 } from '@/utils/errorHandler';
 
@@ -25,6 +26,11 @@ interface CreateSaidaParams {
 
 interface CreateEntradaParams {
   payload: EntradaFinanceiraPayload;
+  signal?: AbortSignal;
+}
+
+interface DeleteFinanceiroParams {
+  id: string;
   signal?: AbortSignal;
 }
 
@@ -46,6 +52,7 @@ const getAuthToken = (): string => {
 const movementsErrorHandler = createErrorHandlerMap(FETCH_MOVEMENTS_ERRORS);
 const reportErrorHandler = createErrorHandlerMap(FETCH_REPORT_ERRORS);
 const outflowErrorHandler = createErrorHandlerMap(CREATE_OUTFLOW_ERRORS);
+const deleteErrorHandler = createErrorHandlerMap(DELETE_MOVEMENTS_ERRORS);
 
 export const financeiroAPI = {
   // Listar todas as movimentações financeiras
@@ -232,4 +239,27 @@ export const financeiroAPI = {
       throw apiError;
     }
   },
+
+  // Deletar movimentação financeira
+  async deleteFinanceiro({
+    id,
+    signal,
+  }: DeleteFinanceiroParams): Promise<void> {
+    try {
+      const token = getAuthToken();
+      await api.delete(`/financeiro/${id}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
+      });
+    } catch (error) {
+      const apiError = handleApiError(error, deleteErrorHandler);
+      console.error('Erro ao deletar movimentação financeira:', apiError);
+      throw apiError;
+    }
+  },
+
+  //Editar movimentação financeira
 };

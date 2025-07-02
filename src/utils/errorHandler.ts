@@ -46,6 +46,11 @@ const CREATE_OUTFLOW_ERRORS = {
   404: ERROR_MESSAGES.NOT_FOUND_STORE,
 };
 
+const DELETE_MOVEMENTS_ERRORS = {
+  400: 'Erro ao remover movimentação financeira.',
+  404: 'Movimentação não encontrada',
+};
+
 const FETCH_BUDGETS_ERRORS = {
   [HTTP_STATUS.BAD_REQUEST]: 'Erro ao listar orçamentos.',
   [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
@@ -205,4 +210,5 @@ export {
   CREATE_CLIENT_ERRORS,
   UPDATE_CLIENT_ERRORS,
   DELETE_CLIENT_ERRORS,
+  DELETE_MOVEMENTS_ERRORS,
 };

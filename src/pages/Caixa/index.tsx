@@ -72,6 +72,7 @@ export default function Caixa() {
     handleCloseEntradaModal,
     adicionarProduto,
     removerProduto,
+    deleteFinanceiro,
   } = useCaixa();
 
   return (
@@ -159,6 +160,7 @@ export default function Caixa() {
                       setShowSaidaModal(true);
                     }
                   }}
+                  onClick={deleteFinanceiro}
                   // Funções de formatação
                   formatarMoeda={formatarMoeda}
                   formatarData={formatarData}
@@ -188,6 +190,7 @@ export default function Caixa() {
                   saldoFinal={saldoFinal}
                   // Handler para adicionar
                   onAddClick={() => setShowSaidaModal(true)}
+                  onClick={deleteFinanceiro}
                   // Funções de formatação
                   formatarMoeda={formatarMoeda}
                   formatarData={formatarData}
