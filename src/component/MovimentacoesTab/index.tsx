@@ -135,14 +135,12 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                   .filter((m) => m.tipo === tipoMovimento)
                   .slice()
                   .map((movimento) => (
-                    <div
+                    <button
                       key={movimento.id}
-                      className="flex items-center justify-between border-b pb-2"
+                      className="w-full text-left flex items-center justify-between border-b pb-2 cursor-pointer hover:bg-gray-100 p-2 rounded-[16px] transition-colors bg-transparent border-0 outline-none focus:ring-2 focus:ring-gray-100 focus:ring-offset-1 font-inherit"
+                      onDoubleClick={() => onDoubleClick?.(movimento.id)}
                     >
-                      <button
-                        className="flex-1 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
-                        onDoubleClick={() => onDoubleClick?.(movimento.id)}
-                      >
+                      <div className="flex-1">
                         <p className="font-medium">
                           {movimento.descricao ??
                             (isEntrada ? 'Entrada' : 'Saída')}
@@ -155,7 +153,7 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                             movimento.juros
                           )}
                         </p>
-                      </button>
+                      </div>
                       <div className="flex gap-2 items-center">
                         <p className={`font-medium ${textColor}`}>
                           {isEntrada ? '' : '-'}
@@ -186,7 +184,7 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                           </svg>
                         </Button>
                       </div>
-                    </div>
+                    </button>
                   ))}
               </div>
               <div className="flex justify-between text-[#1E3A8A] border-t pt-2">
