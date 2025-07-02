@@ -47,6 +47,7 @@ export default function Caixa() {
     valorParaAdicionar,
     showEditModal,
     tipoEdicao,
+    isEditing,
 
     // Setters
     setValorParaAdicionar,
@@ -374,6 +375,7 @@ export default function Caixa() {
           valorParaAdicionar={valorParaAdicionar}
           adicionarProduto={adicionarProduto}
           removerProduto={removerProduto}
+          isEditing={isEditing}
         />
       )}
     </>

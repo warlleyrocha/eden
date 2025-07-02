@@ -36,6 +36,7 @@ interface RegistroModalProps {
   setValorParaAdicionar?: (valor: number) => void; // Adicionado setter para valor
   adicionarProduto?: () => void;
   removerProduto?: (index: number) => void;
+  isEditing?: boolean;
 }
 
 export const RegistroModal: React.FC<RegistroModalProps> = ({
@@ -65,16 +66,30 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
   setValorParaAdicionar,
   adicionarProduto,
   removerProduto,
+  isEditing = false,
 }) => {
   if (!isOpen) return null;
 
   const isCredito = metodoPagamento === 'credito';
-  const titulo =
-    tipo === 'entrada' ? 'Registrar Nova Entrada' : 'Registrar Nova Saída';
-  const botaoTexto =
-    tipo === 'entrada' ? 'Registrar Entrada' : 'Registrar Saída';
-  const loadingTexto =
-    tipo === 'entrada' ? 'Registrando entrada...' : 'Registrando saída...';
+
+  // Lógica condicional para título e textos dos botões
+  let titulo: string;
+  let botaoTexto: string;
+  let loadingTexto: string;
+
+  if (isEditing) {
+    titulo = tipo === 'entrada' ? 'Editar Entrada' : 'Editar Saída';
+    botaoTexto = 'Editar';
+    loadingTexto = 'Editando...';
+  } else if (tipo === 'entrada') {
+    titulo = 'Registrar Nova Entrada';
+    botaoTexto = 'Registrar Entrada';
+    loadingTexto = 'Registrando entrada...';
+  } else {
+    titulo = 'Registrar Nova Saída';
+    botaoTexto = 'Registrar Saída';
+    loadingTexto = 'Registrando saída...';
+  }
 
   // Calcula o valor total dos produtos selecionados
   const valorTotalProdutos = (produtosSelecionados ?? []).reduce(
@@ -447,7 +462,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />{' '}
-                  Registrando...
+                  {isEditing ? 'Editando...' : 'Registrando...'}
                 </>
               ) : (
                 botaoTexto
