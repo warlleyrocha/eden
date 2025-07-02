@@ -27,6 +27,7 @@ interface MovimentacoesTabProps {
   // Handlers
   onAddClick: () => void;
   onClick: (id: string) => void;
+  onDoubleClick: (id: string) => void;
 
   // Funções de formatação
   formatarMoeda: (valor: number) => string;
@@ -60,6 +61,7 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
   // Handlers
   onAddClick,
   onClick,
+  onDoubleClick,
 
   // Funções de formatação
   formatarMoeda,
@@ -137,7 +139,10 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                       key={movimento.id}
                       className="flex items-center justify-between border-b pb-2"
                     >
-                      <div>
+                      <button
+                        className="flex-1 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors"
+                        onDoubleClick={() => onDoubleClick?.(movimento.id)}
+                      >
                         <p className="font-medium">
                           {movimento.descricao ??
                             (isEntrada ? 'Entrada' : 'Saída')}
@@ -150,7 +155,7 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                             movimento.juros
                           )}
                         </p>
-                      </div>
+                      </button>
                       <div className="flex gap-2 items-center">
                         <p className={`font-medium ${textColor}`}>
                           {isEntrada ? '' : '-'}
@@ -160,7 +165,10 @@ const MovimentacoesTab: React.FC<MovimentacoesTabProps> = ({
                           size="sm"
                           variant="ghost"
                           className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full transition-colors duration-200 group"
-                          onClick={() => onClick(movimento.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onClick(movimento.id);
+                          }}
                           title="Excluir movimento"
                         >
                           <svg

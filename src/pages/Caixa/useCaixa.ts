@@ -4,7 +4,12 @@ import { toast } from 'sonner';
 import { useFinanceiro } from '@/hooks/useFinanceiro';
 import { useEstoque } from '@/hooks/useEstoque';
 import { useRelatorioFechamento } from '@/hooks/useRelatorioFechamento';
-import type { MovimentoFinanceiro } from '@/@types/financeiro';
+import type {
+  MovimentoFinanceiro,
+  EditarMovimentacaoFinanceira,
+  TipoMovimento,
+} from '@/@types/financeiro';
+import { MetodoPagamento } from '@/@types/financeiro';
 
 // Mapeamento de métodos de pagamento
 const METODOS_PAGAMENTO_LABELS = {
@@ -19,6 +24,7 @@ export const useCaixa = () => {
   const {
     createSaida,
     createEntrada,
+    updateFinanceiro,
     deleteFinanceiro,
     fetchMovimentacoes,
     fetchRelatorioHoje,
@@ -57,6 +63,201 @@ export const useCaixa = () => {
   const [produtoParaAdicionar, setProdutoParaAdicionar] = useState('');
   const [quantidadeParaAdicionar, setQuantidadeParaAdicionar] = useState(1);
   const [valorParaAdicionar, setValorParaAdicionar] = useState(0);
+
+  // Estados para edição
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [tipoEdicao, setTipoEdicao] = useState<'entrada' | 'saida'>('entrada');
+
+  const handleDoubleClick = (id: string) => {
+    console.log('Editando movimentação:', id);
+
+    const movimentacao = movimentacoes.find((mov) => mov.id === id);
+    if (!movimentacao) {
+      console.error('Movimentação não encontrada:', id);
+      return;
+    }
+
+    console.log('Dados da movimentação:', movimentacao);
+
+    // Função auxiliar para mapear método de pagamento do backend para frontend
+    const mapearMetodoPagamentoParaFrontend = (
+      metodoPagamentoBackend: string
+    ) => {
+      const mapeamento: Record<string, string> = {
+        PIX: 'pix',
+        DINHEIRO: 'dinheiro',
+        DEBITO: 'debito',
+        CREDITO_AVISTA: 'credito',
+        CREDITO_PARCELADO: 'credito',
+      };
+
+      return mapeamento[metodoPagamentoBackend] || 'pix';
+    };
+
+    // Preencher os campos com os dados existentes
+    if (movimentacao.tipo === 'ENTRADA') {
+      setValorEntrada(movimentacao.valor.toString());
+      setDescricaoEntrada(movimentacao.descricao || '');
+      setTipoEdicao('entrada');
+
+      // *** PARTE NOVA: Popular produtos se existirem (usando type assertion segura) ***
+      const movimentacaoComProdutos = movimentacao as MovimentoFinanceiro & {
+        produtos?: Array<{
+          produtoId: string;
+          quantidade: number;
+          valorUnitario: number;
+        }>;
+      };
+
+      if (
+        movimentacaoComProdutos.produtos &&
+        movimentacaoComProdutos.produtos.length > 0
+      ) {
+        console.log(
+          'Populando produtos da movimentação:',
+          movimentacaoComProdutos.produtos
+        );
+
+        setProdutosSelecionados(
+          movimentacaoComProdutos.produtos.map((produto) => ({
+            produtoId: produto.produtoId,
+            quantidade: produto.quantidade,
+            valorUnitario: produto.valorUnitario,
+          }))
+        );
+      } else {
+        // Limpar produtos se não existirem
+        setProdutosSelecionados([]);
+      }
+    } else {
+      setValorSaida(movimentacao.valor.toString());
+      setDescricaoSaida(movimentacao.descricao || '');
+      setTipoEdicao('saida');
+
+      // Limpar produtos para saídas
+      setProdutosSelecionados([]);
+    }
+
+    // Mapear método de pagamento do backend para frontend
+    const metodoPagamentoFrontend = mapearMetodoPagamentoParaFrontend(
+      movimentacao.metodoPagamento || 'PIX'
+    );
+    setMetodoPagamento(metodoPagamentoFrontend);
+
+    setParcelas(movimentacao.parcelas ?? 1);
+    setJuros(movimentacao.juros ?? 0);
+
+    // Limpar campos de adição de produto (importante para não manter lixo)
+    setProdutoParaAdicionar?.('');
+    setQuantidadeParaAdicionar?.(1);
+    setValorParaAdicionar?.(0);
+
+    setEditingId(id);
+    setIsEditing(true);
+    setShowEditModal(true);
+
+    console.log('Estados populados para edição');
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingId) {
+      console.error('Nenhuma movimentação selecionada para edição');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      // Função para mapear método de pagamento do frontend para o backend
+      const mapearMetodoPagamento = (metodo: string): MetodoPagamento => {
+        const mapeamento: Record<string, MetodoPagamento> = {
+          pix: MetodoPagamento.PIX,
+          dinheiro: MetodoPagamento.DINHEIRO,
+          debito: MetodoPagamento.DEBITO,
+          credito:
+            metodoPagamento === 'credito' && parcelas === 1
+              ? MetodoPagamento.CREDITO_AVISTA
+              : MetodoPagamento.CREDITO_PARCELADO,
+        };
+        return mapeamento[metodo] || MetodoPagamento.PIX;
+      };
+
+      // Dados base para edição
+      const dadosEdicao: EditarMovimentacaoFinanceira = {
+        valor:
+          tipoEdicao === 'entrada'
+            ? parseFloat(valorEntrada)
+            : parseFloat(valorSaida),
+        descricao: tipoEdicao === 'entrada' ? descricaoEntrada : descricaoSaida,
+        metodoPagamento: mapearMetodoPagamento(metodoPagamento),
+        parcelas: metodoPagamento === 'credito' ? parcelas : 1,
+        juros: metodoPagamento === 'credito' ? juros : 0,
+        tipo: tipoEdicao.toUpperCase() as TipoMovimento,
+      };
+
+      // Incluir produtos apenas para entradas
+      if (
+        tipoEdicao === 'entrada' &&
+        produtosSelecionados &&
+        produtosSelecionados.length > 0
+      ) {
+        dadosEdicao.produtos = produtosSelecionados.map((produto) => ({
+          produtoId: produto.produtoId,
+          quantidade: produto.quantidade,
+          valorUnitario: produto.valorUnitario,
+        }));
+
+        // Recalcular o valor total baseado nos produtos selecionados
+        const valorTotalProdutos = produtosSelecionados.reduce(
+          (total, item) => total + item.quantidade * item.valorUnitario,
+          0
+        );
+
+        dadosEdicao.valor = valorTotalProdutos;
+
+        console.log('Produtos incluídos na edição:', dadosEdicao.produtos);
+        console.log('Valor total recalculado:', valorTotalProdutos);
+      }
+
+      console.log('Dados para edição:', dadosEdicao);
+      console.log('ID da movimentação:', editingId);
+
+      // Chamar a função de atualização
+      await updateFinanceiro(editingId, dadosEdicao);
+
+      // Recarregar movimentações após a edição
+      await fetchMovimentacoes();
+
+      // Fechar modal
+      handleCloseEditModal();
+    } catch (error) {
+      console.error('Erro ao atualizar movimentação:', error);
+      setError('Erro ao atualizar movimentação. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditing(false);
+    setEditingId(null);
+    setShowEditModal(false);
+
+    // Limpar os campos
+    if (tipoEdicao === 'entrada') {
+      setValorEntrada('');
+      setDescricaoEntrada('');
+    } else {
+      setValorSaida('');
+      setDescricaoSaida('');
+    }
+    setMetodoPagamento('PIX');
+    setParcelas(1);
+    setJuros(0);
+  };
 
   // Carrega as saídas financeiras
   useEffect(() => {
@@ -501,6 +702,9 @@ export const useCaixa = () => {
     quantidadeParaAdicionar,
     valorParaAdicionar,
     products,
+    showEditModal,
+    isEditing,
+    tipoEdicao,
 
     // Referente ao estado *relatorio¹* do hook useFinanceiro
     totalEntradas,
@@ -557,6 +761,7 @@ export const useCaixa = () => {
     setProdutoParaAdicionar,
     setQuantidadeParaAdicionar,
     setValorParaAdicionar,
+    setShowEditModal,
 
     // Funções
     filtrarEntradas,
@@ -570,11 +775,15 @@ export const useCaixa = () => {
     handleEntradaSubmit,
     handleCloseEntradaModal,
     handleDateChange,
+    handleDoubleClick,
+    handleEditSubmit,
+    handleCloseEditModal,
     downloadPDF,
     gerarPDFComPeriodo,
     adicionarProduto,
     removerProduto,
     deleteFinanceiro,
+    updateFinanceiro,
     calcularValorTotalProdutos,
   };
 };

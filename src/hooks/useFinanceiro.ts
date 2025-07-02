@@ -6,6 +6,7 @@ import type {
   MovimentoFinanceiro,
   RelatorioFinanceiro,
   SaidaFinanceiraPayload,
+  EditarMovimentacaoFinanceira,
 } from '@/@types/financeiro';
 import { toast } from 'sonner';
 
@@ -138,6 +139,30 @@ export function useFinanceiro() {
     [fetchMovimentacoes, fetchRelatorioHoje]
   );
 
+  // Editar mov. financeira
+  const updateFinanceiro = async (
+    id: string,
+    updates: EditarMovimentacaoFinanceira
+  ) => {
+    if (!id) {
+      console.warn('ID da movimentação é obrigatório');
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await financeiroAPI.patchFinanceiro({ id, payload: updates });
+      await fetchMovimentacoes();
+    } catch (err: unknown) {
+      console.error('Erro ao atualizar movimentação:', err);
+      setError(err as ApiError);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Deletar mov. financeira
   const deleteFinanceiro = useCallback(
     async (id: string) => {
@@ -174,6 +199,7 @@ export function useFinanceiro() {
     // Actions
     createSaida,
     createEntrada,
+    updateFinanceiro,
     deleteFinanceiro,
     setMovimentacoes,
     fetchMovimentacoes,

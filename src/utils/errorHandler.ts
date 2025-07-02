@@ -46,6 +46,11 @@ const CREATE_OUTFLOW_ERRORS = {
   404: ERROR_MESSAGES.NOT_FOUND_STORE,
 };
 
+const UPDATE_MOVEMENTS_ERRORS = {
+  400: 'Erro ao editar movimentação financeira',
+  404: 'Movimentação não encontrada',
+};
+
 const DELETE_MOVEMENTS_ERRORS = {
   400: 'Erro ao remover movimentação financeira.',
   404: 'Movimentação não encontrada',
@@ -209,6 +214,7 @@ export {
   FETCH_CLIENT_BY_ID_ERRORS,
   CREATE_CLIENT_ERRORS,
   UPDATE_CLIENT_ERRORS,
+  UPDATE_MOVEMENTS_ERRORS,
   DELETE_CLIENT_ERRORS,
   DELETE_MOVEMENTS_ERRORS,
 };

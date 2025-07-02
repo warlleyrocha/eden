@@ -19,6 +19,20 @@ export interface SaidaFinanceiraPayload {
   juros?: number;
 }
 
+export interface EditarMovimentacaoFinanceira {
+  metodoPagamento: MetodoPagamento;
+  valor: number;
+  descricao: string;
+  parcelas?: number;
+  juros?: number;
+  tipo: TipoMovimento;
+  produtos?: Array<{
+    produtoId: string;
+    quantidade: number;
+    valorUnitario: number;
+  }>;
+}
+
 export interface EntradaFinanceiraPayload {
   metodoPagamento: MetodoPagamento;
   valor: number;

@@ -10,6 +10,7 @@ import {
   CREATE_OUTFLOW_ERRORS,
   DELETE_MOVEMENTS_ERRORS,
   ERROR_MESSAGES,
+  UPDATE_MOVEMENTS_ERRORS,
 } from '@/utils/errorHandler';
 
 import type {
@@ -17,6 +18,7 @@ import type {
   RelatorioFinanceiro,
   SaidaFinanceiraPayload,
   EntradaFinanceiraPayload,
+  EditarMovimentacaoFinanceira,
 } from '@/@types/financeiro';
 
 interface CreateSaidaParams {
@@ -26,6 +28,12 @@ interface CreateSaidaParams {
 
 interface CreateEntradaParams {
   payload: EntradaFinanceiraPayload;
+  signal?: AbortSignal;
+}
+
+interface PatchFinanceiroParams {
+  id: string;
+  payload: EditarMovimentacaoFinanceira;
   signal?: AbortSignal;
 }
 
@@ -52,6 +60,7 @@ const getAuthToken = (): string => {
 const movementsErrorHandler = createErrorHandlerMap(FETCH_MOVEMENTS_ERRORS);
 const reportErrorHandler = createErrorHandlerMap(FETCH_REPORT_ERRORS);
 const outflowErrorHandler = createErrorHandlerMap(CREATE_OUTFLOW_ERRORS);
+const updateMovementsHandler = createErrorHandlerMap(UPDATE_MOVEMENTS_ERRORS);
 const deleteErrorHandler = createErrorHandlerMap(DELETE_MOVEMENTS_ERRORS);
 
 export const financeiroAPI = {
@@ -240,6 +249,38 @@ export const financeiroAPI = {
     }
   },
 
+  //Editar movimentação financeira
+  async patchFinanceiro({ id, payload, signal }: PatchFinanceiroParams) {
+    try {
+      const token = getAuthToken();
+
+      if (!id) {
+        throw new Error('ID da movimentação é obrigatório para atualização');
+      }
+
+      console.log('Atualizando produto com ID:', id);
+      console.log('Dados para atualização:', payload);
+
+      const response = await api.patch(`/financeiro/editar/${id}`, payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        signal,
+      });
+      if (response.status === 200) {
+        console.log('Produto atualizado com sucesso:', response.data);
+        return response.data;
+      } else {
+        throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
+      }
+    } catch (error) {
+      const apiError = handleApiError(error, updateMovementsHandler);
+      console.error('Erro ao atualizar movimentação:', apiError);
+      throw apiError;
+    }
+  },
+
   // Deletar movimentação financeira
   async deleteFinanceiro({
     id,
@@ -260,6 +301,4 @@ export const financeiroAPI = {
       throw apiError;
     }
   },
-
-  //Editar movimentação financeira
 };

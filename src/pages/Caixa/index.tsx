@@ -45,6 +45,8 @@ export default function Caixa() {
     produtoParaAdicionar,
     quantidadeParaAdicionar,
     valorParaAdicionar,
+    showEditModal,
+    tipoEdicao,
 
     // Setters
     setValorParaAdicionar,
@@ -68,6 +70,9 @@ export default function Caixa() {
     handleSaidaSubmit,
     handleEntradaSubmit,
     handleDateChange,
+    handleDoubleClick,
+    handleEditSubmit,
+    handleCloseEditModal,
     downloadPDF,
     handleCloseEntradaModal,
     adicionarProduto,
@@ -160,6 +165,7 @@ export default function Caixa() {
                       setShowSaidaModal(true);
                     }
                   }}
+                  onDoubleClick={handleDoubleClick}
                   onClick={deleteFinanceiro}
                   // Funções de formatação
                   formatarMoeda={formatarMoeda}
@@ -190,6 +196,7 @@ export default function Caixa() {
                   saldoFinal={saldoFinal}
                   // Handler para adicionar
                   onAddClick={() => setShowSaidaModal(true)}
+                  onDoubleClick={handleDoubleClick}
                   onClick={deleteFinanceiro}
                   // Funções de formatação
                   formatarMoeda={formatarMoeda}
@@ -330,6 +337,43 @@ export default function Caixa() {
           setParcelas={setParcelas}
           juros={juros}
           setJuros={setJuros}
+        />
+      )}
+
+      {/* Modal de Edição */}
+      {showEditModal && (
+        <RegistroModal
+          isOpen={showEditModal}
+          onClose={handleCloseEditModal}
+          tipo={tipoEdicao}
+          isSubmitting={isSubmitting}
+          onSubmit={handleEditSubmit}
+          error={error}
+          valor={tipoEdicao === 'entrada' ? valorEntrada : valorSaida}
+          setValor={tipoEdicao === 'entrada' ? setValorEntrada : setValorSaida}
+          descricao={
+            tipoEdicao === 'entrada' ? descricaoEntrada : descricaoSaida
+          }
+          setDescricao={
+            tipoEdicao === 'entrada' ? setDescricaoEntrada : setDescricaoSaida
+          }
+          metodoPagamento={metodoPagamento}
+          setMetodoPagamento={setMetodoPagamento}
+          parcelas={parcelas}
+          setParcelas={setParcelas}
+          juros={juros}
+          setJuros={setJuros}
+          // Props de produtos (sempre passadas, mas só usadas se for entrada)
+          products={products}
+          produtosSelecionados={produtosSelecionados}
+          produtoParaAdicionar={produtoParaAdicionar}
+          quantidadeParaAdicionar={quantidadeParaAdicionar}
+          setProdutoParaAdicionar={setProdutoParaAdicionar}
+          setQuantidadeParaAdicionar={setQuantidadeParaAdicionar}
+          setValorParaAdicionar={setValorParaAdicionar}
+          valorParaAdicionar={valorParaAdicionar}
+          adicionarProduto={adicionarProduto}
+          removerProduto={removerProduto}
         />
       )}
     </>
