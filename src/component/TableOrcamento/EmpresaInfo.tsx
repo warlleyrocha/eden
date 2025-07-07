@@ -15,7 +15,7 @@ type OrcamentoModelDetalsProps = Readonly<{
     nome: string;
     cnpj: string;
     endereco: string;
-    subTitle: string;
+    subTitulo: string;
     telefone: string;
     email: string;
   }>;
@@ -53,19 +53,25 @@ type OrcamentoModelDetalsProps = Readonly<{
     status: string;
     total: number;
   }>;
+
+  autoPrint?: boolean;
 }>;
 
 export function OrcamentoModelDetals({
   empresaInfo,
   orcamentoInfo,
+  autoPrint = false,
 }: OrcamentoModelDetalsProps) {
   useEffect(() => {
-    const timeout = setTimeout(() => {
-      window.print();
-    }, 300); // pequeno delay para garantir renderização
+    // Só executa o print se autoPrint for true
+    if (autoPrint) {
+      const timeout = setTimeout(() => {
+        window.print();
+      }, 450); // pequeno delay para garantir renderização
 
-    return () => clearTimeout(timeout);
-  }, []);
+      return () => clearTimeout(timeout);
+    }
+  }, [autoPrint]);
 
   if (!empresaInfo || !orcamentoInfo) return null;
 
@@ -224,7 +230,7 @@ export function OrcamentoModelDetals({
           <div className="text-center text-xs text-gray-500 pt-1 pb-0.5">
             <p>Este orçamento tem validade de 7 dias.</p>
             <p className="font-semibold">
-              {empresaInfo.nome} - {empresaInfo.subTitle}
+              {empresaInfo.nome} - {empresaInfo.subTitulo}
             </p>
           </div>
           <div className="border-b border-dashed my-1"></div>

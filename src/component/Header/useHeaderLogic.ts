@@ -2,9 +2,10 @@
 
 import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import useAuth from '@/hook';
-import { useStore } from '@/hooks/useStore';
+import useAuth from '@/hooks/useAuth';
+import { useStore } from '@/hooks/useLoja';
 import { useOrcamento } from '@/hooks/useOrcamento';
+import { toast } from 'sonner';
 
 export type OrcamentoStatus = 'ABERTO' | 'APROVADO' | 'REPROVADO';
 
@@ -20,7 +21,7 @@ export function useHeaderLogic() {
   const navigate = useNavigate();
 
   const { storeData } = useStore();
-  const nameStore = storeData.nameStore;
+  const nameStore = storeData?.nome;
 
   const {
     orcamentos,
@@ -75,11 +76,22 @@ export function useHeaderLogic() {
 
   const removerOrcamento = useCallback(
     async (id: string) => {
-      const confirmar = window.confirm(
-        'Deseja realmente rejeitar este orçamento?'
-      );
-      if (!confirmar) return;
-      return processAction(id, 'reject', () => deleteOrcamento(id));
+      const toastId = toast.loading('Excluindo orçamento...');
+
+      try {
+        await processAction(id, 'reject', () => deleteOrcamento(id));
+        toast.success('Orçamento excluído!', { id: toastId });
+      } catch (error: unknown) {
+        let errorMessage = 'Falha ao excluir';
+
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        }
+
+        toast.error(errorMessage, { id: toastId });
+      }
     },
     [deleteOrcamento, refreshOrcamentos]
   );

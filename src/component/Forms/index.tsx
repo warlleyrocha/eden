@@ -4,21 +4,17 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-// API
-import { api } from '@/services/api';
-import { AxiosError } from 'axios';
+import { clientsAPI } from '@/services/cliente.api';
 
-import { useClientContext } from '@/contexts/client';
-import { useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useCliente';
 
-type FormsProps = {
+type FormsProps = Readonly<{
   showModal: boolean;
   setShowModal: (value: boolean) => void;
-};
+}>;
 
 export default function Forms({ showModal, setShowModal }: FormsProps) {
-  const { selectedClient, setSelectedClient } = useClientContext();
-  const { updateClients, fetchClients } = useClients();
+  const { fetchClients, selectedClient, setSelectedClient } = useClients();
 
   const [formData, setFormData] = useState({
     name: '',
@@ -72,38 +68,30 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
 
     try {
       if (selectedClient?.id) {
-        const response = await updateClients(selectedClient.id, payload);
-        if (response?.status === 200) {
-          setShowModal(false);
-          toast.success('Cliente atualizado com sucesso!', {
-            description: 'Dados atualizados.',
-            duration: 1500,
-          });
-        } else {
-          // Se a atualização falhar, você pode querer tratar isso de forma diferente
-          toast.error('Erro ao atualizar cliente', {
-            description: `Status inesperado: ${response?.status}`,
-            duration: 1500,
-          });
-        }
+        // Atualização de cliente existente
+        await clientsAPI.updateClient({
+          id: selectedClient.id,
+          payload,
+        });
+        toast.success('Cliente atualizado com sucesso!', {
+          description: 'Dados atualizados.',
+          duration: 1500,
+        });
       } else {
         // Cadastro de novo cliente
-        const response = await api.post(`/clientes/${lojaId}`, payload);
-        if (response.status === 201) {
-          console.log(`Cliente, ${response.data.nome} cadastrado com sucesso!`);
-          await fetchClients();
-          toast.success('Cliente cadastrado com sucesso!', {
-            description: 'Os dados do cliente foram salvos com sucesso.',
-            duration: 1000,
-          });
-        } else {
-          toast.error('Erro ao cadastrar cliente', {
-            description: `Status inesperado: ${response.status}`,
-            duration: 1500,
-          });
-        }
+        await clientsAPI.createClient({
+          payload,
+        });
+        toast.success('Cliente cadastrado com sucesso!', {
+          description: 'Os dados do cliente foram salvos com sucesso.',
+          duration: 1000,
+        });
       }
 
+      // Atualiza a lista de clientes
+      await fetchClients();
+
+      // Reseta o formulário e fecha o modal
       setFormData({
         name: '',
         phone: '',
@@ -113,12 +101,10 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
       });
       setSelectedClient(null);
       setShowModal(false);
-    } catch (error: unknown) {
-      let errorMessage = 'Erro inesperado.';
+    } catch (error) {
+      let errorMessage = 'Erro inesperado ao processar a requisição.';
 
-      if (error instanceof AxiosError) {
-        errorMessage = error.response?.data?.message || error.message;
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         errorMessage = error.message;
       }
 

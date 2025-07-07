@@ -1,31 +1,31 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, type FormEvent } from "react";
-import { api } from "../../services/api";
-import useAuth from "../../hook";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { toast } from "sonner";
+import { useState, type FormEvent } from 'react';
+import { api } from '../../services/api';
+import useAuth from '../../hooks/useAuth';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { toast } from 'sonner';
 
 export default function SignIn() {
   const { setAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
-    setError("");
+    setError('');
 
     if (!email || !password) {
-      setError("Por favor, preencha todos os campos.");
+      setError('Por favor, preencha todos os campos.');
       return;
     }
 
     try {
-      const response = await api.post("/auth/login", {
+      const response = await api.post('/auth/login', {
         email: email,
         senha: password,
       });
@@ -33,32 +33,32 @@ export default function SignIn() {
       if (response.status === 200) {
         const { access_token, loja } = response.data;
 
-        localStorage.setItem("token", access_token);
+        localStorage.setItem('token', access_token);
 
         if (loja?.id) {
-          localStorage.setItem("storeId", loja.id);
+          localStorage.setItem('storeId', loja.id);
         }
 
-        setError("");
+        setError('');
 
-        toast.success("Login realizado com sucesso!", {
-          description: "Você está sendo redirecionado para a página inicial",
+        toast.success('Login realizado com sucesso!', {
+          description: 'Você está sendo redirecionado para a página inicial',
           duration: 1000,
-          position: "top-right",
+          position: 'top-right',
           richColors: true,
         });
 
         setAuthenticated(true);
 
         setTimeout(() => {
-          navigate("/home");
+          navigate('/home');
         }, 3000); // Aguarda o toast antes de redirecionar
       }
     } catch (err) {
-      toast.error("Credenciais inválidas!", {
-        description: "Verifique seu Email e senha.",
+      toast.error('Credenciais inválidas!', {
+        description: 'Verifique seu Email e senha.',
         duration: 3000,
-        position: "top-right",
+        position: 'top-right',
         richColors: true,
       });
     }
@@ -113,7 +113,10 @@ export default function SignIn() {
           </div>
           {error && <div className="text-red-500 mb-4">{error}</div>}
 
-          <Button type="submit" className="w-full bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200 cursor-pointer">
+          <Button
+            type="submit"
+            className="w-full bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200 cursor-pointer"
+          >
             Login
           </Button>
         </form>

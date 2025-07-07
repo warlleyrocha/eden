@@ -2,14 +2,16 @@
 
 import { useMemo, useState } from 'react';
 import { PlusCircle, Search } from 'lucide-react';
+import { toast } from 'sonner';
+
 import DialogModal from '@/component/DialogModal';
 import { Header } from '@/component/Header';
 import { TableData } from '@/component/TableData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useStock } from '@/hooks/useStock';
-import { toast } from 'sonner';
+
+import { useEstoque } from '@/hooks/useEstoque';
 
 import type { Produto } from '@/@types/product';
 
@@ -19,10 +21,9 @@ export default function Stock() {
   const [quantidade, setQuantidade] = useState('');
   const [preco, setPreco] = useState('');
   const [busca, setBusca] = useState('');
-  //const [produtosFiltrados, setProdutosFiltrados] = useState<Produto[]>([]);
   const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
 
-  const { products, addProduct, updateProduct, deleteProduct } = useStock();
+  const { products, addProduct, updateProduct, deleteProduct } = useEstoque();
 
   const produtosFiltrados = useMemo(() => {
     if (!busca.trim()) {
@@ -60,6 +61,20 @@ export default function Stock() {
     setQuantidade(produto.estoque?.toString() || '');
     setPreco(produto.precoCusto?.toString() || '');
     setIsOpen(true);
+  };
+
+  // Função de capitalização automática
+  const capitalize = (text: string): string => {
+    return text
+      .split(' ')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  // Modificação no handler do input do nome do produto
+  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNome(capitalize(value));
   };
 
   return (
@@ -194,7 +209,7 @@ export default function Stock() {
                 e.preventDefault();
 
                 const dados = {
-                  nome,
+                  nome: capitalize(nome),
                   quantidadeInicial: parseInt(quantidade),
                   precoCusto: parseFloat(preco),
                 };
@@ -233,7 +248,7 @@ export default function Stock() {
                 placeholder="Nome do Item"
                 value={nome}
                 className="w-full px-3 py-2 mb-8 border rounded"
-                onChange={(e) => setNome(e.target.value)}
+                onChange={handleNomeChange}
                 required
               />
               <div className="w-full flex flex-col sm:flex-row gap-6">

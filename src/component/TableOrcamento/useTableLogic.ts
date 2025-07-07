@@ -9,7 +9,7 @@ import {
 
 import { getStoreId } from '@/utils/getStoreId';
 
-import { useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useCliente';
 import { useOrcamento } from '@/hooks/useOrcamento';
 
 import type { Client } from '@/@types/clients';
@@ -109,7 +109,6 @@ export function useTableLogic({
   const submittingRef = useRef(false);
 
   // 🔧 Hooks externos chamados apenas uma vez no topo
-  //const { products } = useStock();
   const { clients } = useClients();
   const { getOrcamentoById } = useOrcamento();
 
@@ -151,6 +150,14 @@ export function useTableLogic({
     };
   }, []);
 
+  // Adicione este useMemo logo após os estados, antes do filteredClients
+  const orcamentosComNumeracao = useMemo(() => {
+    return formattedOrcamentos.map((orcamento, index) => ({
+      ...orcamento,
+      numeroSequencial: formattedOrcamentos.length - index,
+    }));
+  }, [formattedOrcamentos]);
+
   // 🔧 Filtros otimizados com debounce implícito
   const filteredClients = useMemo(() => {
     if (!searchTerm.trim()) return formattedClients;
@@ -161,12 +168,27 @@ export function useTableLogic({
   }, [formattedClients, searchTerm]);
 
   const filteredOrcamentos = useMemo(() => {
-    if (!searchTerm.trim()) return formattedOrcamentos;
+    if (!searchTerm.trim()) return orcamentosComNumeracao;
     const lowerSearch = searchTerm.toLowerCase().trim();
-    return formattedOrcamentos.filter((o) =>
-      o.cliente?.nome?.toLowerCase().includes(lowerSearch)
-    );
-  }, [formattedOrcamentos, searchTerm]);
+
+    return orcamentosComNumeracao.filter((o) => {
+      const clienteNome = o.cliente?.nome?.toLowerCase() ?? '';
+      const status = o.status?.toLowerCase() ?? '';
+      const total = o.total?.toString() ?? '';
+      const data = o.criadoEm ?? '';
+      const dataFormatada = o.criadoEm
+        ? new Date(o.criadoEm).toLocaleDateString('pt-BR')
+        : '';
+
+      return (
+        clienteNome.includes(lowerSearch) ||
+        status.includes(lowerSearch) ||
+        total.includes(lowerSearch) ||
+        data.includes(lowerSearch) ||
+        dataFormatada.includes(lowerSearch)
+      );
+    });
+  }, [orcamentosComNumeracao, searchTerm]);
 
   // 🔧 Funções de modal estáveis
   const modalActions = useMemo(
@@ -251,7 +273,7 @@ export function useTableLogic({
     if (orcamentoProdutos.some((p) => p.value && p.quantity)) {
       validateStock();
     }
-  }, [orcamentoProdutos, products, validateStock]); // Removido validateStock das dependências
+  }, [orcamentoProdutos, products, validateStock]);
 
   // 🔧 calculateTotal memoizado
   const calculateTotal = useCallback(() => {
@@ -402,11 +424,6 @@ export function useTableLogic({
       return;
     }
 
-    if (!validateStock()) {
-      alert('Corrija os problemas de estoque antes de enviar');
-      return;
-    }
-
     if (orcamentoProdutos.length === 0 && services.length === 0) {
       alert('Adicione pelo menos um item ou serviço');
       return;
@@ -431,7 +448,7 @@ export function useTableLogic({
     try {
       const newOrcamento: CreateOrcamento = {
         clienteId: clienteSelecionado.id.toString(),
-        lojaId: lojaId as string,
+        lojaId,
         status: 'ABERTO',
         descricao: pagamentoState.descricaoEntrada,
         metodoPagamento: pagamentoState.metodoPagamento.toUpperCase(),
@@ -479,7 +496,6 @@ export function useTableLogic({
     pagamentoState.juros,
     orcamentoProdutos,
     services,
-    validateStock,
     onSubmitOrcamento,
     clients,
     resetForm,

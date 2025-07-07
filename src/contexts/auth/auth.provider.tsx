@@ -1,24 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  createContext,
-  type ReactNode,
-  useState,
-  useEffect,
-  useMemo,
-} from 'react';
+import { type ReactNode, useState, useEffect, useMemo } from 'react';
+import { AuthContext } from './auth.context';
 
-interface AuthContextType {
-  setAuthenticated: (value: boolean) => void;
-  authenticated: boolean;
-  login: (userData?: any) => void;
-  logout: () => void;
-  user?: any;
-  loading: boolean;
-}
-
-export const AuthContext = createContext<AuthContextType | undefined>(
-  undefined
-);
 interface AuthProviderProps {
   children: ReactNode;
 }
@@ -26,7 +9,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any | null>(null);
+  const [user, setUser] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');

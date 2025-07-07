@@ -84,8 +84,8 @@ const CashClosureModel: React.FC<CashClosureModelProps> = ({
           <span className="text-sm text-gray-700 font-medium">
             {startDate && endDate
               ? `${formatDateForDisplay(startDate)} à ${formatDateForDisplay(
-                  endDate
-                )}`
+                endDate
+              )}`
               : 'Selecione as datas'}
           </span>
         </div>

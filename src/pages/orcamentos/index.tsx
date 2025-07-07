@@ -8,11 +8,10 @@ import Forms from '@/component/Forms';
 import TableOrcamento from '@/component/TableOrcamento';
 import TableClient from '@/component/TableClients';
 
-import { useClients } from '@/hooks/useClients';
+import { useClients } from '@/hooks/useCliente';
 import { useOrcamento } from '@/hooks/useOrcamento';
-import { useStock } from '@/hooks/useStock';
-import { useStore } from '@/hooks/useStore';
-import { useClientContext } from '@/contexts/client';
+import { useEstoque } from '@/hooks/useEstoque';
+import { useStore } from '@/hooks/useLoja';
 
 import type {
   Orcamento,
@@ -50,8 +49,7 @@ export default function Orcamento() {
   const [activeTab, setActiveTab] = useState('Clientes');
   const [showEditClientModal, setShowEditClientModal] = useState(false);
   const [tableClientKey, setTableClientKey] = useState(0);
-  const { setSelectedClient } = useClientContext();
-  const { products } = useStock();
+  const { products } = useEstoque();
   const { storeData } = useStore();
 
   // Refs para controlar se os dados já foram carregados
@@ -59,8 +57,13 @@ export default function Orcamento() {
   const orcamentosLoadedRef = useRef(false);
   const isMountedRef = useRef(true);
 
-  const { clients, deleteClient, fetchClients, fetchClientsById } =
-    useClients();
+  const {
+    clients,
+    deleteClient,
+    fetchClients,
+    fetchClientsById,
+    setSelectedClient,
+  } = useClients();
   const { orcamentos, fetchOrcamentos, createOrcamento, deleteOrcamento } =
     useOrcamento();
 
@@ -206,6 +209,22 @@ export default function Orcamento() {
     setActiveTab('Orçamentos');
   }, []);
 
+  // Formatação dos dados da loja com verificações
+  const formattedStoreData = useMemo(() => {
+    if (!storeData) {
+      return undefined;
+    }
+
+    return {
+      nome: storeData.nome || '',
+      email: storeData.email || '',
+      cnpj: storeData.cnpj || '',
+      endereco: storeData.endereco || '',
+      telefone: storeData.telefone || '',
+      subTitulo: storeData.subTitulo || '',
+    };
+  }, [storeData]);
+
   // Renderização condicional otimizada
   const renderContent = useMemo(() => {
     switch (activeTab) {
@@ -226,23 +245,24 @@ export default function Orcamento() {
           onDeleteOrcamento={handleDeleteOrcamento}
           onSubmitOrcamento={handleOrcamentoSubmit}
           products={products}
-          storeData={storeData}
+          storeData={formattedStoreData}
         />
       );
     default:
       return null;
     }
   }, [
+    products,
     activeTab,
+    tableClientKey,
     formattedClients,
     formattedOrcamentos,
+    formattedStoreData,
+
     deleteClient,
     handleSelectClientForEdit,
-    tableClientKey,
     handleDeleteOrcamento,
     handleOrcamentoSubmit,
-    products,
-    storeData,
   ]);
 
   return (

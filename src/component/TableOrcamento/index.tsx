@@ -35,11 +35,12 @@ interface TableProps {
   // Novos props para evitar requisições desnecessárias
   products?: ProductType[];
   storeData?: {
-    nameStore: string;
-    emailStore: string;
-    cnpjStore: string;
-    enderecoStore: string;
-    subTitleStore: string;
+    nome: string;
+    email: string;
+    cnpj: string;
+    endereco: string;
+    telefone: string;
+    subTitulo: string;
   };
 }
 
@@ -65,14 +66,12 @@ interface ProductType {
 const TableRowOrcamento = memo(
   ({
     orcamento,
-    index,
-    totalLength,
+    numeroSequencial,
     onOpenModalDetails,
     onDeleteOrcamento,
   }: {
     orcamento: OrcamentoRenderDetails;
-    index: number;
-    totalLength: number;
+    numeroSequencial: number;
     onOpenModalDetails: (id: string) => void;
     onDeleteOrcamento: (id: string) => void;
   }) => {
@@ -93,7 +92,7 @@ const TableRowOrcamento = memo(
 
     return (
       <TableRow className="hover:bg-gray-50 text-center">
-        <TableCell className="py-2 px-4">{totalLength - index}</TableCell>
+        <TableCell className="py-2 px-4">{numeroSequencial}</TableCell>
         <TableCell className="py-2 px-4">
           {orcamento.cliente?.nome ?? 'Sem nome'}
         </TableCell>
@@ -376,31 +375,32 @@ function TableOrcamento({
     // Fallback: usar hook apenas se não tiver dados externos
     // IMPORTANTE: Mova esta lógica para o componente pai
     return {
-      nameStore: '',
-      emailStore: '',
-      cnpjStore: '',
-      enderecoStore: '',
-      subTitleStore: '',
+      nome: '',
+      email: '',
+      cnpj: '',
+      endereco: '',
+      subTitulo: '',
+      telefone: '',
     };
   }, [externalStoreData]);
 
   // Memoriza as informações da empresa
   const empresaInfo = useMemo(
     () => ({
-      nome: storeData.nameStore,
-      cnpj: formatCpfCnpj(storeData.cnpjStore),
-      endereco: storeData.enderecoStore,
-      subTitle: storeData.subTitleStore,
+      nome: storeData.nome,
+      cnpj: formatCpfCnpj(storeData.cnpj),
+      endereco: storeData.endereco,
+      subTitulo: storeData.subTitulo,
       telefone: '00 00000-0000',
-      email: storeData.emailStore,
+      email: storeData.email,
       data: '2023-10-01',
     }),
     [
-      storeData.nameStore,
-      storeData.emailStore,
-      storeData.cnpjStore,
-      storeData.enderecoStore,
-      storeData.subTitleStore,
+      storeData.nome,
+      storeData.email,
+      storeData.cnpj,
+      storeData.endereco,
+      storeData.subTitulo,
     ]
   );
 
@@ -524,6 +524,7 @@ function TableOrcamento({
           numeroParcelas: selectedOrcamento.numeroParcelas ?? 1,
           status: selectedOrcamento.status ?? 'pendente',
         }}
+        autoPrint={true}
       />
     );
   }, [selectedOrcamento, empresaInfo, filteredOrcamentos]);
@@ -567,12 +568,11 @@ function TableOrcamento({
         </TableHeader>
 
         <TableBody>
-          {filteredOrcamentos.map((orcamento, index) => (
+          {filteredOrcamentos.map((orcamento) => (
             <TableRowOrcamento
               key={orcamento.id}
               orcamento={orcamento}
-              index={index}
-              totalLength={filteredOrcamentos.length}
+              numeroSequencial={orcamento.numeroSequencial}
               onOpenModalDetails={handleOpenModalDetails}
               onDeleteOrcamento={onDeleteOrcamento}
             />

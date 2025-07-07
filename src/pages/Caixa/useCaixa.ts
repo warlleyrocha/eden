@@ -2,8 +2,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { useFinanceiro } from '@/hooks/useFinanceiro';
+import { useEstoque } from '@/hooks/useEstoque';
 import { useRelatorioFechamento } from '@/hooks/useRelatorioFechamento';
-import type { MovimentoFinanceiro } from '@/@types/financeiro';
+import type {
+  MovimentoFinanceiro,
+  EditarMovimentacaoFinanceira,
+  TipoMovimento,
+} from '@/@types/financeiro';
+import { MetodoPagamento } from '@/@types/financeiro';
 
 // Mapeamento de métodos de pagamento
 const METODOS_PAGAMENTO_LABELS = {
@@ -17,34 +23,284 @@ const METODOS_PAGAMENTO_LABELS = {
 export const useCaixa = () => {
   const {
     createSaida,
-    fetchMovimentacoesFinanceiras,
-    fetchRelatorioFinanceiro,
-    fetchRelatorioFinanceiroComPeriodo,
+    createEntrada,
+    updateFinanceiro,
+    deleteFinanceiro,
+    fetchMovimentacoes,
+    fetchRelatorioHoje,
+    fetchRelatorioPorPeriodo,
     movimentacoes,
     relatorio,
   } = useFinanceiro();
 
   const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
 
+  const { products } = useEstoque();
+
   // Estados do hook
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [showExitModal, setShowExitModal] = useState(false);
+  const [showCashClosureModal, setShowCashClosureModal] = useState(false);
+  const [showEntradaModal, setShowEntradaModal] = useState(false);
+  const [showSaidaModal, setShowSaidaModal] = useState(false);
   const [metodoPagamento, setMetodoPagamento] = useState('pix');
   const [valorSaida, setValorSaida] = useState('');
+  const [valorEntrada, setValorEntrada] = useState('');
   const [descricaoSaida, setDescricaoSaida] = useState('');
+  const [descricaoEntrada, setDescricaoEntrada] = useState('');
   const [parcelas, setParcelas] = useState(1);
   const [juros, setJuros] = useState(0);
   // Estados para controlar o período do relatório
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
+  const [produtosSelecionados, setProdutosSelecionados] = useState<
+    Array<{
+      produtoId: string;
+      quantidade: number;
+      valorUnitario: number;
+    }>
+  >([]);
+  const [produtoParaAdicionar, setProdutoParaAdicionar] = useState('');
+  const [quantidadeParaAdicionar, setQuantidadeParaAdicionar] = useState(1);
+  const [valorParaAdicionar, setValorParaAdicionar] = useState(0);
+
+  // Estados para edição
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [tipoEdicao, setTipoEdicao] = useState<'entrada' | 'saida'>('entrada');
+
+  const handleDoubleClick = (id: string) => {
+    console.log('Editando movimentação:', id);
+
+    const movimentacao = movimentacoes.find((mov) => mov.id === id);
+    if (!movimentacao) {
+      console.error('Movimentação não encontrada:', id);
+      return;
+    }
+
+    console.log('Dados da movimentação:', movimentacao);
+
+    // Função auxiliar para mapear método de pagamento do backend para frontend
+    const mapearMetodoPagamentoParaFrontend = (
+      metodoPagamentoBackend: string
+    ) => {
+      const mapeamento: Record<string, string> = {
+        PIX: 'pix',
+        DINHEIRO: 'dinheiro',
+        DEBITO: 'debito',
+        CREDITO_AVISTA: 'credito',
+        CREDITO_PARCELADO: 'credito',
+      };
+
+      return mapeamento[metodoPagamentoBackend] || 'pix';
+    };
+
+    // Preencher os campos com os dados existentes
+    if (movimentacao.tipo === 'ENTRADA') {
+      setValorEntrada(movimentacao.valor.toString());
+      setDescricaoEntrada(movimentacao.descricao || '');
+      setTipoEdicao('entrada');
+
+      // *** PARTE NOVA: Popular produtos se existirem (usando type assertion segura) ***
+      const movimentacaoComProdutos = movimentacao as MovimentoFinanceiro & {
+        produtos?: Array<{
+          produtoId: string;
+          quantidade: number;
+          valorUnitario: number;
+        }>;
+      };
+
+      if (
+        movimentacaoComProdutos.produtos &&
+        movimentacaoComProdutos.produtos.length > 0
+      ) {
+        console.log(
+          'Populando produtos da movimentação:',
+          movimentacaoComProdutos.produtos
+        );
+
+        setProdutosSelecionados(
+          movimentacaoComProdutos.produtos.map((produto) => ({
+            produtoId: produto.produtoId,
+            quantidade: produto.quantidade,
+            valorUnitario: produto.valorUnitario,
+          }))
+        );
+      } else {
+        // Limpar produtos se não existirem
+        setProdutosSelecionados([]);
+      }
+    } else {
+      setValorSaida(movimentacao.valor.toString());
+      setDescricaoSaida(movimentacao.descricao || '');
+      setTipoEdicao('saida');
+
+      // Limpar produtos para saídas
+      setProdutosSelecionados([]);
+    }
+
+    // Mapear método de pagamento do backend para frontend
+    const metodoPagamentoFrontend = mapearMetodoPagamentoParaFrontend(
+      movimentacao.metodoPagamento || 'PIX'
+    );
+    setMetodoPagamento(metodoPagamentoFrontend);
+
+    setParcelas(movimentacao.parcelas ?? 1);
+    setJuros(movimentacao.juros ?? 0);
+
+    // Limpar campos de adição de produto (importante para não manter lixo)
+    setProdutoParaAdicionar?.('');
+    setQuantidadeParaAdicionar?.(1);
+    setValorParaAdicionar?.(0);
+
+    setEditingId(id);
+    setIsEditing(true);
+    setShowEditModal(true);
+
+    console.log('Estados populados para edição');
+  };
+
+  const handleEditSubmit = async () => {
+    if (!editingId) {
+      console.error('Nenhuma movimentação selecionada para edição');
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      // Função para mapear método de pagamento do frontend para o backend
+      const mapearMetodoPagamento = (metodo: string): MetodoPagamento => {
+        const mapeamento: Record<string, MetodoPagamento> = {
+          pix: MetodoPagamento.PIX,
+          dinheiro: MetodoPagamento.DINHEIRO,
+          debito: MetodoPagamento.DEBITO,
+          credito:
+            metodoPagamento === 'credito' && parcelas === 1
+              ? MetodoPagamento.CREDITO_AVISTA
+              : MetodoPagamento.CREDITO_PARCELADO,
+        };
+        return mapeamento[metodo] || MetodoPagamento.PIX;
+      };
+
+      // Dados base para edição
+      const dadosEdicao: EditarMovimentacaoFinanceira = {
+        valor:
+          tipoEdicao === 'entrada'
+            ? parseFloat(valorEntrada)
+            : parseFloat(valorSaida),
+        descricao: tipoEdicao === 'entrada' ? descricaoEntrada : descricaoSaida,
+        metodoPagamento: mapearMetodoPagamento(metodoPagamento),
+        parcelas: metodoPagamento === 'credito' ? parcelas : 1,
+        juros: metodoPagamento === 'credito' ? juros : 0,
+        tipo: tipoEdicao.toUpperCase() as TipoMovimento,
+      };
+
+      // Incluir produtos apenas para entradas
+      if (
+        tipoEdicao === 'entrada' &&
+        produtosSelecionados &&
+        produtosSelecionados.length > 0
+      ) {
+        dadosEdicao.produtos = produtosSelecionados.map((produto) => ({
+          produtoId: produto.produtoId,
+          quantidade: produto.quantidade,
+          valorUnitario: produto.valorUnitario,
+        }));
+
+        // Recalcular o valor total baseado nos produtos selecionados
+        const valorTotalProdutos = produtosSelecionados.reduce(
+          (total, item) => total + item.quantidade * item.valorUnitario,
+          0
+        );
+
+        dadosEdicao.valor = valorTotalProdutos;
+
+        console.log('Produtos incluídos na edição:', dadosEdicao.produtos);
+        console.log('Valor total recalculado:', valorTotalProdutos);
+      }
+
+      console.log('Dados para edição:', dadosEdicao);
+      console.log('ID da movimentação:', editingId);
+
+      // Chamar a função de atualização
+      await updateFinanceiro(editingId, dadosEdicao);
+
+      // Recarregar movimentações após a edição
+      await fetchMovimentacoes();
+
+      // Fechar modal
+      handleCloseEditModal();
+    } catch (error) {
+      console.error('Erro ao atualizar movimentação:', error);
+      setError('Erro ao atualizar movimentação. Tente novamente.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCloseEditModal = () => {
+    setIsEditing(false);
+    setEditingId(null);
+    setShowEditModal(false);
+
+    // Limpar os campos
+    if (tipoEdicao === 'entrada') {
+      setValorEntrada('');
+      setDescricaoEntrada('');
+    } else {
+      setValorSaida('');
+      setDescricaoSaida('');
+    }
+    setMetodoPagamento('PIX');
+    setParcelas(1);
+    setJuros(0);
+  };
 
   // Carrega as saídas financeiras
   useEffect(() => {
-    fetchMovimentacoesFinanceiras();
-    fetchRelatorioFinanceiro();
-  }, [fetchMovimentacoesFinanceiras, fetchRelatorioFinanceiro]);
+    fetchMovimentacoes();
+    fetchRelatorioHoje();
+  }, [fetchMovimentacoes, fetchRelatorioHoje]);
+
+  // Função para limpar os produtos selecionados quando fechar o modal de entrada
+  const handleCloseEntradaModal = useCallback(() => {
+    setShowEntradaModal(false);
+    setProdutosSelecionados([]); // Limpa o array de produtos selecionados
+  }, []);
+
+  const adicionarProduto = useCallback(() => {
+    if (
+      produtoParaAdicionar &&
+      quantidadeParaAdicionar > 0 &&
+      valorParaAdicionar > 0
+    ) {
+      setProdutosSelecionados((prev) => [
+        ...prev,
+        {
+          produtoId: produtoParaAdicionar,
+          quantidade: quantidadeParaAdicionar,
+          valorUnitario: valorParaAdicionar,
+        },
+      ]);
+      setProdutoParaAdicionar('');
+      setQuantidadeParaAdicionar(1);
+      setValorParaAdicionar(0);
+    }
+  }, [produtoParaAdicionar, quantidadeParaAdicionar, valorParaAdicionar]);
+
+  const removerProduto = useCallback((index: number) => {
+    setProdutosSelecionados((prev) => prev.filter((_, i) => i !== index));
+  }, []);
+
+  // Função para calcular o valor total dos produtos selecionados
+  const calcularValorTotalProdutos = useCallback(() => {
+    return produtosSelecionados.reduce((total, item) => {
+      return total + item.quantidade * item.valorUnitario;
+    }, 0);
+  }, [produtosSelecionados]);
 
   // Formatação de data
   const formatarData = useCallback((dataString: string) => {
@@ -139,7 +395,7 @@ export const useCaixa = () => {
   );
 
   // Calcula o total de entradas
-  const totalEntries = useMemo(() => {
+  const totalEntradas = useMemo(() => {
     return relatorio ? formatarMoeda(relatorio.totalEntradas || 0) : 'R$ 0,00';
   }, [relatorio, formatarMoeda]);
 
@@ -149,24 +405,34 @@ export const useCaixa = () => {
   }, [relatorio, formatarMoeda]);
 
   // Calcula o saldo final
-  const finalBalance = useMemo(() => {
+  const saldoFinal = useMemo(() => {
     return relatorio ? formatarMoeda(relatorio.saldo || 0) : 'R$ 0,00';
   }, [relatorio, formatarMoeda]);
 
   // Extrai os totais por método de pagamento do relatório
   const totalPorMetodoEntrada = relatorio?.totalPorMetodoEntrada ?? {};
+  const totalPorMetodoSaida = relatorio?.totalPorMetodoSaida ?? {};
 
   // Desestruturação dos totais por método de pagamento
   const {
-    PIX = 0,
-    DINHEIRO = 0,
-    DEBITO = 0,
-    CREDITO_AVISTA = 0,
-    CREDITO_PARCELADO = 0,
+    PIX: pixEntrada = 0,
+    DINHEIRO: dinheiroEntrada = 0,
+    DEBITO: debitoEntrada = 0,
+    CREDITO_AVISTA: creditoAvistaEntrada = 0,
+    CREDITO_PARCELADO: creditoParceladoEntrada = 0,
   } = totalPorMetodoEntrada;
 
+  const {
+    PIX: pixSaida = 0,
+    DINHEIRO: dinheiroSaida = 0,
+    DEBITO: debitoSaida = 0,
+    CREDITO_AVISTA: creditoAvistaSaida = 0,
+    CREDITO_PARCELADO: creditoParceladoSaida = 0,
+  } = totalPorMetodoSaida;
+
   // Calcula o total de crédito (avista + parcelado)
-  const totalCreditoEntrada = CREDITO_AVISTA + CREDITO_PARCELADO;
+  const totalCreditoEntrada = creditoAvistaEntrada + creditoParceladoEntrada;
+  const totalCreditoSaida = creditoAvistaSaida + creditoParceladoSaida;
 
   // Manipulador de envio de saída
   const handleSaidaSubmit = useCallback(
@@ -209,7 +475,7 @@ export const useCaixa = () => {
         setMetodoPagamento('pix');
         setParcelas(1);
         setJuros(0);
-        setShowExitModal(false);
+        setShowSaidaModal(false);
 
         toast.success('Saída registrada com sucesso!');
       } catch (err) {
@@ -232,6 +498,96 @@ export const useCaixa = () => {
     ]
   );
 
+  //Manipulador de envio de entrada
+  const handleEntradaSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+
+      const valorTotalProdutos = calcularValorTotalProdutos();
+      const temProdutos = produtosSelecionados.length > 0;
+
+      // Se tem produtos, usa o valor total dos produtos; senão, usa o valor manual
+      const valorParaEnvio = temProdutos
+        ? valorTotalProdutos
+        : Number(valorEntrada);
+
+      if (!temProdutos && (!valorEntrada || isNaN(Number(valorEntrada)))) {
+        setError('Valor inválido');
+        return;
+      }
+
+      if (temProdutos && valorTotalProdutos <= 0) {
+        setError('Adicione produtos com valores válidos');
+        return;
+      }
+
+      setIsSubmitting(true);
+      setError(null);
+
+      try {
+        // Calcula valor final (com juros se for crédito)
+        let valorFinal = valorParaEnvio;
+        if (metodoPagamento === 'credito' && juros > 0) {
+          valorFinal = valorFinal * (1 + juros / 100);
+        }
+
+        const payload = {
+          metodoPagamento: formatarTipoMetodo(
+            metodoPagamento,
+            metodoPagamento === 'credito' ? parcelas : undefined
+          ),
+          valor: valorFinal,
+          descricao: descricaoEntrada,
+          ...(metodoPagamento === 'credito' && {
+            parcelas: Number(parcelas),
+            juros: Number(juros),
+          }),
+          // Adicionar os arrays de produtos e quantidades
+          ...(produtosSelecionados.length > 0 && {
+            produtosIds: produtosSelecionados.map((p) => p.produtoId),
+            quantidades: produtosSelecionados.map((p) => p.quantidade),
+            valoresUnitarios: produtosSelecionados.map((p) => p.valorUnitario),
+          }),
+        };
+
+        console.log('Payload', payload);
+        await createEntrada({ payload });
+
+        // Reset dos campos após sucesso
+        setValorEntrada('');
+        setDescricaoEntrada('');
+        setMetodoPagamento('pix');
+        setParcelas(1);
+        setJuros(0);
+        setShowEntradaModal(false);
+        setProdutosSelecionados([]);
+        setProdutoParaAdicionar('');
+        setQuantidadeParaAdicionar(1);
+        setValorParaAdicionar(0);
+
+        toast.success('Venda registrada com sucesso!');
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erro desconhecido';
+        setError(errorMessage);
+        console.error('Erro ao registrar saída:', err);
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+    [
+      valorEntrada,
+      metodoPagamento,
+      juros,
+      descricaoEntrada,
+      parcelas,
+      produtosSelecionados,
+      calcularValorTotalProdutos,
+      formatarTipoMetodo,
+      createEntrada,
+    ]
+  );
+
   // Download do PDF com período selecionado
   const downloadPDF = useCallback(() => {
     if (!startDate || !endDate) {
@@ -242,7 +598,7 @@ export const useCaixa = () => {
     gerarPDFComPeriodo(
       startDate,
       endDate,
-      fetchRelatorioFinanceiroComPeriodo,
+      fetchRelatorioPorPeriodo,
       movimentacoes,
       formatarDataSimples,
       formatarMoeda,
@@ -253,7 +609,7 @@ export const useCaixa = () => {
     startDate,
     endDate,
     gerarPDFComPeriodo,
-    fetchRelatorioFinanceiroComPeriodo,
+    fetchRelatorioPorPeriodo,
     movimentacoes,
     formatarDataSimples,
     formatarMoeda,
@@ -335,48 +691,77 @@ export const useCaixa = () => {
 
   return {
     // Estados
-    totalEntradaPix,
-    totalEntradaDebito,
-    totalEntradaDinheiro,
-    totalEntradaCredito,
-    totalSaidaPix,
-    totalSaidaDebito,
-    totalSaidaDinheiro,
-    totalSaidaCredito,
     isSubmitting,
     isGeneratingPDF,
     error,
-    showModal,
-    showExitModal,
-    totalEntries,
+    showCashClosureModal,
+    showSaidaModal,
+    showEntradaModal,
+    produtosSelecionados,
+    produtoParaAdicionar,
+    quantidadeParaAdicionar,
+    valorParaAdicionar,
+    products,
+    showEditModal,
+    isEditing,
+    tipoEdicao,
+
+    // Referente ao estado *relatorio¹* do hook useFinanceiro
+    totalEntradas,
     totalSaidas,
-    finalBalance,
-    PIX,
-    DINHEIRO,
-    DEBITO,
-    CREDITO_AVISTA,
-    CREDITO_PARCELADO,
+    saldoFinal,
+
+    pixEntrada,
+    dinheiroEntrada,
+    debitoEntrada,
     totalCreditoEntrada,
-    relatorio,
+
+    pixSaida,
+    dinheiroSaida,
+    debitoSaida,
+    totalCreditoSaida,
+
+    // Referente ao estado *movimentacoes²* do hook useFinanceiro
+    totalEntradaPix,
+    totalEntradaDinheiro,
+    totalEntradaDebito,
+    totalEntradaCredito,
+
+    totalSaidaPix,
+    totalSaidaDinheiro,
+    totalSaidaDebito,
+    totalSaidaCredito,
+
+    relatorio /* 1* */,
+    movimentacoes /* 2* */,
     metodoPagamento,
     valorSaida,
     descricaoSaida,
+    valorEntrada,
+    descricaoEntrada,
     parcelas,
     juros,
-    movimentacoes,
     startDate,
     endDate,
 
     // Setters
-    setShowModal,
-    setShowExitModal,
+    setShowCashClosureModal,
+    setShowSaidaModal,
+    setShowEntradaModal,
     setMetodoPagamento,
     setValorSaida,
     setDescricaoSaida,
+    setValorEntrada,
+    setDescricaoEntrada,
     setParcelas,
     setJuros,
     setStartDate,
     setEndDate,
+    setProdutosSelecionados,
+    setProdutoParaAdicionar,
+    setQuantidadeParaAdicionar,
+    setValorParaAdicionar,
+    setShowEditModal,
 
     // Funções
     filtrarEntradas,
@@ -387,8 +772,18 @@ export const useCaixa = () => {
     formatarMetodoPagamento,
     formatarMetodoPagamentoCompleto,
     handleSaidaSubmit,
+    handleEntradaSubmit,
+    handleCloseEntradaModal,
     handleDateChange,
+    handleDoubleClick,
+    handleEditSubmit,
+    handleCloseEditModal,
     downloadPDF,
     gerarPDFComPeriodo,
+    adicionarProduto,
+    removerProduto,
+    deleteFinanceiro,
+    updateFinanceiro,
+    calcularValorTotalProdutos,
   };
 };

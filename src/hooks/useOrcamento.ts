@@ -1,227 +1,137 @@
-import { useEffect, useState, useCallback } from 'react';
-import { getStoreId } from '@/utils/getStoreId';
-import { api } from '@/services/api';
-import axios from 'axios';
-import type { AxiosError } from 'axios';
+import { useEffect, useState, useCallback, useContext } from 'react';
+import { orcamentoAPI } from '@/services/orcamento.api';
+import {
+  OrcamentoSequenciaContext,
+  type OrcamentoContextData,
+} from '@/contexts/OrcamentoSequenciaContext';
 import type { Orcamento, CreateOrcamento } from '@/@types/orcamento';
-import { toast } from 'sonner';
-
-type ApiError = {
-  message: string;
-  status?: number;
-};
+import type { ApiError } from '@/utils/errorHandler';
 
 interface CreateOrcamentoParams {
   payload: CreateOrcamento;
   signal?: AbortSignal;
 }
 
-function isAxiosError(error: unknown): error is AxiosError {
-  return axios.isAxiosError(error);
+interface UpdateOrcamentoParams {
+  id: string;
+  payload: Partial<Orcamento>;
+  signal?: AbortSignal;
 }
-
-const getAuthToken = (): string => {
-  const token = localStorage.getItem('token');
-  if (!token) {
-    throw new Error('Usuário não autenticado: token não encontrado.');
-  }
-  return token;
-};
 
 export function useOrcamento() {
   const [orcamentos, setOrcamentos] = useState<Orcamento[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
 
-  const handleApiError = (err: unknown): ApiError => {
-    if (isAxiosError(err)) {
-      const status = err.response?.status;
-      if (status === 404) return { message: 'Loja não encontrada.', status };
-      if (status && status >= 500)
-        return { message: 'Erro no servidor.', status };
-      return {
-        message: err.message || 'Erro inesperado ao buscar orçamentos.',
-        status,
-      };
-    }
-    return { message: 'Erro inesperado ao buscar orçamentos.' };
-  };
-
+  // Buscar todos os orçamentos
   const fetchOrcamentos = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setError(null);
 
     try {
-      const token = getAuthToken();
-      const lojaId = getStoreId();
-
-      if (!lojaId) {
-        setError({ message: 'ID da loja não encontrado no localStorage' });
-        return;
-      }
-
-      const response = await api.get(`/orcamentos/loja/${lojaId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        signal,
-      });
-
-      if (response.status === 200 && Array.isArray(response.data)) {
-        setOrcamentos(response.data);
-      } else {
-        setError({ message: 'Resposta inválida da API.' });
-        setOrcamentos([]);
-      }
-    } catch (err: unknown) {
+      const data = await orcamentoAPI.fetchOrcamentos(signal);
+      setOrcamentos(data);
+    } catch (err) {
+      // Ignora erros de cancelamento
       if (
         err instanceof Error &&
         (err.name === 'CanceledError' || err.name === 'AbortError')
-      )
-        return; // Ignore cancel errors
-      if (
-        err instanceof Error &&
-        err.message === 'Usuário não autenticado: token não encontrado.'
       ) {
-        setError({
-          message: 'Usuário não autenticado. Por favor, faça login novamente.',
-        });
-      } else {
-        setError(handleApiError(err));
+        return;
       }
+      setError(err as ApiError);
     } finally {
       setLoading(false);
     }
   }, []);
 
+  // Carregar orçamentos na inicialização
   useEffect(() => {
     const controller = new AbortController();
     fetchOrcamentos(controller.signal);
     return () => controller.abort();
   }, [fetchOrcamentos]);
 
+  // Criar novo orçamento
   const createOrcamento = useCallback(
     async ({ payload, signal }: CreateOrcamentoParams) => {
-      const token = getAuthToken();
-      console.log('Criando orçamento com dados:', payload);
       try {
-        const response = await api.post('/orcamentos', payload, {
-          headers: { Authorization: `Bearer ${token}` },
+        const newOrcamento = await orcamentoAPI.createOrcamento({
+          payload,
           signal,
         });
+        // Atualiza a lista após criação
         await fetchOrcamentos();
-        toast.success('Orçamento criado com sucesso!');
-        return response.data;
+        return newOrcamento;
       } catch (err) {
-        if (
-          err instanceof Error &&
-          err.message === 'Usuário não autenticado: token não encontrado.'
-        ) {
-          setError({
-            message:
-              'Usuário não autenticado. Por favor, faça login novamente.',
-          });
-          throw err;
-        }
-        const apiError = handleApiError(err);
-        setError(apiError);
-        throw apiError;
+        setError(err as ApiError);
+        throw err;
       }
     },
     [fetchOrcamentos]
   );
 
-  const patchOrcamento = async (
-    orcamentoId: string,
-    data: Partial<Orcamento>
-  ) => {
-    const token = getAuthToken();
-    try {
-      const response = await api.patch(`/orcamentos/${orcamentoId}`, data, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Atualiza a lista após sucesso
-      await fetchOrcamentos();
-      return response.data;
-    } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message === 'Usuário não autenticado: token não encontrado.'
-      ) {
-        setError({
-          message: 'Usuário não autenticado. Por favor, faça login novamente.',
+  // Atualizar orçamento existente
+  const updateOrcamento = useCallback(
+    async ({ id, payload, signal }: UpdateOrcamentoParams) => {
+      try {
+        const updatedOrcamento = await orcamentoAPI.updateOrcamento({
+          id,
+          payload,
+          signal,
         });
-        // Também pode fazer logout ou redirecionar aqui
+        // Atualiza a lista após atualização
+        await fetchOrcamentos();
+        return updatedOrcamento;
+      } catch (err) {
+        setError(err as ApiError);
         throw err;
       }
+    },
+    [fetchOrcamentos]
+  );
 
-      const apiError = handleApiError(err);
-      setError(apiError);
-      throw apiError;
-    }
-  };
+  // Função de compatibilidade com a assinatura antiga
+  const patchOrcamento = useCallback(
+    async (id: string, payload: Partial<Orcamento>, signal?: AbortSignal) => {
+      return updateOrcamento({ id, payload, signal });
+    },
+    [updateOrcamento]
+  );
 
-  const deleteOrcamento = async (id: string) => {
-    const token = getAuthToken();
-    try {
-      await api.delete(`/orcamentos/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Atualiza a lista após sucesso
-      await fetchOrcamentos();
-    } catch (err) {
-      if (
-        err instanceof Error &&
-        err.message === 'Usuário não autenticado: token não encontrado.'
-      ) {
-        setError({
-          message: 'Usuário não autenticado. Por favor, faça login novamente.',
-        });
+  // Deletar orçamento
+  const deleteOrcamento = useCallback(
+    async (id: string, signal?: AbortSignal) => {
+      try {
+        await orcamentoAPI.deleteOrcamento({ id, signal });
+        // Atualiza a lista após exclusão
+        await fetchOrcamentos();
+      } catch (err) {
+        setError(err as ApiError);
         throw err;
       }
-      const apiError = handleApiError(err);
-      setError(apiError);
-      throw apiError;
-    }
-  };
+    },
+    [fetchOrcamentos]
+  );
 
+  // Buscar orçamento por ID
   const getOrcamentoById = useCallback(
     async (id: string, signal?: AbortSignal) => {
       setLoading(true);
       setError(null);
 
       try {
-        const token = getAuthToken();
-
-        const response = await api.get(`/orcamentos/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-          signal,
-        });
-
-        if (response.status === 200) {
-          console.log('Orçamento recebido:', response.data);
-          return response.data; // Retorna o orçamento encontrado
-        } else {
-          setError({ message: 'Resposta inválida da API.' });
-          return null;
-        }
-      } catch (err: unknown) {
+        const orcamento = await orcamentoAPI.getOrcamentoById({ id, signal });
+        return orcamento;
+      } catch (err) {
+        // Ignora erros de cancelamento
         if (
           err instanceof Error &&
           (err.name === 'CanceledError' || err.name === 'AbortError')
-        )
-          return;
-        if (
-          err instanceof Error &&
-          err.message === 'Usuário não autenticado: token não encontrado.'
         ) {
-          setError({
-            message:
-              'Usuário não autenticado. Por favor, faça login novamente.',
-          });
-        } else {
-          setError(handleApiError(err));
+          return null;
         }
+        setError(err as ApiError);
         return null;
       } finally {
         setLoading(false);
@@ -231,14 +141,39 @@ export function useOrcamento() {
   );
 
   return {
+    // Estados
     orcamentos,
     loading,
     error,
+
+    // Ações
     createOrcamento,
-    patchOrcamento,
+    updateOrcamento,
     deleteOrcamento,
     fetchOrcamentos,
     getOrcamentoById,
+    patchOrcamento,
+
+    // Alias para compatibilidade
     refetch: fetchOrcamentos,
   };
 }
+
+// Hook personalizado para usar o contexto
+export const useOrcamentoContext = (): OrcamentoContextData => {
+  const context = useContext(OrcamentoSequenciaContext);
+
+  if (context === undefined) {
+    throw new Error(
+      'useOrcamento deve ser usado dentro de um OrcamentoSequenciaProvider'
+    );
+  }
+
+  return context;
+};
+
+// Hook específico para obter apenas o número sequencial
+export const useNumeroSequencial = (orcamentoId: string): number | null => {
+  const { getNumeroSequencial } = useOrcamentoContext();
+  return getNumeroSequencial(orcamentoId);
+};

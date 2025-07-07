@@ -1,16 +1,19 @@
-import { AuthProvider } from './contexts/auth';
-import { ClientProvider } from './contexts/client';
-import { StoreProvider } from './contexts/storeContext';
+import { AuthProvider } from './contexts/auth/auth.provider';
+import { ClientProvider } from './contexts/client/client.provider';
+import { StoreProvider } from './contexts/store/store.provider';
+import { OrcamentoSequenciaProvider } from './contexts/orcamentoContext';
 import RouterApp from './routes';
 
 export const App = () => {
   return (
     <AuthProvider>
-      <ClientProvider>
-        <StoreProvider>
-          <RouterApp />
-        </StoreProvider>
-      </ClientProvider>
+      <OrcamentoSequenciaProvider>
+        <ClientProvider>
+          <StoreProvider>
+            <RouterApp />
+          </StoreProvider>
+        </ClientProvider>
+      </OrcamentoSequenciaProvider>
     </AuthProvider>
   );
 };
