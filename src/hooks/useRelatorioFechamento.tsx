@@ -60,19 +60,24 @@ export const useRelatorioFechamento = () => {
         };
 
         // Período formatado usando função segura
-        const periodo = `${formatarDataSimples(
+        const periodo = `${formatarDataSegura(
           dataInicialSegura
-        )} à ${formatarDataSimples(dataFinalSegura)}`;
+        )} à ${formatarDataSegura(dataFinalSegura)}`;
 
-        // Filtrar movimentações do período de forma mais segura
-        const movimentacoesPeriodo = movimentacoes.filter((m) => {
-          const dataMovimento = extrairDataSemTimezone(m.criadoEm);
-          return (
+        // CORREÇÃO PRINCIPAL: Filtrar movimentações com a mesma lógica de data
+        const movimentacoesPeriodo = movimentacoes.filter((movimento) => {
+          // Extrair data da movimentação no mesmo formato
+          const dataMovimento = extrairDataSemTimezone(movimento.criadoEm);
+
+          // Comparar strings diretamente (YYYY-MM-DD)
+          const estaNoPeríodo =
             dataMovimento >= dataInicialSegura &&
-            dataMovimento <= dataFinalSegura
-          );
+            dataMovimento <= dataFinalSegura;
+
+          return estaNoPeríodo;
         });
 
+        // Separar entradas e saídas
         const entradasPeriodo = movimentacoesPeriodo.filter(
           (m) => m.tipo === 'ENTRADA'
         );
@@ -103,8 +108,18 @@ export const useRelatorioFechamento = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
 
+        // Nome do arquivo com datas formatadas
+        const dataIniFormatada = formatarDataSegura(dataInicialSegura).replace(
+          /\//g,
+          '-'
+        );
+        const dataFimFormatada = formatarDataSegura(dataFinalSegura).replace(
+          /\//g,
+          '-'
+        );
+
         link.href = url;
-        link.download = `fechamento-caixa-${dataInicialSegura}-${dataFinalSegura}.pdf`;
+        link.download = `fechamento-caixa-${dataIniFormatada}-${dataFimFormatada}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
