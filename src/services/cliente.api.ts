@@ -1,6 +1,5 @@
 import { api } from '@/services/api';
 import { getStoreId } from '@/utils/getStoreId';
-import { toast } from 'sonner';
 import {
   handleApiError,
   createErrorHandlerMap,
@@ -82,7 +81,6 @@ export const clientsAPI = {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      toast.success('Cliente criado com sucesso!');
       return response.data;
     } catch (error) {
       const apiError = handleApiError(error, createClientErrorHandler);
@@ -103,7 +101,6 @@ export const clientsAPI = {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      toast.success('Cliente atualizado com sucesso!');
       return response.data;
     } catch (error) {
       const apiError = handleApiError(error, updateClientErrorHandler);
@@ -116,7 +113,6 @@ export const clientsAPI = {
   async deleteClient({ id, signal }: DeleteClientParams): Promise<void> {
     try {
       await api.delete(`/clientes/${id}`, { signal });
-      toast.success('Cliente removido com sucesso!');
     } catch (error) {
       const apiError = handleApiError(error, deleteClientErrorHandler);
       console.error('Erro ao deletar cliente:', apiError);

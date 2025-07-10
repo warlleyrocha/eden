@@ -43,8 +43,8 @@ export default function SignIn() {
 
         toast.success('Login realizado com sucesso!', {
           description: 'Você está sendo redirecionado para a página inicial',
-          duration: 1000,
-          position: 'top-right',
+          duration: 2000,
+          position: 'bottom-right',
           richColors: true,
         });
 
@@ -57,8 +57,8 @@ export default function SignIn() {
     } catch (err) {
       toast.error('Credenciais inválidas!', {
         description: 'Verifique seu Email e senha.',
-        duration: 3000,
-        position: 'top-right',
+        duration: 2000,
+        position: 'bottom-right',
         richColors: true,
       });
     }

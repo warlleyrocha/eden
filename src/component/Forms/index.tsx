@@ -52,7 +52,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
     if (!lojaId) {
       toast.error('Erro ao cadastrar', {
         description: 'ID da loja não encontrado.',
-        duration: 1500,
+        duration: 2000,
       });
       return;
     }
@@ -75,7 +75,9 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
         });
         toast.success('Cliente atualizado com sucesso!', {
           description: 'Dados atualizados.',
-          duration: 1500,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
         });
       } else {
         // Cadastro de novo cliente
@@ -84,7 +86,9 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
         });
         toast.success('Cliente cadastrado com sucesso!', {
           description: 'Os dados do cliente foram salvos com sucesso.',
-          duration: 1000,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
         });
       }
 
@@ -110,7 +114,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
 
       toast.error('Erro ao cadastrar cliente', {
         description: errorMessage,
-        duration: 1500,
+        duration: 2000,
       });
     }
   };

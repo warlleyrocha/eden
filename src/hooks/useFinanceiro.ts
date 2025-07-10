@@ -172,7 +172,12 @@ export function useFinanceiro() {
         await financeiroAPI.deleteFinanceiro({ id });
         await fetchMovimentacoes();
         await fetchRelatorioHoje();
-        toast.success('Movimentação excluída com sucesso!');
+        toast.success('Movimentação excluída com sucesso!', {
+          description: 'A movimentação foi removida do sistema.',
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } catch (error) {
         setError(error as Error);
         toast.error('Erro ao excluir movimentação');

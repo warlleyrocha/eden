@@ -71,15 +71,11 @@ export const useCaixa = () => {
   const [tipoEdicao, setTipoEdicao] = useState<'entrada' | 'saida'>('entrada');
 
   const handleDoubleClick = (id: string) => {
-    console.log('Editando movimentação:', id);
-
     const movimentacao = movimentacoes.find((mov) => mov.id === id);
     if (!movimentacao) {
       console.error('Movimentação não encontrada:', id);
       return;
     }
-
-    console.log('Dados da movimentação:', movimentacao);
 
     // Função auxiliar para mapear método de pagamento do backend para frontend
     const mapearMetodoPagamentoParaFrontend = (
@@ -115,11 +111,6 @@ export const useCaixa = () => {
         movimentacaoComProdutos.produtos &&
         movimentacaoComProdutos.produtos.length > 0
       ) {
-        console.log(
-          'Populando produtos da movimentação:',
-          movimentacaoComProdutos.produtos
-        );
-
         setProdutosSelecionados(
           movimentacaoComProdutos.produtos.map((produto) => ({
             produtoId: produto.produtoId,
@@ -157,8 +148,6 @@ export const useCaixa = () => {
     setEditingId(id);
     setIsEditing(true);
     setShowEditModal(true);
-
-    console.log('Estados populados para edição');
   };
 
   const handleEditSubmit = async () => {
@@ -217,13 +206,7 @@ export const useCaixa = () => {
         );
 
         dadosEdicao.valor = valorTotalProdutos;
-
-        console.log('Produtos incluídos na edição:', dadosEdicao.produtos);
-        console.log('Valor total recalculado:', valorTotalProdutos);
       }
-
-      console.log('Dados para edição:', dadosEdicao);
-      console.log('ID da movimentação:', editingId);
 
       // Chamar a função de atualização
       await updateFinanceiro(editingId, dadosEdicao);
@@ -477,7 +460,14 @@ export const useCaixa = () => {
         setJuros(0);
         setShowSaidaModal(false);
 
-        toast.success('Saída registrada com sucesso!');
+        toast.success('Saída registrada com sucesso!', {
+          description: `Saída de ${formatarMoeda(
+            valorFinal
+          )} registrada com sucesso!`,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Erro desconhecido';
@@ -494,6 +484,7 @@ export const useCaixa = () => {
       descricaoSaida,
       parcelas,
       formatarTipoMetodo,
+      formatarMoeda,
       createSaida,
     ]
   );
@@ -550,7 +541,6 @@ export const useCaixa = () => {
           }),
         };
 
-        console.log('Payload', payload);
         await createEntrada({ payload });
 
         // Reset dos campos após sucesso
@@ -565,7 +555,14 @@ export const useCaixa = () => {
         setQuantidadeParaAdicionar(1);
         setValorParaAdicionar(0);
 
-        toast.success('Venda registrada com sucesso!');
+        toast.success('Venda registrada com sucesso!', {
+          description: `Entrada de ${formatarMoeda(
+            valorFinal
+          )} registrada com sucesso!`,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } catch (err) {
         const errorMessage =
           err instanceof Error ? err.message : 'Erro desconhecido';
@@ -584,6 +581,7 @@ export const useCaixa = () => {
       produtosSelecionados,
       calcularValorTotalProdutos,
       formatarTipoMetodo,
+      formatarMoeda,
       createEntrada,
     ]
   );

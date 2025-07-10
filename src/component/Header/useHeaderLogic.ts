@@ -76,11 +76,8 @@ export function useHeaderLogic() {
 
   const removerOrcamento = useCallback(
     async (id: string) => {
-      const toastId = toast.loading('Excluindo orçamento...');
-
       try {
         await processAction(id, 'reject', () => deleteOrcamento(id));
-        toast.success('Orçamento excluído!', { id: toastId });
       } catch (error: unknown) {
         let errorMessage = 'Falha ao excluir';
 
@@ -90,7 +87,7 @@ export function useHeaderLogic() {
           errorMessage = error;
         }
 
-        toast.error(errorMessage, { id: toastId });
+        toast.error(errorMessage);
       }
     },
     [deleteOrcamento, refreshOrcamentos]

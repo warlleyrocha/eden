@@ -87,7 +87,12 @@ export function useClients() {
         if (selectedClient?.id === id) {
           setSelectedClient(updatedClient);
         }
-        toast.success('Cliente atualizado com sucesso!');
+        toast.success('Cliente atualizado com sucesso!', {
+          description: 'As informações do cliente foram atualizadas.',
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
         return updatedClient;
       } catch (error) {
         setError(error as Error);
@@ -111,7 +116,12 @@ export function useClients() {
         }
         await fetchClients(); // Atualiza a lista
 
-        toast.success('Cliente removido com sucesso!');
+        toast.success('Cliente removido com sucesso!', {
+          description: 'O cliente foi removido da lista.',
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } catch (error) {
         setError(error as Error);
         toast.error('Erro ao remover cliente');

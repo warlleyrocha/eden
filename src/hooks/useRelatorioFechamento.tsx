@@ -36,11 +36,6 @@ export const useRelatorioFechamento = () => {
       setIsGeneratingPDF(true);
 
       try {
-        console.log('Iniciando geração do PDF para período:', {
-          dataInicial,
-          dataFinal,
-        });
-
         // Garantir que as datas estejam no formato correto
         const dataInicialSegura = extrairDataSemTimezone(dataInicial);
         const dataFinalSegura = extrairDataSemTimezone(dataFinal);
@@ -50,8 +45,6 @@ export const useRelatorioFechamento = () => {
           dataInicial: dataInicialSegura,
           dataFinal: dataFinalSegura,
         });
-
-        console.log('Relatório retornado:', relatorioFiltrado);
 
         if (!relatorioFiltrado || typeof relatorioFiltrado !== 'object') {
           console.error('Relatório inválido:', relatorioFiltrado);
@@ -87,12 +80,6 @@ export const useRelatorioFechamento = () => {
           (m) => m.tipo === 'SAIDA'
         );
 
-        console.log('Movimentações filtradas:', {
-          total: movimentacoesPeriodo.length,
-          entradas: entradasPeriodo.length,
-          saidas: saidasPeriodo.length,
-        });
-
         // Data de geração usando função segura
         const dataGeracao = formatarDataSegura(new Date());
 
@@ -124,8 +111,12 @@ export const useRelatorioFechamento = () => {
 
         URL.revokeObjectURL(url);
 
-        console.log('PDF gerado com sucesso');
-        toast.success('Relatório PDF gerado com sucesso!');
+        toast.success('Relatório PDF gerado com sucesso!', {
+          description: `Relatório de fechamento de caixa gerado para o período de ${periodo}.`,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } catch (error) {
         console.error('Erro ao gerar PDF:', error);
 
