@@ -1,6 +1,5 @@
 import { api } from '@/services/api';
 import { getStoreId } from '@/utils/getStoreId';
-import { toast } from 'sonner';
 
 import {
   handleApiError,
@@ -76,11 +75,6 @@ export const estoqueAPI = {
       });
 
       if (response.status === 200) {
-        console.log(
-          'Relatório de produtos retornado com sucesso:',
-          response.data
-        );
-
         const { produtos, totalProdutos, quantidadeTotal, valorTotal } =
           response.data;
 
@@ -118,8 +112,6 @@ export const estoqueAPI = {
         lojaId,
       };
 
-      console.log('Criando produto com dados:', productPayload);
-
       const response = await api.post('/produtos', productPayload, {
         headers: {
           'Content-Type': 'application/json',
@@ -129,8 +121,6 @@ export const estoqueAPI = {
       });
 
       if (response.status === 201) {
-        console.log('Produto criado com sucesso:', response.data);
-        toast.success('Produto adicionado com sucesso!');
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -160,9 +150,6 @@ export const estoqueAPI = {
         throw new Error('ID do produto é obrigatório para atualização');
       }
 
-      console.log('Atualizando produto com ID:', id);
-      console.log('Dados para atualização:', payload);
-
       // Filtrar campos undefined/null
       const filteredUpdates = Object.fromEntries(
         Object.entries(payload).filter(
@@ -186,8 +173,6 @@ export const estoqueAPI = {
         throw new Error('Nenhum dado válido fornecido para atualização');
       }
 
-      console.log('Payload para atualização:', updatePayload);
-
       const response = await api.patch(`/produtos/${id}`, updatePayload, {
         headers: {
           'Content-Type': 'application/json',
@@ -197,8 +182,6 @@ export const estoqueAPI = {
       });
 
       if (response.status === 200) {
-        console.log('Produto atualizado com sucesso:', response.data);
-        toast.success('Produto atualizado com sucesso!');
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -219,8 +202,6 @@ export const estoqueAPI = {
         throw new Error('ID do produto é obrigatório');
       }
 
-      console.log('Deletando produto com ID:', id);
-
       const response = await api.delete(`/produtos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -229,8 +210,7 @@ export const estoqueAPI = {
       });
 
       if (response.status === 200 || response.status === 204) {
-        console.log('Produto deletado com sucesso');
-        toast.success('Produto deletado com sucesso!');
+        return;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
       }

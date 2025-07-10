@@ -79,10 +79,6 @@ export const financeiroAPI = {
       });
 
       if (response.status === 200) {
-        console.log(
-          'Lista de movimentações financeiras retornada com sucesso:',
-          response.data
-        );
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -117,10 +113,6 @@ export const financeiroAPI = {
       );
 
       if (response.status === 200) {
-        console.log(
-          'Relatório financeiro do dia gerado com sucesso:',
-          response.data
-        );
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -165,7 +157,6 @@ export const financeiroAPI = {
       );
 
       if (response.status === 200) {
-        console.log('Relatório financeiro por periodo:', response.data);
         return response.data; // RETORNA os dados
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -201,7 +192,6 @@ export const financeiroAPI = {
       );
 
       if (response.status === 201) {
-        console.log('Saída financeira registrada com sucesso:', response.data);
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -234,10 +224,6 @@ export const financeiroAPI = {
       );
 
       if (response.status === 201) {
-        console.log(
-          'Entrada financeira registrada com sucesso:',
-          response.data
-        );
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -258,9 +244,6 @@ export const financeiroAPI = {
         throw new Error('ID da movimentação é obrigatório para atualização');
       }
 
-      console.log('Atualizando produto com ID:', id);
-      console.log('Dados para atualização:', payload);
-
       const response = await api.patch(`/financeiro/editar/${id}`, payload, {
         headers: {
           'Content-Type': 'application/json',
@@ -269,7 +252,6 @@ export const financeiroAPI = {
         signal,
       });
       if (response.status === 200) {
-        console.log('Produto atualizado com sucesso:', response.data);
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);

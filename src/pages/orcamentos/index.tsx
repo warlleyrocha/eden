@@ -131,7 +131,6 @@ export default function Orcamento() {
     async (id: string) => {
       try {
         await deleteOrcamento(id);
-        console.log('Orçamento deletado com sucesso!');
         // Recarrega orçamentos após deletar
         orcamentosLoadedRef.current = false;
         await loadOrcamentos();

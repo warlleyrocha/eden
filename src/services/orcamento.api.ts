@@ -72,10 +72,6 @@ export const orcamentoAPI = {
       });
 
       if (response.status === 200) {
-        console.log(
-          'Lista de orçamentos retornada com sucesso:',
-          response.data
-        );
         return Array.isArray(response.data) ? response.data : [];
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -103,7 +99,6 @@ export const orcamentoAPI = {
       });
 
       if (response.status === 200) {
-        console.log('Orçamento encontrado com sucesso:', response.data);
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -123,8 +118,6 @@ export const orcamentoAPI = {
     try {
       const token = getAuthToken();
 
-      console.log('Criando orçamento com dados:', payload);
-
       const response = await api.post('/orcamentos', payload, {
         headers: {
           'Content-Type': 'application/json',
@@ -134,8 +127,12 @@ export const orcamentoAPI = {
       });
 
       if (response.status === 201) {
-        console.log('Orçamento criado com sucesso:', response.data);
-        toast.success('Orçamento criado com sucesso!');
+        toast.success('Orçamento criado com sucesso!', {
+          description: `Orçamento de ${response.data.cliente.nome} criado com sucesso!`,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -156,8 +153,6 @@ export const orcamentoAPI = {
     try {
       const token = getAuthToken();
 
-      console.log('Atualizando orçamento:', id, 'com dados:', payload);
-
       const response = await api.patch(`/orcamentos/${id}`, payload, {
         headers: {
           'Content-Type': 'application/json',
@@ -167,8 +162,12 @@ export const orcamentoAPI = {
       });
 
       if (response.status === 200) {
-        console.log('Orçamento atualizado com sucesso:', response.data);
-        toast.success('Orçamento atualizado com sucesso!');
+        toast.success('Orçamento aprovado com sucesso!', {
+          description: `Orçamento de ${response.data.cliente.nome} aprovado com sucesso!`,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
         return response.data;
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
@@ -185,8 +184,6 @@ export const orcamentoAPI = {
     try {
       const token = getAuthToken();
 
-      console.log('Deletando orçamento:', id);
-
       const response = await api.delete(`/orcamentos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -195,8 +192,11 @@ export const orcamentoAPI = {
       });
 
       if (response.status === 200 || response.status === 204) {
-        console.log('Orçamento deletado com sucesso');
-        toast.success('Orçamento deletado com sucesso!');
+        toast.success('Orçamento deletado com sucesso!', {
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } else {
         throw new Error(ERROR_MESSAGES.INVALID_RESPONSE);
       }

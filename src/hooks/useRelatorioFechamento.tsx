@@ -36,11 +36,6 @@ export const useRelatorioFechamento = () => {
       setIsGeneratingPDF(true);
 
       try {
-        console.log('Iniciando geração do PDF para período:', {
-          dataInicial,
-          dataFinal,
-        });
-
         // Garantir que as datas estejam no formato correto
         const dataInicialSegura = extrairDataSemTimezone(dataInicial);
         const dataFinalSegura = extrairDataSemTimezone(dataFinal);
@@ -50,8 +45,6 @@ export const useRelatorioFechamento = () => {
           dataInicial: dataInicialSegura,
           dataFinal: dataFinalSegura,
         });
-
-        console.log('Relatório retornado:', relatorioFiltrado);
 
         if (!relatorioFiltrado || typeof relatorioFiltrado !== 'object') {
           console.error('Relatório inválido:', relatorioFiltrado);
@@ -67,19 +60,24 @@ export const useRelatorioFechamento = () => {
         };
 
         // Período formatado usando função segura
-        const periodo = `${formatarDataSimples(
+        const periodo = `${formatarDataSegura(
           dataInicialSegura
-        )} à ${formatarDataSimples(dataFinalSegura)}`;
+        )} à ${formatarDataSegura(dataFinalSegura)}`;
 
-        // Filtrar movimentações do período de forma mais segura
-        const movimentacoesPeriodo = movimentacoes.filter((m) => {
-          const dataMovimento = extrairDataSemTimezone(m.criadoEm);
-          return (
+        // CORREÇÃO PRINCIPAL: Filtrar movimentações com a mesma lógica de data
+        const movimentacoesPeriodo = movimentacoes.filter((movimento) => {
+          // Extrair data da movimentação no mesmo formato
+          const dataMovimento = extrairDataSemTimezone(movimento.criadoEm);
+
+          // Comparar strings diretamente (YYYY-MM-DD)
+          const estaNoPeríodo =
             dataMovimento >= dataInicialSegura &&
-            dataMovimento <= dataFinalSegura
-          );
+            dataMovimento <= dataFinalSegura;
+
+          return estaNoPeríodo;
         });
 
+        // Separar entradas e saídas
         const entradasPeriodo = movimentacoesPeriodo.filter(
           (m) => m.tipo === 'ENTRADA'
         );
@@ -87,14 +85,22 @@ export const useRelatorioFechamento = () => {
           (m) => m.tipo === 'SAIDA'
         );
 
-        console.log('Movimentações filtradas:', {
-          total: movimentacoesPeriodo.length,
-          entradas: entradasPeriodo.length,
-          saidas: saidasPeriodo.length,
-        });
-
         // Data de geração usando função segura
         const dataGeracao = formatarDataSegura(new Date());
+
+        // CORREÇÃO: Criar função específica para formatar datas no PDF
+        const formatarDataParaPDF = (dataString: string): string => {
+          try {
+            // Se já está no formato correto, usar formatarDataSimples
+            if (dataString && typeof dataString === 'string') {
+              return formatarDataSimples(dataString);
+            }
+            return 'Data inválida';
+          } catch (error) {
+            console.error('Erro ao formatar data para PDF:', error, dataString);
+            return 'Data inválida';
+          }
+        };
 
         // Gerar PDF usando React PDF
         const pdfDoc = (
@@ -105,7 +111,7 @@ export const useRelatorioFechamento = () => {
             saidasPeriodo={saidasPeriodo}
             dataGeracao={dataGeracao}
             formatarMoeda={formatarMoeda}
-            formatarDataSimples={formatarDataSegura}
+            formatarDataSimples={formatarDataParaPDF} // ← CORREÇÃO AQUI
             formatarMetodoPagamentoCompleto={formatarMetodoPagamentoCompleto}
             METODOS_PAGAMENTO_LABELS={METODOS_PAGAMENTO_LABELS}
           />
@@ -116,16 +122,30 @@ export const useRelatorioFechamento = () => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
 
+        // Nome do arquivo com datas formatadas
+        const dataIniFormatada = formatarDataSegura(dataInicialSegura).replace(
+          /\//g,
+          '-'
+        );
+        const dataFimFormatada = formatarDataSegura(dataFinalSegura).replace(
+          /\//g,
+          '-'
+        );
+
         link.href = url;
-        link.download = `fechamento-caixa-${dataInicialSegura}-${dataFinalSegura}.pdf`;
+        link.download = `fechamento-caixa-${dataIniFormatada}-${dataFimFormatada}.pdf`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
 
         URL.revokeObjectURL(url);
 
-        console.log('PDF gerado com sucesso');
-        toast.success('Relatório PDF gerado com sucesso!');
+        toast.success('Relatório PDF gerado com sucesso!', {
+          description: `Relatório de fechamento de caixa gerado para o período de ${periodo}.`,
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
       } catch (error) {
         console.error('Erro ao gerar PDF:', error);
 

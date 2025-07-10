@@ -156,8 +156,8 @@ export default function Stock() {
               deleteProduct(id);
               toast.success('Produto excluído com sucesso!', {
                 description: 'O item foi removido do estoque.',
-                duration: 3000,
-                position: 'top-right',
+                duration: 2000,
+                position: 'bottom-right',
                 richColors: true,
               });
             }}
@@ -219,8 +219,8 @@ export default function Stock() {
                   await updateProduct(produtoEditando.id, dados);
                   toast.success('Produto atualizado com sucesso!', {
                     description: 'As alterações foram salvas.',
-                    duration: 3000,
-                    position: 'top-right',
+                    duration: 2000,
+                    position: 'bottom-right',
                     richColors: true,
                   });
                 } else {
@@ -228,8 +228,8 @@ export default function Stock() {
                   toast.success('Produto adicionado ao estoque com sucesso!', {
                     description:
                       'O item foi incluído corretamente no seu inventário.',
-                    duration: 3000,
-                    position: 'top-right',
+                    duration: 2000,
+                    position: 'bottom-right',
                     richColors: true,
                   });
                 }
