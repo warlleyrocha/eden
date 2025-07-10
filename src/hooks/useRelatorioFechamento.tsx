@@ -88,6 +88,20 @@ export const useRelatorioFechamento = () => {
         // Data de geração usando função segura
         const dataGeracao = formatarDataSegura(new Date());
 
+        // CORREÇÃO: Criar função específica para formatar datas no PDF
+        const formatarDataParaPDF = (dataString: string): string => {
+          try {
+            // Se já está no formato correto, usar formatarDataSimples
+            if (dataString && typeof dataString === 'string') {
+              return formatarDataSimples(dataString);
+            }
+            return 'Data inválida';
+          } catch (error) {
+            console.error('Erro ao formatar data para PDF:', error, dataString);
+            return 'Data inválida';
+          }
+        };
+
         // Gerar PDF usando React PDF
         const pdfDoc = (
           <RelatorioFechamentoPDF
@@ -97,7 +111,7 @@ export const useRelatorioFechamento = () => {
             saidasPeriodo={saidasPeriodo}
             dataGeracao={dataGeracao}
             formatarMoeda={formatarMoeda}
-            formatarDataSimples={formatarDataSegura}
+            formatarDataSimples={formatarDataParaPDF} // ← CORREÇÃO AQUI
             formatarMetodoPagamentoCompleto={formatarMetodoPagamentoCompleto}
             METODOS_PAGAMENTO_LABELS={METODOS_PAGAMENTO_LABELS}
           />
