@@ -2,5 +2,5 @@
 import Axios from 'axios';
 
 export const api = Axios.create({
-  baseURL: 'https://edenbackend-production.up.railway.app',
+  baseURL: import.meta.env.VITE_API_URL,
 });
