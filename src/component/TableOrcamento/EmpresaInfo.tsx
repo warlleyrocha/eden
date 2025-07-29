@@ -239,7 +239,7 @@ export function OrcamentoModelDetals({
           <div className="flex flex-col border-t pt-6 border-gray-300 print:border-none">
             <div className="flex justify-between">
               <span className="font-semibold text-gray-800 mb-2">
-                Assinatura do Cliente (Recorte aqui)
+                Assinatura do Cliente
               </span>
               <h1 className="text-sm font-semibold text-gray-700">
                 Orçamento: #
