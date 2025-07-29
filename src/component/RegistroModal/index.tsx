@@ -190,16 +190,43 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                   <div className="flex-1">
                     <Label className="block text-sm font-medium text-gray-700 mb-1">
                       Quantidade
+                      {produtoParaAdicionar && (() => {
+                        const produtoSelecionado = products?.find(p => p.id === produtoParaAdicionar);
+                        const estoqueDisponivel = (produtoSelecionado?.estoque || 0) - 
+                          (produtosSelecionados?.filter(item => item.produtoId === produtoParaAdicionar)
+                            .reduce((total, item) => total + item.quantidade, 0) || 0);
+                        return (
+                          <span className={`ml-2 text-xs ${estoqueDisponivel > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            (Disponível: {estoqueDisponivel})
+                          </span>
+                        );
+                      })()}
                     </Label>
                     <Input
                       type="number"
                       placeholder="Quantidade"
-                      className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      value={quantidadeParaAdicionar ?? ''}
+                      className={`w-full mt-[5px] py-4.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        produtoParaAdicionar && (() => {
+                          const produtoSelecionado = products?.find(p => p.id === produtoParaAdicionar);
+                          const estoqueDisponivel = (produtoSelecionado?.estoque || 0) - 
+                            (produtosSelecionados?.filter(item => item.produtoId === produtoParaAdicionar)
+                              .reduce((total, item) => total + item.quantidade, 0) || 0);
+                          return (quantidadeParaAdicionar || 0) > estoqueDisponivel ? 'border-red-300' : 'border-gray-300';
+                        })()
+                      }`}
+                      value={quantidadeParaAdicionar === 0 ? '' : quantidadeParaAdicionar ?? ''}
                       onChange={(e) => {
-                        setQuantidadeParaAdicionar?.(Number(e.target.value));
+                        const valor = e.target.value;
+                        setQuantidadeParaAdicionar?.(valor === '' ? 0 : Number(valor));
                       }}
                       min="1"
+                      max={produtoParaAdicionar ? (() => {
+                        const produtoSelecionado = products?.find(p => p.id === produtoParaAdicionar);
+                        const estoqueDisponivel = (produtoSelecionado?.estoque || 0) - 
+                          (produtosSelecionados?.filter(item => item.produtoId === produtoParaAdicionar)
+                            .reduce((total, item) => total + item.quantidade, 0) || 0);
+                        return estoqueDisponivel;
+                      })() : undefined}
                     />
                   </div>
                 </div>
@@ -214,7 +241,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                     <Input
                       type="number"
                       step="0.01"
-                      min="0.01"
+                      min="0.00"
                       placeholder="0,00"
                       className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={valorParaAdicionar ?? ''}
