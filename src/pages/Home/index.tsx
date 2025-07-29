@@ -6,7 +6,7 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-[#F5F5F5] text-[#333] flex flex-col h-full  ">
+    <div className="min-h-screen bg-[linear-gradient(90deg,rgba(42,123,155,1)_37%,rgba(87,199,133,1)_98%)] text-[#333] flex flex-col h-full  ">
       <div className="flex flex-row">
         <Header />
       </div>

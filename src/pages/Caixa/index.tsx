@@ -87,7 +87,7 @@ export default function Caixa() {
         <Header name="" />
       </div>
 
-      <div className="flex flex-col lg:flex-row min-h-screen bg-[#F5F5F5] text-[#333] p-6">
+      <div className="flex flex-col lg:flex-row min-h-screen bg-[linear-gradient(90deg,rgba(42,123,155,1)_37%,rgba(87,199,133,1)_98%)] text-[#333] p-6">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 rounded-xl p-16 sm:p-8 w-full max-w-7xl">
           <div className="rounded-xl p-6 sm:p-8 glow-shadow">
             {/* Header com Tabs */}
