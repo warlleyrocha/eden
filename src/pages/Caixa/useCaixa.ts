@@ -31,6 +31,7 @@ export const useCaixa = () => {
     fetchRelatorioPorPeriodo,
     movimentacoes,
     relatorio,
+    relatorioPeriodo,
   } = useFinanceiro();
 
   const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
@@ -396,6 +397,26 @@ export const useCaixa = () => {
   const totalPorMetodoEntrada = relatorio?.totalPorMetodoEntrada ?? {};
   const totalPorMetodoSaida = relatorio?.totalPorMetodoSaida ?? {};
 
+  // Calcula os totais do período selecionado
+const totalEntradasPeriodo = useMemo(() => {
+  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.totalEntradas || 0) : 'R$ 0,00';
+}, [relatorioPeriodo, formatarMoeda]);
+
+const totalSaidasPeriodo = useMemo(() => {
+  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.totalSaidas || 0) : 'R$ 0,00';
+}, [relatorioPeriodo, formatarMoeda]);
+
+const saldoFinalPeriodo = useMemo(() => {
+  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.saldo || 0) : 'R$ 0,00';
+}, [relatorioPeriodo, formatarMoeda]);
+
+// Adicione um useEffect para buscar dados quando as datas mudarem
+useEffect(() => {
+  if (startDate && endDate) {
+    fetchRelatorioPorPeriodo({ dataInicial: startDate, dataFinal: endDate });
+  }
+}, [startDate, endDate, fetchRelatorioPorPeriodo]);
+
   // Desestruturação dos totais por método de pagamento
   const {
     PIX: pixEntrada = 0,
@@ -703,6 +724,11 @@ export const useCaixa = () => {
     showEditModal,
     isEditing,
     tipoEdicao,
+
+    totalEntradasPeriodo,
+    totalSaidasPeriodo,
+    saldoFinalPeriodo,
+    relatorioPeriodo,
 
     // Referente ao estado *relatorio¹* do hook useFinanceiro
     totalEntradas,
