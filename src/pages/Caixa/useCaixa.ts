@@ -31,6 +31,8 @@ export const useCaixa = () => {
     fetchRelatorioPorPeriodo,
     movimentacoes,
     relatorio,
+    relatorioPeriodo,
+    setRelatorioPeriodo,
   } = useFinanceiro();
 
   const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
@@ -70,6 +72,18 @@ export const useCaixa = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tipoEdicao, setTipoEdicao] = useState<'entrada' | 'saida'>('entrada');
 
+  const resetCashClosureModal = useCallback(() => {
+    // Limpar as datas selecionadas
+    setStartDate('');
+    setEndDate('');
+    
+    // Limpar o relatório do período
+    setRelatorioPeriodo(null); // Assumindo que você tem este setter no useFinanceiro
+    
+    // Fechar o modal
+    setShowCashClosureModal(false);
+  }, []);  
+  
   const handleDoubleClick = (id: string) => {
     const movimentacao = movimentacoes.find((mov) => mov.id === id);
     if (!movimentacao) {
@@ -396,6 +410,26 @@ export const useCaixa = () => {
   const totalPorMetodoEntrada = relatorio?.totalPorMetodoEntrada ?? {};
   const totalPorMetodoSaida = relatorio?.totalPorMetodoSaida ?? {};
 
+  // Calcula os totais do período selecionado
+const totalEntradasPeriodo = useMemo(() => {
+  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.totalEntradas || 0) : 'R$ 0,00';
+}, [relatorioPeriodo, formatarMoeda]);
+
+const totalSaidasPeriodo = useMemo(() => {
+  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.totalSaidas || 0) : 'R$ 0,00';
+}, [relatorioPeriodo, formatarMoeda]);
+
+const saldoFinalPeriodo = useMemo(() => {
+  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.saldo || 0) : 'R$ 0,00';
+}, [relatorioPeriodo, formatarMoeda]);
+
+// Adicione um useEffect para buscar dados quando as datas mudarem
+useEffect(() => {
+  if (startDate && endDate) {
+    fetchRelatorioPorPeriodo({ dataInicial: startDate, dataFinal: endDate });
+  }
+}, [startDate, endDate, fetchRelatorioPorPeriodo]);
+
   // Desestruturação dos totais por método de pagamento
   const {
     PIX: pixEntrada = 0,
@@ -704,6 +738,11 @@ export const useCaixa = () => {
     isEditing,
     tipoEdicao,
 
+    totalEntradasPeriodo,
+    totalSaidasPeriodo,
+    saldoFinalPeriodo,
+    relatorioPeriodo,
+
     // Referente ao estado *relatorio¹* do hook useFinanceiro
     totalEntradas,
     totalSaidas,
@@ -762,6 +801,7 @@ export const useCaixa = () => {
     setShowEditModal,
 
     // Funções
+    resetCashClosureModal,
     filtrarEntradas,
     filtrarSaidas,
     formatarData,

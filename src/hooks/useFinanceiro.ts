@@ -28,7 +28,7 @@ type ApiError = {
 export function useFinanceiro() {
   const [movimentacoes, setMovimentacoes] = useState<MovimentoFinanceiro[]>([]);
   const [relatorio, setRelatorio] = useState<RelatorioFinanceiro | null>(null);
-
+  const [relatorioPeriodo, setRelatorioPeriodo] = useState<RelatorioFinanceiro | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
 
@@ -73,13 +73,27 @@ export function useFinanceiro() {
     async (
       params: { dataInicial: string; dataFinal: string },
       signal?: AbortSignal
-    ) => {
-      const { dataInicial, dataFinal } = params;
-      return await financeiroAPI.fetchRelatorioFinanceiroComPeriodo({
-        dataInicial,
-        dataFinal,
-        signal,
-      });
+    ): Promise<RelatorioFinanceiro> => {
+      setLoading(true);
+      setError(null);
+      try {
+        const { dataInicial, dataFinal } = params;
+        const data = await financeiroAPI.fetchRelatorioFinanceiroComPeriodo({
+          dataInicial,
+          dataFinal,
+          signal,
+        });
+        setRelatorioPeriodo(data);
+        return data;
+      } catch (err) {
+        if (!axios.isCancel(err)) {
+          setError(err as ApiError);
+          setRelatorioPeriodo(null);
+        }
+        throw err;
+      } finally {
+        setLoading(false);
+      }
     },
     []
   );
@@ -201,8 +215,10 @@ export function useFinanceiro() {
     // Estados
     movimentacoes,
     relatorio,
+    relatorioPeriodo,
     loading,
     error,
+    setRelatorioPeriodo,
     // Actions
     createSaida,
     createEntrada,
