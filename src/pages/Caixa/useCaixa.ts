@@ -32,6 +32,7 @@ export const useCaixa = () => {
     movimentacoes,
     relatorio,
     relatorioPeriodo,
+    setRelatorioPeriodo,
   } = useFinanceiro();
 
   const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
@@ -71,6 +72,18 @@ export const useCaixa = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tipoEdicao, setTipoEdicao] = useState<'entrada' | 'saida'>('entrada');
 
+  const resetCashClosureModal = useCallback(() => {
+    // Limpar as datas selecionadas
+    setStartDate('');
+    setEndDate('');
+    
+    // Limpar o relatório do período
+    setRelatorioPeriodo(null); // Assumindo que você tem este setter no useFinanceiro
+    
+    // Fechar o modal
+    setShowCashClosureModal(false);
+  }, []);  
+  
   const handleDoubleClick = (id: string) => {
     const movimentacao = movimentacoes.find((mov) => mov.id === id);
     if (!movimentacao) {
@@ -788,6 +801,7 @@ useEffect(() => {
     setShowEditModal,
 
     // Funções
+    resetCashClosureModal,
     filtrarEntradas,
     filtrarSaidas,
     formatarData,

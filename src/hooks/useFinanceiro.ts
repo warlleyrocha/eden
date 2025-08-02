@@ -218,6 +218,7 @@ export function useFinanceiro() {
     relatorioPeriodo,
     loading,
     error,
+    setRelatorioPeriodo,
     // Actions
     createSaida,
     createEntrada,

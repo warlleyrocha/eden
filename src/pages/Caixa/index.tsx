@@ -70,6 +70,7 @@ export default function Caixa() {
     setQuantidadeParaAdicionar,
 
     // Funções
+    resetCashClosureModal,
     formatarData,
     formatarMoeda,
     formatarMetodoPagamentoCompleto,
@@ -222,12 +223,12 @@ export default function Caixa() {
         <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
           <button
             className="bg-black opacity-60 absolute inset-0 backdrop-blur-sm transition-opacity"
-            onClick={() => setShowCashClosureModal(false)}
+            onClick={resetCashClosureModal}
             disabled={isGeneratingPDF}
           ></button>
           <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg min-h-[32rem]">
             <button
-              onClick={() => setShowCashClosureModal(false)}
+              onClick={resetCashClosureModal}
               disabled={isGeneratingPDF}
               className="absolute top-6 right-6 p-1 rounded-full hover:bg-gray-100 transition-colors duration-200"
               aria-label="Close"
