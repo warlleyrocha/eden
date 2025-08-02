@@ -6,15 +6,18 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function SignIn() {
-  const { setAuthenticated } = useAuth();
-  const navigate = useNavigate();
+  const { setAuthenticated } = useAuth(); // Hook para gerenciar autenticação
+  const navigate = useNavigate(); // Hook para navegação entre rotas
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState(''); // Estado para armazenar o email
+  const [password, setPassword] = useState(''); // Estado para armazenar a senha
+  const [showPassword, setShowPassword] = useState(false); // Estado para controlar a visibilidade da senha
   const [error, setError] = useState('');
 
+  // Função para lidar com o envio do formulário de login
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -64,6 +67,11 @@ export default function SignIn() {
     }
   };
 
+  // Função para alternar visibilidade
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   return (
     <div className="flex flex-col items-center p-4 justify-center h-screen bg-[linear-gradient(90deg,rgba(42,123,155,1)_37%,rgba(87,199,133,1)_98%)]">
       <div className="bg-white shadow-lg rounded-lg p-6 max-w-md w-full">
@@ -98,18 +106,33 @@ export default function SignIn() {
             >
               Password:
             </label>
-            <Input
-              type="password"
-              required
-              onChange={(e) => setPassword(e.target.value)}
-              value={password}
-              placeholder="Senha"
-              className="mt-1 block w-full border-2 border-[#B8C6E0] rounded-md p-3
-             transition-all duration-200 ease-in-out
-             focus:border-[#152C6B] focus:ring-4 focus:ring-[#3A5AAA]
-             focus:outline-none placeholder-[#0E1F4D]
-             hover:border-[#2A4A9A] text-[#081534]"
-            />
+            <div className="relative"> {/* Container relativo para posicionar o ícone */}
+              <Input
+                type={showPassword ? 'text' : 'password'}
+                required
+                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                placeholder="Senha"
+                className="mt-1 block w-full border-2 border-[#B8C6E0] rounded-md p-3 pr-12
+               transition-all duration-200 ease-in-out
+               focus:border-[#152C6B] focus:ring-4 focus:ring-[#3A5AAA]
+               focus:outline-none placeholder-[#0E1F4D]
+               hover:border-[#2A4A9A] text-[#081534]"
+              />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 
+                         text-[#1E3A8A] hover:text-[#152C6B] transition-colors duration-200
+                         focus:outline-none focus:ring-2 focus:ring-[#3A5AAA] focus:ring-offset-1 rounded"
+              >
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
+            </div>
           </div>
           {error && <div className="text-red-500 mb-4">{error}</div>}
 
