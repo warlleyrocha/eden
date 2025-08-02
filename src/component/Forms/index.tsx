@@ -5,8 +5,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 import { clientsAPI } from '@/services/cliente.api';
-
 import { useClients } from '@/hooks/useCliente';
+
+// Importa as funções utilitárias de formatação
+import {
+  formatPhone,
+  formatCpfCnpj,
+  removePhoneFormatting,
+  removeCpfCnpjFormatting,
+} from '@/utils/formatters';
 
 type FormsProps = Readonly<{
   showModal: boolean;
@@ -28,9 +35,9 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
     if (showModal && selectedClient) {
       setFormData({
         name: selectedClient.nome ?? '',
-        phone: selectedClient.telefone ?? '',
+        phone: selectedClient.telefone ? formatPhone(selectedClient.telefone) : '',
         email: selectedClient.email ?? '',
-        cpfCnpj: selectedClient.cpfCnpj ?? '',
+        cpfCnpj: selectedClient.cpfCnpj ? formatCpfCnpj(selectedClient.cpfCnpj) : '',
         address: selectedClient.endereco ?? '',
       });
     } else if (showModal && !selectedClient) {
@@ -45,6 +52,26 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
     }
   }, [showModal, selectedClient]);
 
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatPhone(value);
+    
+    // Limita o tamanho máximo (formato celular completo)
+    if (removePhoneFormatting(value).length <= 11) {
+      setFormData((prev) => ({ ...prev, phone: formattedValue }));
+    }
+  };
+
+  const handleCpfCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const formattedValue = formatCpfCnpj(value);
+    
+    // Limita o tamanho máximo (CNPJ completo tem 14 dígitos)
+    if (removeCpfCnpjFormatting(value).length <= 14) {
+      setFormData((prev) => ({ ...prev, cpfCnpj: formattedValue }));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -57,11 +84,12 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
       return;
     }
 
+    // Remove a formatação antes de enviar para a API
     const payload = {
       nome: formData.name,
       email: formData.email,
-      telefone: formData.phone,
-      cpfCnpj: formData.cpfCnpj,
+      telefone: removePhoneFormatting(formData.phone),
+      cpfCnpj: removeCpfCnpjFormatting(formData.cpfCnpj),
       endereco: formData.address,
       lojaId,
     };
@@ -168,9 +196,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
             type="text"
             required
             value={formData.phone}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, phone: e.target.value }))
-            }
+            onChange={handlePhoneChange}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
           />
         </div>
@@ -204,9 +230,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
             type="text"
             required
             value={formData.cpfCnpj}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, cpfCnpj: e.target.value }))
-            }
+            onChange={handleCpfCnpjChange}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
           />
         </div>
