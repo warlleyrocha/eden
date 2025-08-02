@@ -51,6 +51,8 @@ export default function Caixa() {
     showEditModal,
     tipoEdicao,
     isEditing,
+    startDate,
+    endDate,
 
     // Setters
     setValorParaAdicionar,
@@ -261,9 +263,9 @@ export default function Caixa() {
             )}
 
             <CashClosureModel
-              totalEntries={totalEntradasPeriodo}
-              totalExits={totalSaidasPeriodo}
-              finalBalance={saldoFinalPeriodo}
+              totalEntries={startDate && endDate ? totalEntradasPeriodo : totalEntradas}
+              totalExits={startDate && endDate ? totalSaidasPeriodo : totalSaidas}
+              finalBalance={startDate && endDate ? saldoFinalPeriodo : saldoFinal}
               onDateChange={handleDateChange}
             />
 
