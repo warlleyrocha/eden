@@ -10,6 +10,7 @@ import type {
   TipoMovimento,
 } from '@/@types/financeiro';
 import { MetodoPagamento } from '@/@types/financeiro';
+import { useOrcamento } from '@/hooks/useOrcamento';
 
 // Mapeamento de métodos de pagamento
 const METODOS_PAGAMENTO_LABELS = {
@@ -34,6 +35,8 @@ export const useCaixa = () => {
     relatorioPeriodo,
     setRelatorioPeriodo,
   } = useFinanceiro();
+
+  const { orcamentos } = useOrcamento();
 
   const { gerarPDFComPeriodo, isGeneratingPDF } = useRelatorioFechamento();
 
@@ -76,14 +79,14 @@ export const useCaixa = () => {
     // Limpar as datas selecionadas
     setStartDate('');
     setEndDate('');
-    
+
     // Limpar o relatório do período
     setRelatorioPeriodo(null); // Assumindo que você tem este setter no useFinanceiro
-    
+
     // Fechar o modal
     setShowCashClosureModal(false);
-  }, []);  
-  
+  }, [setRelatorioPeriodo]);
+
   const handleDoubleClick = (id: string) => {
     const movimentacao = movimentacoes.find((mov) => mov.id === id);
     if (!movimentacao) {
@@ -411,24 +414,30 @@ export const useCaixa = () => {
   const totalPorMetodoSaida = relatorio?.totalPorMetodoSaida ?? {};
 
   // Calcula os totais do período selecionado
-const totalEntradasPeriodo = useMemo(() => {
-  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.totalEntradas || 0) : 'R$ 0,00';
-}, [relatorioPeriodo, formatarMoeda]);
+  const totalEntradasPeriodo = useMemo(() => {
+    return relatorioPeriodo
+      ? formatarMoeda(relatorioPeriodo.totalEntradas || 0)
+      : 'R$ 0,00';
+  }, [relatorioPeriodo, formatarMoeda]);
 
-const totalSaidasPeriodo = useMemo(() => {
-  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.totalSaidas || 0) : 'R$ 0,00';
-}, [relatorioPeriodo, formatarMoeda]);
+  const totalSaidasPeriodo = useMemo(() => {
+    return relatorioPeriodo
+      ? formatarMoeda(relatorioPeriodo.totalSaidas || 0)
+      : 'R$ 0,00';
+  }, [relatorioPeriodo, formatarMoeda]);
 
-const saldoFinalPeriodo = useMemo(() => {
-  return relatorioPeriodo ? formatarMoeda(relatorioPeriodo.saldo || 0) : 'R$ 0,00';
-}, [relatorioPeriodo, formatarMoeda]);
+  const saldoFinalPeriodo = useMemo(() => {
+    return relatorioPeriodo
+      ? formatarMoeda(relatorioPeriodo.saldo || 0)
+      : 'R$ 0,00';
+  }, [relatorioPeriodo, formatarMoeda]);
 
-// Adicione um useEffect para buscar dados quando as datas mudarem
-useEffect(() => {
-  if (startDate && endDate) {
-    fetchRelatorioPorPeriodo({ dataInicial: startDate, dataFinal: endDate });
-  }
-}, [startDate, endDate, fetchRelatorioPorPeriodo]);
+  // Adicione um useEffect para buscar dados quando as datas mudarem
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchRelatorioPorPeriodo({ dataInicial: startDate, dataFinal: endDate });
+    }
+  }, [startDate, endDate, fetchRelatorioPorPeriodo]);
 
   // Desestruturação dos totais por método de pagamento
   const {
@@ -632,6 +641,7 @@ useEffect(() => {
       endDate,
       fetchRelatorioPorPeriodo,
       movimentacoes,
+      orcamentos,
       formatarDataSimples,
       formatarMoeda,
       formatarMetodoPagamentoCompleto,
@@ -643,6 +653,7 @@ useEffect(() => {
     gerarPDFComPeriodo,
     fetchRelatorioPorPeriodo,
     movimentacoes,
+    orcamentos,
     formatarDataSimples,
     formatarMoeda,
     formatarMetodoPagamentoCompleto,

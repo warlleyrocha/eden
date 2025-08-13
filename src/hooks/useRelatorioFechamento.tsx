@@ -3,8 +3,10 @@ import React, { useCallback } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { toast } from 'sonner';
 import { RelatorioFechamentoPDF } from '../component/RelatorioFechamentoPDF';
-import type { RelatorioFinanceiro, Movimento } from '@/@types/relatorio';
+import type { RelatorioFinanceiro } from '@/@types/relatorio';
 import { extrairDataSemTimezone, formatarDataSegura } from '../utils/date';
+import type { Orcamento } from '@/@types/orcamento';
+import type { MovimentoFinanceiro } from '@/@types/financeiro';
 
 /**
  * Hook para gerenciar a geração de relatórios PDF
@@ -23,7 +25,8 @@ export const useRelatorioFechamento = () => {
         dataInicial: string;
         dataFinal: string;
       }) => Promise<RelatorioFinanceiro>,
-      movimentacoes: Movimento[],
+      movimentacoes: MovimentoFinanceiro[],
+      orcamentos: Orcamento[],
       formatarDataSimples: (data: string) => string,
       formatarMoeda: (valor: number) => string,
       formatarMetodoPagamentoCompleto: (
@@ -58,6 +61,16 @@ export const useRelatorioFechamento = () => {
           totalSaidas: relatorioFiltrado.totalSaidas || 0,
           saldo: relatorioFiltrado.saldo || 0,
         };
+
+        const orcamentoPeriodo = (orcamentos || []).filter((o) => {
+          if (!o.criadoEm) return false; // ignora orçamentos sem data
+
+          const dataOrcamento = extrairDataSemTimezone(o.criadoEm);
+          return (
+            dataOrcamento >= dataInicialSegura &&
+            dataOrcamento <= dataFinalSegura
+          );
+        });
 
         // Período formatado usando função segura
         const periodo = `${formatarDataSegura(
@@ -109,6 +122,7 @@ export const useRelatorioFechamento = () => {
             periodo={periodo}
             entradasPeriodo={entradasPeriodo}
             saidasPeriodo={saidasPeriodo}
+            orcamentos={orcamentoPeriodo}
             dataGeracao={dataGeracao}
             formatarMoeda={formatarMoeda}
             formatarDataSimples={formatarDataParaPDF} // ← CORREÇÃO AQUI
