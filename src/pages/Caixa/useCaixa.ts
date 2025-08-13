@@ -62,12 +62,12 @@ export const useCaixa = () => {
     Array<{
       produtoId: string;
       quantidade: number;
-      valorUnitario: number;
+      valorUnitario: string | number;
     }>
   >([]);
   const [produtoParaAdicionar, setProdutoParaAdicionar] = useState('');
   const [quantidadeParaAdicionar, setQuantidadeParaAdicionar] = useState(1);
-  const [valorParaAdicionar, setValorParaAdicionar] = useState(0);
+  const [valorParaAdicionar, setValorParaAdicionar] = useState('');
 
   // Estados para edição
   const [showEditModal, setShowEditModal] = useState(false);
@@ -160,7 +160,7 @@ export const useCaixa = () => {
     // Limpar campos de adição de produto (importante para não manter lixo)
     setProdutoParaAdicionar?.('');
     setQuantidadeParaAdicionar?.(1);
-    setValorParaAdicionar?.(0);
+    setValorParaAdicionar?.('');
 
     setEditingId(id);
     setIsEditing(true);
@@ -218,7 +218,8 @@ export const useCaixa = () => {
 
         // Recalcular o valor total baseado nos produtos selecionados
         const valorTotalProdutos = produtosSelecionados.reduce(
-          (total, item) => total + item.quantidade * item.valorUnitario,
+          (total, item) =>
+            total + Number(item.quantidade) * Number(item.valorUnitario),
           0
         );
 
@@ -275,7 +276,7 @@ export const useCaixa = () => {
     if (
       produtoParaAdicionar &&
       quantidadeParaAdicionar > 0 &&
-      valorParaAdicionar > 0
+      valorParaAdicionar > ''
     ) {
       setProdutosSelecionados((prev) => [
         ...prev,
@@ -287,7 +288,7 @@ export const useCaixa = () => {
       ]);
       setProdutoParaAdicionar('');
       setQuantidadeParaAdicionar(1);
-      setValorParaAdicionar(0);
+      setValorParaAdicionar('');
     }
   }, [produtoParaAdicionar, quantidadeParaAdicionar, valorParaAdicionar]);
 
@@ -298,7 +299,7 @@ export const useCaixa = () => {
   // Função para calcular o valor total dos produtos selecionados
   const calcularValorTotalProdutos = useCallback(() => {
     return produtosSelecionados.reduce((total, item) => {
-      return total + item.quantidade * item.valorUnitario;
+      return total + Number(item.quantidade) * Number(item.valorUnitario);
     }, 0);
   }, [produtosSelecionados]);
 
@@ -596,7 +597,7 @@ export const useCaixa = () => {
         setProdutosSelecionados([]);
         setProdutoParaAdicionar('');
         setQuantidadeParaAdicionar(1);
-        setValorParaAdicionar(0);
+        setValorParaAdicionar('');
 
         toast.success('Venda registrada com sucesso!', {
           description: `Entrada de ${formatarMoeda(

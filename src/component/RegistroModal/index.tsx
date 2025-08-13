@@ -26,14 +26,14 @@ interface RegistroModalProps {
   produtosSelecionados?: Array<{
     produtoId: string;
     quantidade: number;
-    valorUnitario: number; // Adicionado campo de valor unitário
+    valorUnitario: number | string; // Adicionado campo de valor unitário
   }>;
   produtoParaAdicionar?: string;
   quantidadeParaAdicionar?: number;
-  valorParaAdicionar?: number; // Adicionado campo de valor para adicionar
+  valorParaAdicionar?: string; // Adicionado campo de valor para adicionar
   setProdutoParaAdicionar?: (produto: string) => void;
   setQuantidadeParaAdicionar?: (quantidade: number) => void;
-  setValorParaAdicionar?: (valor: number) => void; // Adicionado setter para valor
+  setValorParaAdicionar?: (valor: string) => void; // Adicionado setter para valor
   adicionarProduto?: () => void;
   removerProduto?: (index: number) => void;
   isEditing?: boolean;
@@ -94,7 +94,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
   // Calcula o valor total dos produtos selecionados
   const valorTotalProdutos = (produtosSelecionados ?? []).reduce(
     (total, item) => {
-      return total + item.quantidade * item.valorUnitario;
+      return total + Number(item.quantidade) * Number(item.valorUnitario);
     },
     0
   );
@@ -190,43 +190,94 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                   <div className="flex-1">
                     <Label className="block text-sm font-medium text-gray-700 mb-1">
                       Quantidade
-                      {produtoParaAdicionar && (() => {
-                        const produtoSelecionado = products?.find(p => p.id === produtoParaAdicionar);
-                        const estoqueDisponivel = (produtoSelecionado?.estoque || 0) - 
-                          (produtosSelecionados?.filter(item => item.produtoId === produtoParaAdicionar)
-                            .reduce((total, item) => total + item.quantidade, 0) || 0);
-                        return (
-                          <span className={`ml-2 text-xs ${estoqueDisponivel > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            (Disponível: {estoqueDisponivel})
-                          </span>
-                        );
-                      })()}
+                      {produtoParaAdicionar &&
+                        (() => {
+                          const produtoSelecionado = products?.find(
+                            (p) => p.id === produtoParaAdicionar
+                          );
+                          const estoqueDisponivel =
+                            (produtoSelecionado?.estoque || 0) -
+                            (produtosSelecionados
+                              ?.filter(
+                                (item) =>
+                                  item.produtoId === produtoParaAdicionar
+                              )
+                              .reduce(
+                                (total, item) => total + item.quantidade,
+                                0
+                              ) || 0);
+                          return (
+                            <span
+                              className={`ml-2 text-xs ${
+                                estoqueDisponivel > 0
+                                  ? 'text-green-600'
+                                  : 'text-red-600'
+                              }`}
+                            >
+                              (Disponível: {estoqueDisponivel})
+                            </span>
+                          );
+                        })()}
                     </Label>
                     <Input
                       type="number"
                       placeholder="Quantidade"
                       className={`w-full mt-[5px] py-4.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        produtoParaAdicionar && (() => {
-                          const produtoSelecionado = products?.find(p => p.id === produtoParaAdicionar);
-                          const estoqueDisponivel = (produtoSelecionado?.estoque || 0) - 
-                            (produtosSelecionados?.filter(item => item.produtoId === produtoParaAdicionar)
-                              .reduce((total, item) => total + item.quantidade, 0) || 0);
-                          return (quantidadeParaAdicionar || 0) > estoqueDisponivel ? 'border-red-300' : 'border-gray-300';
+                        produtoParaAdicionar &&
+                        (() => {
+                          const produtoSelecionado = products?.find(
+                            (p) => p.id === produtoParaAdicionar
+                          );
+                          const estoqueDisponivel =
+                            (produtoSelecionado?.estoque || 0) -
+                            (produtosSelecionados
+                              ?.filter(
+                                (item) =>
+                                  item.produtoId === produtoParaAdicionar
+                              )
+                              .reduce(
+                                (total, item) => total + item.quantidade,
+                                0
+                              ) || 0);
+                          return (quantidadeParaAdicionar || 0) >
+                            estoqueDisponivel
+                            ? 'border-red-300'
+                            : 'border-gray-300';
                         })()
                       }`}
-                      value={quantidadeParaAdicionar === 0 ? '' : quantidadeParaAdicionar ?? ''}
+                      value={
+                        quantidadeParaAdicionar === 0
+                          ? ''
+                          : quantidadeParaAdicionar ?? ''
+                      }
                       onChange={(e) => {
                         const valor = e.target.value;
-                        setQuantidadeParaAdicionar?.(valor === '' ? 0 : Number(valor));
+                        setQuantidadeParaAdicionar?.(
+                          valor === '' ? 0 : Number(valor)
+                        );
                       }}
                       min="1"
-                      max={produtoParaAdicionar ? (() => {
-                        const produtoSelecionado = products?.find(p => p.id === produtoParaAdicionar);
-                        const estoqueDisponivel = (produtoSelecionado?.estoque || 0) - 
-                          (produtosSelecionados?.filter(item => item.produtoId === produtoParaAdicionar)
-                            .reduce((total, item) => total + item.quantidade, 0) || 0);
-                        return estoqueDisponivel;
-                      })() : undefined}
+                      max={
+                        produtoParaAdicionar
+                          ? (() => {
+                            const produtoSelecionado = products?.find(
+                              (p) => p.id === produtoParaAdicionar
+                            );
+                            const estoqueDisponivel =
+                                (produtoSelecionado?.estoque || 0) -
+                                (produtosSelecionados
+                                  ?.filter(
+                                    (item) =>
+                                      item.produtoId === produtoParaAdicionar
+                                  )
+                                  .reduce(
+                                    (total, item) => total + item.quantidade,
+                                    0
+                                  ) || 0);
+                            return estoqueDisponivel;
+                          })()
+                          : undefined
+                      }
                     />
                   </div>
                 </div>
@@ -246,7 +297,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                       className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       value={valorParaAdicionar ?? ''}
                       onChange={(e) => {
-                        setValorParaAdicionar?.(Number(e.target.value));
+                        setValorParaAdicionar?.(String(e.target.value));
                       }}
                     />
                   </div>
@@ -258,8 +309,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                       onClick={adicionarProduto}
                       disabled={
                         !produtoParaAdicionar ||
-                        (quantidadeParaAdicionar ?? 0) <= 0 ||
-                        (valorParaAdicionar ?? 0) <= 0
+                        (quantidadeParaAdicionar ?? 0) <= 0
                       }
                       className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                     >
@@ -280,7 +330,8 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                       const produto = products?.find(
                         (p) => p.id === item.produtoId
                       );
-                      const valorTotal = item.quantidade * item.valorUnitario;
+                      const valorTotal =
+                        Number(item.quantidade) * Number(item.valorUnitario);
                       return (
                         <div
                           key={`produto-${item.produtoId}-${index}`}
@@ -292,7 +343,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                             </div>
                             <div className="text-xs text-gray-600">
                               Qtd: {item.quantidade} ×{' '}
-                              {formatarMoeda(item.valorUnitario)} ={' '}
+                              {formatarMoeda(Number(item.valorUnitario))} ={' '}
                               {formatarMoeda(valorTotal)}
                             </div>
                           </div>
