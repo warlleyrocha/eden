@@ -1,3 +1,6 @@
+import type { Orcamento } from './orcamento';
+import type { MovimentoFinanceiro } from './financeiro';
+
 // types/relatorio.types.ts
 export interface Movimento {
   criadoEm: string;
@@ -19,9 +22,10 @@ export interface RelatorioFinanceiro {
 export interface PDFProps {
   relatorio: RelatorioFinanceiro;
   periodo: string;
-  entradasPeriodo: Movimento[];
-  saidasPeriodo: Movimento[];
+  entradasPeriodo: MovimentoFinanceiro[];
+  saidasPeriodo: MovimentoFinanceiro[];
   dataGeracao: string;
+  orcamentos: Orcamento[];
   formatarMoeda: (valor: number) => string;
   formatarDataSimples: (data: string) => string;
   formatarMetodoPagamentoCompleto: (
