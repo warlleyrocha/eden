@@ -10,6 +10,7 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
   entradasPeriodo,
   saidasPeriodo,
   dataGeracao,
+  orcamentos,
   formatarMoeda,
   formatarDataSimples,
   formatarMetodoPagamentoCompleto,
@@ -27,29 +28,6 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
       {/* RESUMO FINANCEIRO */}
       <View style={pdfStyles.section}>
         <Text style={pdfStyles.sectionTitle}>RESUMO FINANCEIRO</Text>
-
-        {/* ENTRADAS POR MÉTODO */}
-        <Text
-          style={[
-            pdfStyles.sectionTitle,
-            { fontSize: 12, backgroundColor: '#E8F5E8' },
-          ]}
-        >
-          ENTRADAS POR MÉTODO
-        </Text>
-        {Object.entries(relatorio.totalPorMetodoEntrada)
-          .filter(([_, valor]) => valor > 0)
-          .map(([metodo, valor]) => {
-            const nomeMetodo = METODOS_PAGAMENTO_LABELS[metodo] || metodo;
-            return (
-              <View key={metodo} style={pdfStyles.row}>
-                <Text style={pdfStyles.label}>{nomeMetodo}</Text>
-                <Text style={pdfStyles.value}>{formatarMoeda(valor)}</Text>
-              </View>
-            );
-          })}
-
-        <View style={pdfStyles.separator} />
 
         {/* TOTAIS */}
         <View style={pdfStyles.totalBox}>
@@ -92,6 +70,29 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
             </Text>
           </View>
         </View>
+
+        {/* ENTRADAS POR MÉTODO */}
+        <Text
+          style={[
+            pdfStyles.sectionTitle,
+            { fontSize: 12, backgroundColor: '#E8F5E8' },
+          ]}
+        >
+          ENTRADAS POR MÉTODO
+        </Text>
+        {Object.entries(relatorio.totalPorMetodoEntrada)
+          .filter(([_, valor]) => valor > 0)
+          .map(([metodo, valor]) => {
+            const nomeMetodo = METODOS_PAGAMENTO_LABELS[metodo] || metodo;
+            return (
+              <View key={metodo} style={pdfStyles.row}>
+                <Text style={pdfStyles.label}>{nomeMetodo}</Text>
+                <Text style={pdfStyles.value}>{formatarMoeda(valor)}</Text>
+              </View>
+            );
+          })}
+
+        <View style={pdfStyles.separator} />
       </View>
 
       {/* DETALHAMENTO DAS ENTRADAS */}
@@ -114,8 +115,8 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
         </View>
 
         {entradasPeriodo.length > 0 ? (
-          entradasPeriodo.map((movimento, index) => (
-            <View key={index} style={pdfStyles.detailRow}>
+          entradasPeriodo.map((movimento) => (
+            <View key={movimento.id} style={pdfStyles.detailRow}>
               <Text style={pdfStyles.date}>
                 {formatarDataSimples(movimento.criadoEm)}
               </Text>
@@ -159,8 +160,8 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
         </View>
 
         {saidasPeriodo.length > 0 ? (
-          saidasPeriodo.map((movimento, index) => (
-            <View key={index} style={pdfStyles.detailRow}>
+          saidasPeriodo.map((movimento) => (
+            <View key={movimento.id} style={pdfStyles.detailRow}>
               <Text style={pdfStyles.date}>
                 {formatarDataSimples(movimento.criadoEm)}
               </Text>
@@ -201,6 +202,45 @@ export const RelatorioFechamentoPDF: React.FC<PDFProps> = ({
           <Text style={pdfStyles.label}>Número de saídas:</Text>
           <Text style={pdfStyles.value}>{saidasPeriodo.length}</Text>
         </View>
+      </View>
+
+      {/* ORÇAMENTOS */}
+      <View style={pdfStyles.section}>
+        <Text style={[pdfStyles.sectionTitle]}>
+          ORÇAMENTOS ({orcamentos.length})
+        </Text>
+
+        {/* Cabeçalho da tabela */}
+        <View
+          style={[
+            pdfStyles.detailRow,
+            { fontWeight: 'bold', borderBottomWidth: 1 },
+          ]}
+        >
+          <Text style={pdfStyles.date}>Data</Text>
+          <Text style={pdfStyles.method}>Nome</Text>
+          <Text style={pdfStyles.amount}>Valor</Text>
+          <Text style={pdfStyles.description}>Descrição</Text>
+        </View>
+
+        {orcamentos.length > 0 ? (
+          orcamentos.map((orcamento, index) => (
+            <View key={orcamento.id} style={pdfStyles.detailRow}>
+              <Text style={pdfStyles.date}>
+                {formatarDataSimples(orcamento.criadoEm ?? '')}
+              </Text>
+              <Text style={pdfStyles.method}>{orcamento.cliente.nome}</Text>
+              <Text style={pdfStyles.amount}>
+                {formatarMoeda(orcamento.total ?? 0)}
+              </Text>
+              <Text style={pdfStyles.description}>
+                {orcamento.descricao ?? 'Orçamento #' + (index + 1)}
+              </Text>
+            </View>
+          ))
+        ) : (
+          <Text style={pdfStyles.label}>Nenhum orçamento no período</Text>
+        )}
       </View>
 
       {/* RODAPÉ */}
