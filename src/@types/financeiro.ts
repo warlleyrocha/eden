@@ -29,7 +29,7 @@ export interface EditarMovimentacaoFinanceira {
   produtos?: Array<{
     produtoId: string;
     quantidade: number;
-    valorUnitario: number;
+    valorUnitario: number | string; // Permite tanto número quanto string para compatibilidade com o frontend
   }>;
 }
 

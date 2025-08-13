@@ -264,9 +264,15 @@ export default function Caixa() {
             )}
 
             <CashClosureModel
-              totalEntries={startDate && endDate ? totalEntradasPeriodo : totalEntradas}
-              totalExits={startDate && endDate ? totalSaidasPeriodo : totalSaidas}
-              finalBalance={startDate && endDate ? saldoFinalPeriodo : saldoFinal}
+              totalEntries={
+                startDate && endDate ? totalEntradasPeriodo : totalEntradas
+              }
+              totalExits={
+                startDate && endDate ? totalSaidasPeriodo : totalSaidas
+              }
+              finalBalance={
+                startDate && endDate ? saldoFinalPeriodo : saldoFinal
+              }
               onDateChange={handleDateChange}
             />
 
