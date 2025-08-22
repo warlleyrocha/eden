@@ -31,6 +31,14 @@ export const formatPhone = (value: string): string => {
   }
 };
 
+export const formatarMoeda = (valor: number) => {
+  return valor.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+    minimumFractionDigits: 2,
+  });
+};
+
 /**
  * Formata CPF ou CNPJ automaticamente baseado no tamanho
  * @param value - String com números do documento

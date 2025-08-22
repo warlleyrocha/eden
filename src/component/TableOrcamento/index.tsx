@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback } from 'react';
-import { FileText, Plus, Printer, Search, X } from 'lucide-react';
+import { FileText, Plus, Printer, Search, Trash } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +18,8 @@ import ModalEntrada from '../ModalEntrada';
 import ModalOrcamentos from '../ModalOrcamentos';
 
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
+import { formatarDataSegura } from '@/utils/date';
+import { formatarMoeda } from '@/utils/formatters';
 
 import { useTableLogic } from './useTableLogic';
 
@@ -91,7 +93,7 @@ const TableRowOrcamento = memo(
     }, [orcamento.total]);
 
     return (
-      <TableRow className="hover:bg-gray-50 text-center">
+      <TableRow className="hover:bg-gray-50 text-left bg-white">
         <TableCell className="py-2 px-4">{numeroSequencial}</TableCell>
         <TableCell className="py-2 px-4">
           {orcamento.cliente?.nome ?? 'Sem nome'}
@@ -99,22 +101,20 @@ const TableRowOrcamento = memo(
         <TableCell className="py-2 px-4">{formattedDate}</TableCell>
         <TableCell className="py-2 px-4">{formattedTotal}</TableCell>
         <TableCell className="py-2 px-4">{orcamento.status}</TableCell>
-        <TableCell className="py-2 px-4 space-x-2 text-center">
+        <TableCell className="py-2 px-4 space-x-2 text-left">
           <Button
-            variant="ghost"
-            className="border-2 border-zinc-700"
+            variant="outline"
+            className="text-blue-600 hover:bg-blue-100 "
             onClick={handleClick}
           >
-            <Printer className="mr-1" />
-            Imprimir
+            <Printer />
           </Button>
           <Button
-            variant="ghost"
-            className="border-2 border-zinc-700"
+            variant="outline"
+            className="text-red-600 hover:bg-red-100"
             onClick={() => onDeleteOrcamento(orcamento.id)}
           >
-            <X className="mr-1" />
-            Deletar
+            <Trash />
           </Button>
         </TableCell>
       </TableRow>
@@ -226,7 +226,7 @@ const ProductItem = memo(
           className="border-2 border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200 self-end"
           onClick={handleRemove}
         >
-          <X className="text-red-500" />
+          <Trash className="text-red-500" />
         </Button>
 
         {stockError && (
@@ -299,7 +299,7 @@ const ServiceItem = memo(
               className="border-2 border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
               onClick={handleRemove}
             >
-              <X className="text-red-500" />
+              <Trash className="text-red-500" />
             </Button>
           </div>
         </div>
@@ -530,24 +530,27 @@ function TableOrcamento({
   }, [selectedOrcamento, empresaInfo, filteredOrcamentos]);
 
   return (
-    <div className="w-full h-full p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row w-full justify-between mb-10">
-        <div className="flex items-center w-full sm:w-auto mb-2 sm:mb-0">
-          <Search className="mr-2" />
+    <div className="flex-1">
+      {/* 🔍 Barra de busca e botão */}
+      <div className="flex flex-row justify-between gap-2 pb-6">
+        {/* Campo de busca */}
+        <div className="relative w-full sm:w-[30%]">
           <Input
             type="text"
             placeholder="Buscar orçamentos"
             value={searchTerm}
             onChange={handleSearchChange}
-            className="flex-grow sm:w-64 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full bg-white placeholder:text-[#55575c] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
+          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
         </div>
 
-        <div className="my-2">
+        {/* Botão novo orçamento */}
+        <div>
           <Button
-            variant={'ghost'}
+            variant="ghost"
             onClick={toggleModal}
-            className="border-2 border-zinc-700 w-full"
+            className="flex items-center sm:space-x-2 bg-[#1E3A8A] text-white hover:bg-[#152C6B] px-3 sm:px-4 py-2 rounded-lg cursor-pointer text-sm sm:text-base"
           >
             <FileText className="mr-2" />
             Novo Orçamento
@@ -555,30 +558,104 @@ function TableOrcamento({
         </div>
       </div>
 
-      <Table className="w-full border rounded-lg shadow-md">
-        <TableHeader>
-          <TableRow className="bg-gray-100 text-center">
-            <TableCell className="py-2 px-4">ID</TableCell>
-            <TableCell className="py-2 px-4">Nome</TableCell>
-            <TableCell className="py-2 px-4">Data</TableCell>
-            <TableCell className="py-2 px-4">Total</TableCell>
-            <TableCell className="py-2 px-4">Status</TableCell>
-            <TableCell className="py-2 px-4">Ações</TableCell>
-          </TableRow>
-        </TableHeader>
+      {/* 🖥️ Lista em Tabela (Desktop/Tablet) */}
+      <div className="hidden md:block bg-white rounded-lg shadow-md">
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+          <Table className="w-full min-w-[800px]">
+            <TableHeader>
+              <TableRow className="bg-gray-100 text-center">
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  ID
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Nome
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Data
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Total
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Status
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Ações
+                </TableCell>
+              </TableRow>
+            </TableHeader>
 
-        <TableBody>
-          {filteredOrcamentos.map((orcamento) => (
-            <TableRowOrcamento
-              key={orcamento.id}
-              orcamento={orcamento}
-              numeroSequencial={orcamento.numeroSequencial}
-              onOpenModalDetails={handleOpenModalDetails}
-              onDeleteOrcamento={onDeleteOrcamento}
-            />
-          ))}
-        </TableBody>
-      </Table>
+            <TableBody>
+              {filteredOrcamentos.map((orcamento) => (
+                <TableRowOrcamento
+                  key={orcamento.id}
+                  orcamento={orcamento}
+                  numeroSequencial={orcamento.numeroSequencial}
+                  onOpenModalDetails={handleOpenModalDetails}
+                  onDeleteOrcamento={onDeleteOrcamento}
+                />
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </div>
+
+      {/* 📱 Lista em Cards (Mobile) */}
+      <div className="block md:hidden space-y-4">
+        {filteredOrcamentos.map((orcamento) => (
+          <div
+            key={orcamento.id}
+            className="bg-white w-full border border-gray-200 rounded-lg p-4 shadow-sm hover:bg-gray-50"
+          >
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-semibold text-gray-900 text-lg flex-1 mr-2">
+                #{orcamento.numeroSequencial} - {orcamento.cliente?.nome}
+              </h3>
+              <div className="flex space-x-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-blue-600 hover:bg-blue-100 min-w-[32px] px-1.5 h-8"
+                  onClick={() => handleOpenModalDetails(orcamento.id)}
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-100 min-w-[32px] px-1.5 h-8"
+                  onClick={() => onDeleteOrcamento(orcamento.id)}
+                >
+                  <Trash className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center">
+                <span className="text-gray-600 w-20">Data:</span>
+                <span className="text-gray-900 font-medium">
+                  {formatarDataSegura(orcamento.criadoEm)}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <span className="text-gray-600 w-20">Total:</span>
+                <span className="text-gray-900 font-medium">
+                  {formatarMoeda(orcamento.total)}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <span className="text-gray-600 w-20">Status:</span>
+                <span className="text-gray-900 font-medium">
+                  {orcamento.status}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {isModalOpen && (
         <ModalOrcamentos
