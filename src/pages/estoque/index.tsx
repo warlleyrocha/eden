@@ -143,17 +143,13 @@ export default function Stock() {
 
         <div className="w-full sm:w-[30%] mt-8">
           <div className="relative">
-            <form className="flex flex-row gap-1.5">
-              <Input
-                placeholder="Buscar produto..."
-                className="w-full bg-white placeholder:text-[#081534] px-3 sm:px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-              />
-              <Button type="button" className="bg-[#1E3A8A] px-3 sm:px-4">
-                <Search className="w-4 h-4" />
-              </Button>
-            </form>
+            <Input
+              placeholder="Buscar produto..."
+              className="w-full bg-white placeholder:text-[#081534] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
 

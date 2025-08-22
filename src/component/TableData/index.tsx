@@ -69,7 +69,7 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
               {items.map((item) => (
                 <TableRow
                   key={item.id}
-                  className="hover:bg-gray-50"
+                  className="hover:bg-gray-50 cursor-pointer"
                   onDoubleClick={() => onEdit?.(item.id)}
                 >
                   <TableCell className="px-4 lg:px-6 py-4 text-sm text-[#1E3A8A] max-w-[200px]">
@@ -91,7 +91,7 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center space-x-1 text-blue-600 hover:bg-blue-100 min-w-[36px] px-2"
+                        className="flex items-center space-x-1 text-blue-600 hover:bg-blue-100 min-w-[36px] px-2 cursor-pointer"
                         onClick={() => onEdit?.(item.id)}
                       >
                         <Edit className="w-4 h-4" />
@@ -99,7 +99,7 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
                       <Button
                         variant="outline"
                         size="sm"
-                        className="flex items-center space-x-1 text-red-600 hover:bg-red-100 min-w-[36px] px-2"
+                        className="flex items-center space-x-1 text-red-600 hover:bg-red-100 min-w-[36px] px-2 cursor-pointer"
                         onClick={() => openConfirmDialog(item.id)}
                       >
                         <Trash className="w-4 h-4" />
