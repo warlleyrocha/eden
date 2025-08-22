@@ -93,7 +93,7 @@ const TableRowOrcamento = memo(
     }, [orcamento.total]);
 
     return (
-      <TableRow className="hover:bg-gray-50 text-left bg-white">
+      <TableRow className="hover:bg-gray-50 text-center bg-white">
         <TableCell className="py-2 px-4">{numeroSequencial}</TableCell>
         <TableCell className="py-2 px-4">
           {orcamento.cliente?.nome ?? 'Sem nome'}
@@ -101,7 +101,7 @@ const TableRowOrcamento = memo(
         <TableCell className="py-2 px-4">{formattedDate}</TableCell>
         <TableCell className="py-2 px-4">{formattedTotal}</TableCell>
         <TableCell className="py-2 px-4">{orcamento.status}</TableCell>
-        <TableCell className="py-2 px-4 space-x-2 text-left">
+        <TableCell className="py-2 px-4 space-x-2">
           <Button
             variant="outline"
             className="text-blue-600 hover:bg-blue-100 "
@@ -548,7 +548,6 @@ function TableOrcamento({
         {/* Botão novo orçamento */}
         <div>
           <Button
-            variant="ghost"
             onClick={toggleModal}
             className="flex items-center sm:space-x-2 bg-[#1E3A8A] text-white hover:bg-[#152C6B] px-3 sm:px-4 py-2 rounded-lg cursor-pointer text-sm sm:text-base"
           >
@@ -564,22 +563,16 @@ function TableOrcamento({
           <Table className="w-full min-w-[800px]">
             <TableHeader>
               <TableRow className="bg-gray-100 text-center">
-                <TableCell className="py-3 px-4 text-left font-semibold">
-                  ID
-                </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
-                  Nome
-                </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
-                  Data
-                </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+                <TableCell className="py-3 px-4  font-semibold">ID</TableCell>
+                <TableCell className="py-3 px-4  font-semibold">Nome</TableCell>
+                <TableCell className="py-3 px-4  font-semibold">Data</TableCell>
+                <TableCell className="py-3 px-4  font-semibold">
                   Total
                 </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+                <TableCell className="py-3 px-4  font-semibold">
                   Status
                 </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+                <TableCell className="py-3 px-4 text-center font-semibold">
                   Ações
                 </TableCell>
               </TableRow>

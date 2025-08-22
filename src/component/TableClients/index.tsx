@@ -72,20 +72,18 @@ export default function TableClient({
         <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
           <Table className="w-full min-w-[800px]">
             <TableHeader>
-              <TableRow className="bg-gray-100">
-                <TableCell className="py-3 px-4 text-left font-semibold">
-                  Nome
-                </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+              <TableRow className="bg-gray-100 text-center">
+                <TableCell className="py-3 px-4  font-semibold">Nome</TableCell>
+                <TableCell className="py-3 px-4  font-semibold">
                   Telefone
                 </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+                <TableCell className="py-3 px-4  font-semibold">
                   E-mail
                 </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+                <TableCell className="py-3 px-4  font-semibold">
                   Endereço
                 </TableCell>
-                <TableCell className="py-3 px-4 text-left font-semibold">
+                <TableCell className="py-3 px-4  font-semibold">
                   CPF/CNPJ
                 </TableCell>
                 <TableCell className="py-3 px-4 text-center font-semibold">
@@ -97,7 +95,7 @@ export default function TableClient({
               {filteredClients.map((client) => (
                 <TableRow
                   key={client.id}
-                  className="hover:bg-gray-50 cursor-pointer"
+                  className="hover:bg-gray-50 text-center cursor-pointer"
                   onDoubleClick={() => onSelectClientForEdit(client)}
                 >
                   <TableCell className="py-3 px-4 max-w-[150px]">
