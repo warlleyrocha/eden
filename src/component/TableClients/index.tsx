@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash } from 'lucide-react';
+import { Edit, Trash, Search } from 'lucide-react';
 
 import type { Client } from '@/@types/clients';
 
@@ -17,7 +17,6 @@ import { formatPhone } from '@/utils/formatPhone';
 
 import useTableClientLogic from './useTableClientLogic';
 
-import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { ConfirmDialog } from '../ConfirmDialog';
 
@@ -54,72 +53,169 @@ export default function TableClient({
   };
 
   return (
-    <div className="w-full h-full p-4 sm:p-8">
-      <div className="flex flex-col sm:flex-row w-full justify-between mb-[5vh] mt-[8px] ">
-        <div className="flex items-center w-full sm:w-auto mb-2 sm:mb-0 ">
-          <Search className="mr-2" />
-          <Input
-            type="text"
-            placeholder="Buscar clientes"
-            value={searchTerm}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchTerm(e.target.value)
-            }
-            className="flex-grow sm:w-64 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+    <div className="w-full space-y-6 ">
+      <div className="relative w-full sm:w-[30%]">
+        <Input
+          type="text"
+          placeholder="Buscar clientes"
+          className="w-full bg-white placeholder:text-[#55575c] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchTerm}
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+            setSearchTerm(e.target.value)
+          }
+        />
+        <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
+      </div>
+
+      {/* Versão Desktop/Tablet */}
+      <div className="hidden md:block bg-white rounded-lg shadow-md">
+        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
+          <Table className="w-full min-w-[800px]">
+            <TableHeader>
+              <TableRow className="bg-gray-100">
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Nome
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Telefone
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  E-mail
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  Endereço
+                </TableCell>
+                <TableCell className="py-3 px-4 text-left font-semibold">
+                  CPF/CNPJ
+                </TableCell>
+                <TableCell className="py-3 px-4 text-center font-semibold">
+                  Ações
+                </TableCell>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredClients.map((client) => (
+                <TableRow
+                  key={client.id}
+                  className="hover:bg-gray-50 cursor-pointer"
+                  onDoubleClick={() => onSelectClientForEdit(client)}
+                >
+                  <TableCell className="py-3 px-4 max-w-[150px]">
+                    <div className="truncate" title={client.nome}>
+                      {client.nome}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-4">
+                    {formatPhone(client.telefone)}
+                  </TableCell>
+                  <TableCell className="py-3 px-4 max-w-[200px]">
+                    <div className="truncate" title={client.email}>
+                      {client.email}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-4 max-w-[200px]">
+                    <div className="truncate" title={client.endereco}>
+                      {client.endereco}
+                    </div>
+                  </TableCell>
+                  <TableCell className="py-3 px-4">
+                    {formatCpfCnpj(client.cpfCnpj)}
+                  </TableCell>
+                  <TableCell className="py-3 px-4">
+                    <div className="flex justify-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center text-blue-600 hover:bg-blue-100 min-w-[36px] px-2"
+                        onClick={() => onSelectClientForEdit(client)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center text-red-600 hover:bg-red-100 min-w-[36px] px-2"
+                        onClick={() => openConfirmDialog(client.id)}
+                      >
+                        <Trash className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </div>
-      <Table className="w-full border rounded-lg shadow-md">
-        <TableHeader>
-          <TableRow className="bg-gray-100 text-center">
-            <TableCell className="py-2 px-4">Nome</TableCell>
-            <TableCell className="py-2 px-4">Telefone</TableCell>
-            <TableCell className="py-2 px-4">E-mail</TableCell>
-            <TableCell className="py-2 px-4">Endereço</TableCell>
-            <TableCell className="py-2 px-4">CPF/CNPJ</TableCell>
-            <TableCell className="py-2 px-4"></TableCell>
-          </TableRow>
-        </TableHeader>
 
-        <TableBody>
-          {filteredClients.map((client) => (
-            <TableRow key={client.id} className="hover:bg-gray-50 text-center">
-              <TableCell className="py-2 px-4">{client.nome}</TableCell>
-              <TableCell className="py-2 px-4">
-                {formatPhone(client.telefone)}
-              </TableCell>
-              <TableCell className="py-2 px-4">{client.email}</TableCell>
-              <TableCell className="py-2 px-4">{client.endereco}</TableCell>
-              <TableCell className="py-2 px-4">
-                {formatCpfCnpj(client.cpfCnpj)}
-              </TableCell>
-              <TableCell className="py-2 px-4">
-                <div className="flex justify-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center space-x-1 text-blue-600 hover:bg-blue-100"
-                    onClick={() => onSelectClientForEdit(client)}
-                  >
-                    <Edit className="w-4 h-4" />
-                    <span>Editar</span>
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center space-x-1 text-red-600 hover:bg-red-100"
-                    onClick={() => openConfirmDialog(client.id)}
-                  >
-                    <Trash className="w-4 h-4" />
-                    <span>Excluir</span>
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {/* Versão Mobile - Cards */}
+      <div className="block md:hidden space-y-4">
+        {filteredClients.map((client) => (
+          <button
+            key={client.id}
+            className="bg-white w-full border border-gray-200 rounded-lg p-4 shadow-sm cursor-pointer hover:bg-gray-50"
+            onDoubleClick={() => onSelectClientForEdit(client)}
+          >
+            <div className="flex justify-between items-start mb-3">
+              <h3 className="font-semibold text-gray-900 text-lg flex-1 mr-2">
+                {client.nome}
+              </h3>
+              <div className="flex space-x-1 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center text-blue-600 hover:bg-blue-100 min-w-[32px] px-1.5 h-8"
+                  onClick={() => onSelectClientForEdit(client)}
+                >
+                  <Edit className="w-3.5 h-3.5" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center text-red-600 hover:bg-red-100 min-w-[32px] px-1.5 h-8"
+                  onClick={() => openConfirmDialog(client.id)}
+                >
+                  <Trash className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            </div>
 
+            <div className="space-y-2 text-sm">
+              <div className="flex items-center">
+                <span className="text-gray-600 w-20">Telefone:</span>
+                <span className="text-gray-900 font-medium">
+                  {formatPhone(client.telefone)}
+                </span>
+              </div>
+
+              <div className="flex items-start">
+                <span className="text-gray-600 w-20 flex-shrink-0">
+                  E-mail:
+                </span>
+                <span className="text-gray-900 font-medium break-all">
+                  {client.email}
+                </span>
+              </div>
+
+              <div className="flex items-start">
+                <span className="text-gray-600 w-20 flex-shrink-0">
+                  Endereço:
+                </span>
+                <span className="text-gray-900 font-medium">
+                  {client.endereco}
+                </span>
+              </div>
+
+              <div className="flex items-center">
+                <span className="text-gray-600 w-20">CPF/CNPJ:</span>
+                <span className="text-gray-900 font-medium">
+                  {formatCpfCnpj(client.cpfCnpj)}
+                </span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
       {/* ConfirmDialog do Radix UI */}
       <ConfirmDialog
         open={dialogOpen}

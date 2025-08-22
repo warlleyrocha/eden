@@ -272,7 +272,6 @@ export default function Orcamento() {
         <h1 className="text-3xl text-[#1E3A8A] font-bold mb-6">
           Clientes e Orçamentos
         </h1>
-
         <div className="flex mb-4 w-full gap-5 p-5 bg-white rounded-lg shadow-md hover:none ">
           <Button
             variant={'ghost'}
@@ -293,8 +292,7 @@ export default function Orcamento() {
             Orçamentos
           </Button>
         </div>
-
-        <div className="p-4 bg-white rounded shadow">{renderContent}</div>
+        <div className="">{renderContent}</div>
       </div>
 
       {/* Modal de edição de cliente */}
