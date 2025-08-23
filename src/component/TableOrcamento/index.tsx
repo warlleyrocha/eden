@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback } from 'react';
-import { FileText, Plus, Printer, Search, Trash } from 'lucide-react';
+import { FileText, Plus, Printer, Search, Trash, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -480,54 +480,14 @@ function TableOrcamento({
     [handleGenerateOrcamento]
   );
 
-  // Memoiza o conteúdo do modal de detalhes
+  /* // Memoiza o conteúdo do modal de detalhes
   const modalDetailsContent = useMemo(() => {
     if (!selectedOrcamento) return null;
 
     return (
-      <OrcamentoModelDetals
-        empresaInfo={empresaInfo}
-        orcamentoInfo={{
-          index: filteredOrcamentos.findIndex(
-            (o) => o.id === selectedOrcamento.id
-          ),
-          totalOrcamentos: filteredOrcamentos.length,
-          orcamentoId: selectedOrcamento.id,
-          cliente: {
-            id: selectedOrcamento.cliente?.id ?? '',
-            nome: selectedOrcamento.cliente?.nome ?? 'Cliente não informado',
-            telefone: selectedOrcamento.cliente?.telefone ?? 'Não informado',
-            endereco: selectedOrcamento.cliente?.endereco ?? 'Não informado',
-          },
-          date: selectedOrcamento.criadoEm
-            ? new Date(selectedOrcamento.criadoEm).toLocaleDateString('pt-BR')
-            : 'Data não informada',
-          itens:
-            selectedOrcamento.itens?.map((item) => ({
-              produtoId: item.produtoId,
-              nome: item.nomeProduto
-                ? `Produto: ${item.nomeProduto}`
-                : 'Produto: Produto sem nome informado',
-              precoUnitario: item.precoUnitario,
-              quantidade: item.quantidade,
-              valorTotal: item.precoUnitario * item.quantidade,
-            })) || [],
-          servicos:
-            selectedOrcamento.servicos?.map((servico) => ({
-              descricao: servico.descricao,
-              valor: servico.valor,
-            })) || [],
-          total: selectedOrcamento.total ?? 0,
-          lojaId: selectedOrcamento.lojaId ?? '',
-          descricao: selectedOrcamento.descricao ?? '',
-          metodoPagamento: selectedOrcamento.metodoPagamento ?? '',
-          numeroParcelas: selectedOrcamento.numeroParcelas ?? 1,
-          status: selectedOrcamento.status ?? 'pendente',
-        }}
-        autoPrint={true}
-      />
+      
     );
-  }, [selectedOrcamento, empresaInfo, filteredOrcamentos]);
+  }, [selectedOrcamento, empresaInfo, filteredOrcamentos]);*/
 
   return (
     <div className="flex-1">
@@ -653,11 +613,28 @@ function TableOrcamento({
       {isModalOpen && (
         <ModalOrcamentos
           isOpen={isModalOpen}
-          onClose={toggleModal}
-          title="Novo orçamento"
-          subTitle="Crie um novo orcamento para um cliente:"
           content={
             <>
+              <div className="flex justify-between items-start mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#1E3A8A]">
+                    Novo Orçamento
+                  </h2>
+
+                  <p className="text-[#152C6B] mt-1">
+                    Crie um novo orcamento para um cliente:
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={toggleModal}
+                  size="icon"
+                  className="text-[#152C6B] hover:text-gray-700 hover:bg-gray-100 rounded-full"
+                >
+                  <X className="h-5 w-5" />
+                  <span className="sr-only">Fechar modal</span>
+                </Button>
+              </div>
               <div className="mb-4">
                 <Label
                   htmlFor="cliente"
@@ -816,10 +793,48 @@ function TableOrcamento({
       )}
 
       {isModalOpenDetails && selectedOrcamento && (
-        <ModalOrcamentos
+        <OrcamentoModelDetals
           isOpen={isModalOpenDetails}
           onClose={toggleModalDetails}
-          content={modalDetailsContent}
+          empresaInfo={empresaInfo}
+          orcamentoInfo={{
+            index: filteredOrcamentos.findIndex(
+              (o) => o.id === selectedOrcamento.id
+            ),
+            totalOrcamentos: filteredOrcamentos.length,
+            orcamentoId: selectedOrcamento.id,
+            cliente: {
+              id: selectedOrcamento.cliente?.id ?? '',
+              nome: selectedOrcamento.cliente?.nome ?? 'Cliente não informado',
+              telefone: selectedOrcamento.cliente?.telefone ?? 'Não informado',
+              endereco: selectedOrcamento.cliente?.endereco ?? 'Não informado',
+            },
+            date: selectedOrcamento.criadoEm
+              ? new Date(selectedOrcamento.criadoEm).toLocaleDateString('pt-BR')
+              : 'Data não informada',
+            itens:
+              selectedOrcamento.itens?.map((item) => ({
+                produtoId: item.produtoId,
+                nome: item.nomeProduto
+                  ? `Produto: ${item.nomeProduto}`
+                  : 'Produto: Produto sem nome informado',
+                precoUnitario: item.precoUnitario,
+                quantidade: item.quantidade,
+                valorTotal: item.precoUnitario * item.quantidade,
+              })) || [],
+            servicos:
+              selectedOrcamento.servicos?.map((servico) => ({
+                descricao: servico.descricao,
+                valor: servico.valor,
+              })) || [],
+            total: selectedOrcamento.total ?? 0,
+            lojaId: selectedOrcamento.lojaId ?? '',
+            descricao: selectedOrcamento.descricao ?? '',
+            metodoPagamento: selectedOrcamento.metodoPagamento ?? '',
+            numeroParcelas: selectedOrcamento.numeroParcelas ?? 1,
+            status: selectedOrcamento.status ?? 'pendente',
+          }}
+          autoPrint={true}
         />
       )}
     </div>
