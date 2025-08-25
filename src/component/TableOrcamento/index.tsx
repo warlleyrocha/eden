@@ -13,7 +13,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
-import { OrcamentoModelDetals } from './EmpresaInfo';
+import { OrcamentoModalDetails } from './EmpresaInfo';
 import ModalEntrada from '../ModalEntrada';
 import ModalOrcamentos from '../ModalOrcamentos';
 
@@ -793,7 +793,7 @@ function TableOrcamento({
       )}
 
       {isModalOpenDetails && selectedOrcamento && (
-        <OrcamentoModelDetals
+        <OrcamentoModalDetails
           isOpen={isModalOpenDetails}
           onClose={toggleModalDetails}
           empresaInfo={empresaInfo}
