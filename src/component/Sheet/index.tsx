@@ -26,9 +26,9 @@ export function DynamicSheet({
   children,
   isOpen,
   onOpenChange,
-}: DynamicSheetProps) {
+}: Readonly<DynamicSheetProps>) {
   return (
-    <ShadcnSheet open={isOpen} onOpenChange={onOpenChange}>
+    <ShadcnSheet open={isOpen} onOpenChange={onOpenChange} modal={false}>
       <SheetTrigger asChild>
         <button onClick={() => onOpenChange(true)}>
           {icon} {triggerText}
