@@ -3,17 +3,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Trash } from 'lucide-react';
+import type { ProductType } from '@/@types/product';
 
 interface ProductItemType {
   name: string;
   value: string;
   unitPrice: string;
   quantity?: string;
-}
-interface ProductType {
-  id: string;
-  nome: string;
-  precoCusto: number;
 }
 
 export interface ProductItemProps {
