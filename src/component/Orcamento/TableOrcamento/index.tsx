@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback } from 'react';
-import { FileText, Plus, Search, Trash, X } from 'lucide-react';
+import { FileText, Search, Trash } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,15 +10,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 
 import { OrcamentoModalDetails } from './EmpresaInfo';
-import ModalEntrada from '../../ModalEntrada';
+
 import ModalOrcamentos from '../../ModalOrcamentos';
 import { TableRowOrcamento } from '../TableRowOrcamento';
-import { ProductItem } from '../ProductItem';
-import { ServiceItem } from '../ServiceItem';
 
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
 import { formatarDataSegura } from '@/utils/date';
@@ -31,6 +27,7 @@ import type {
   CreateOrcamento,
 } from '@/@types/orcamento';
 import type { Client } from '@/@types/clients';
+import type { ProductType } from '@/@types/product';
 
 interface TableProps {
   formattedClients?: Client[];
@@ -47,12 +44,6 @@ interface TableProps {
     telefone: string;
     subTitulo: string;
   };
-}
-
-interface ProductType {
-  id: string;
-  nome: string;
-  precoCusto: number;
 }
 
 function TableOrcamento({
@@ -218,14 +209,9 @@ function TableOrcamento({
   );
 
   // Handler para gerar orçamento
-  const handleGenerateClick = useCallback(
-    (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      handleGenerateOrcamento();
-    },
-    [handleGenerateOrcamento]
-  );
+  const handleGenerateClick = () => {
+    handleGenerateOrcamento();
+  };
 
   return (
     <div className="flex-1">
@@ -351,182 +337,42 @@ function TableOrcamento({
       {isModalOpen && (
         <ModalOrcamentos
           isOpen={isModalOpen}
-          content={
-            <>
-              <div className="flex justify-between items-start mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold text-[#1E3A8A]">
-                    Novo Orçamento
-                  </h2>
-
-                  <p className="text-[#152C6B] mt-1">
-                    Crie um novo orcamento para um cliente:
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  onClick={toggleModal}
-                  size="icon"
-                  className="text-[#152C6B] hover:text-gray-700 hover:bg-gray-100 rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                  <span className="sr-only">Fechar modal</span>
-                </Button>
-              </div>
-              <div className="mb-4">
-                <Label
-                  htmlFor="cliente"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Cliente
-                </Label>
-                <select
-                  id="cliente"
-                  name="cliente"
-                  aria-label="Cliente"
-                  className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-                  value={selectedClient}
-                  onChange={handleClientChange}
-                >
-                  <option value="" disabled>
-                    Selecione um cliente
-                  </option>
-                  {formattedClients.map((item) => (
-                    <option key={item.id} value={item.nome}>
-                      {item.nome}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {orcamentoProdutos.map((item, idx) => (
-                <ProductItem
-                  key={`prod-${idx}`}
-                  item={item}
-                  index={idx}
-                  products={products}
-                  onUpdate={handleProductUpdate}
-                  onRemove={handleProductRemove}
-                  stockError={stockErrors[item.value]}
-                />
-              ))}
-
-              {services.map((item, idx) => (
-                <ServiceItem
-                  key={`serv-${idx}`}
-                  item={item}
-                  index={idx}
-                  onUpdate={handleServiceUpdate}
-                  onRemove={handleServiceRemove}
-                />
-              ))}
-
-              <div className="flex-shrink-0 mb-2">
-                <Button
-                  variant="ghost"
-                  className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
-                  onClick={handleAddProduct}
-                >
-                  <Plus className="mr-2" />
-                  Adicionar Produtos
-                </Button>
-              </div>
-
-              <div className="flex-shrink-0 mb-2">
-                <Button
-                  variant="ghost"
-                  className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
-                  onClick={handleAddService}
-                >
-                  <Plus className="mr-2" />
-                  Adicionar Serviços
-                </Button>
-              </div>
-
-              <div className="flex-shrink-0 mb-2">
-                {registroConcluido ? (
-                  <div className="text-sm text-gray-700 border border-zinc-400 p-4 rounded-md bg-gray-50 space-y-1">
-                    <p>
-                      <strong>Resumo da Saída:</strong>
-                    </p>
-                    <p>Descrição: {descricaoEntrada}</p>
-                    <p>Método: {metodoPagamento}</p>
-                    <p>Valor: R$ {Number(valorEntrada).toFixed(2)}</p>
-                    {metodoPagamento === 'credito' && (
-                      <>
-                        <p>Parcelas: {parcelas}x</p>
-                        <p>Juros: {juros}%</p>
-                        <p>
-                          Total com Juros: R${' '}
-                          {(Number(valorEntrada) * (1 + juros / 100)).toFixed(
-                            2
-                          )}
-                        </p>
-                        <p>
-                          Valor por Parcela: R${' '}
-                          {(
-                            (Number(valorEntrada) * (1 + juros / 100)) /
-                            parcelas
-                          ).toFixed(2)}
-                        </p>
-                      </>
-                    )}
-                  </div>
-                ) : (
-                  <Button
-                    variant="ghost"
-                    className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
-                    onClick={handleOpenPaymentModal}
-                  >
-                    <Plus className="mr-2" />
-                    Método de Pagamento
-                  </Button>
-                )}
-
-                <ModalEntrada
-                  showExitModal={showExitModal}
-                  setShowExitModal={setShowExitModal}
-                  valorEntrada={valorEntrada}
-                  setValorEntrada={setValorEntrada}
-                  descricaoEntrada={descricaoEntrada}
-                  setDescricaoEntrada={setDescricaoEntrada}
-                  metodoPagamento={metodoPagamento}
-                  setMetodoPagamento={setMetodoPagamento}
-                  parcelas={parcelas}
-                  setParcelas={setParcelas}
-                  juros={juros}
-                  setJuros={setJuros}
-                  handleEntradaSubmit={() => {
-                    handleEntradaSubmit();
-                    setRegistroConcluido(true);
-                  }}
-                />
-              </div>
-
-              <div>
-                <Label className="block text-sm font-medium text-gray-700 mb-1">
-                  Descrição
-                </Label>
-                <Input
-                  type="text"
-                  placeholder="Descrição do orçamento"
-                  className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <Separator className="my-4" />
-
-              <div className="flex-shrink-0">
-                <Button
-                  variant="ghost"
-                  className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
-                  onClick={handleGenerateClick}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Gerando...' : 'Gerar Orçamento'}
-                </Button>
-              </div>
-            </>
-          }
+          onClose={toggleModal}
+          // Estados básicos
+          selectedClient={selectedClient}
+          formattedClients={formattedClients}
+          orcamentoProdutos={orcamentoProdutos}
+          services={services}
+          products={products}
+          stockErrors={stockErrors}
+          // Estados do pagamento
+          registroConcluido={registroConcluido}
+          showExitModal={showExitModal}
+          valorEntrada={valorEntrada}
+          descricaoEntrada={descricaoEntrada}
+          metodoPagamento={metodoPagamento}
+          parcelas={parcelas}
+          juros={juros}
+          isSubmitting={isSubmitting}
+          // Handlers
+          onClientChange={handleClientChange}
+          onProductUpdate={handleProductUpdate}
+          onProductRemove={handleProductRemove}
+          onServiceUpdate={handleServiceUpdate}
+          onServiceRemove={handleServiceRemove}
+          onAddProduct={handleAddProduct}
+          onAddService={handleAddService}
+          onOpenPaymentModal={handleOpenPaymentModal}
+          onEntradaSubmit={handleEntradaSubmit}
+          onGenerateClick={handleGenerateClick}
+          // Setters
+          setShowExitModal={setShowExitModal}
+          setValorEntrada={setValorEntrada}
+          setDescricaoEntrada={setDescricaoEntrada}
+          setMetodoPagamento={setMetodoPagamento}
+          setParcelas={setParcelas}
+          setJuros={setJuros}
+          setRegistroConcluido={setRegistroConcluido}
         />
       )}
 
