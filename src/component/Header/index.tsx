@@ -28,7 +28,7 @@ export function Header({ name }: HeaderProps) {
   const location = useLocation();
 
   const { definirLista, getNumeroSequencial } = useOrcamentoContext();
-  const { abrirModalImpressao } = useModalImpressao();
+  const { abrirModalImpressao, modalAberto } = useModalImpressao();
 
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -57,10 +57,11 @@ export function Header({ name }: HeaderProps) {
   }, [orcamentos, definirLista]);
 
   const handleOpenChange = (open: boolean) => {
+    // Enquanto o modal de impressão estiver aberto, ignore tentativas de fechar o sheet
+    if (!open && modalAberto) return;
+
     setIsSheetOpen(open);
-    if (open) {
-      refreshOrcamentos(); // Força a atualização ao abrir o sheet
-    }
+    if (open) refreshOrcamentos();
   };
 
   return (
