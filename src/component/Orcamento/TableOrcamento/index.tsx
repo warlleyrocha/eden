@@ -12,8 +12,7 @@ import {
 } from '@/components/ui/table';
 
 import { OrcamentoModalDetails } from './EmpresaInfo';
-
-import ModalOrcamentos from '../../ModalOrcamentos';
+import FormOrcamento from '../FormOrcamento';
 import { TableRowOrcamento } from '../TableRowOrcamento';
 
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
@@ -335,7 +334,7 @@ function TableOrcamento({
       </div>
 
       {isModalOpen && (
-        <ModalOrcamentos
+        <FormOrcamento
           isOpen={isModalOpen}
           onClose={toggleModal}
           // Estados básicos

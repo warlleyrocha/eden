@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 
-import { ProductItem } from './Orcamento/ProductItem';
-import { ServiceItem } from './Orcamento/ServiceItem';
-import ModalEntrada from './ModalEntrada';
+import { ProductItem } from '../ProductItem';
+import { ServiceItem } from '../ServiceItem';
+import ModalEntrada from '../../ModalEntrada';
 
 import type { ProductType } from '@/@types/product';
 
@@ -32,7 +32,7 @@ interface ClientType {
   nome: string;
 }
 
-interface ModalOrcamentosProps {
+interface FormOrcamentoProps {
   // Controle do modal
   isOpen?: boolean;
   onClose?: () => void;
@@ -77,7 +77,7 @@ interface ModalOrcamentosProps {
   setRegistroConcluido: Dispatch<SetStateAction<boolean>>;
 }
 
-const ModalOrcamentos: React.FC<ModalOrcamentosProps> = ({
+const FormOrcamento: React.FC<FormOrcamentoProps> = ({
   // Controle do modal
   isOpen = false,
   onClose,
@@ -326,4 +326,4 @@ const ModalOrcamentos: React.FC<ModalOrcamentosProps> = ({
   );
 };
 
-export default ModalOrcamentos;
+export default FormOrcamento;
