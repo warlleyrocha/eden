@@ -176,14 +176,14 @@ export default function ModalEntrada({
           <div className="flex justify-between space-x-2 mt-6">
             <Button
               variant="outline"
-              className="w-[30%] sm:w-auto"
+              className="w-[30%] sm:w-auto rounded-full"
               type="button"
               onClick={() => setShowExitModal(false)}
             >
               Cancelar
             </Button>
             <Button
-              className="bg-gradient-to-r from-green-500 to-green-700 text-white px-5 py-3 rounded-full hover:from-green-600 hover:to-green-800 w-full sm:w-auto"
+              className="bg-gradient-to-r from-green-500 to-green-700 text-white px-5 py-3 rounded-full hover:from-green-600 hover:to-green-800 w-auto sm:w-auto"
               type="button"
               onClick={enviarEntradaComMetodo}
             >

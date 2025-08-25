@@ -1,5 +1,5 @@
-@import "tailwindcss";
-@import "tw-animate-css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -121,4 +121,14 @@
 
 .glow-shadow {
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.15);
+}
+
+/* Oculta a barra de rolagem mas mantém scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE e Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari e Opera */
 }

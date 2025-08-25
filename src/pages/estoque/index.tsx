@@ -52,6 +52,14 @@ export default function Stock() {
     setIsOpen(true);
   };
 
+  const closeModal = () => {
+    setIsOpen(false);
+    setProdutoEditando(null);
+    setNome('');
+    setPreco('');
+    setQuantidade('');
+  };
+
   const editarProduto = (id: string) => {
     const produto = products.find((p) => p.id === id);
     if (!produto) return;
@@ -82,21 +90,21 @@ export default function Stock() {
       <div className="flex flex-row">
         <Header />
       </div>
-      <div className="max-w-4xl mx-auto mt-8 w-full px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 p-4 bg-white rounded-lg shadow-md">
+      <div className="max-w-7xl mx-auto mt-8 w-full px-2 sm:px-4 lg:px-6">
+        <div className="flex flex-row justify-between items-center mb-6 p-3 sm:p-4 bg-white rounded-lg shadow-md">
           <h1 className="text-xl sm:text-2xl font-bold text-[#1E3A8A]">
             Gerenciador de Estoque
           </h1>
           <Button
-            className="flex items-center space-x-2 bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200 px-4 py-2 rounded-lg mt-4 sm:mt-0 cursor-pointer"
+            className="flex items-center sm:space-x-2 bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200 px-3 sm:px-4 py-2 rounded-lg cursor-pointer text-sm sm:text-base"
             onClick={openModal}
           >
-            <PlusCircle className="w-5 h-5" />
-            <span>Adicionar no Estoque</span>
+            <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Adicionar no Estoque</span>
           </Button>
         </div>
 
-        <div className="px-5 py-5 border-2 rounded-2xl shadow-lg border-gray-200 bg-white">
+        <div className="px-3 sm:px-5 py-5 border-2 rounded-2xl shadow-lg border-gray-200 bg-white">
           <h1 className="text-2xl font-bold text-[#1E3A8A] mb-2">
             Resumo do estoque
           </h1>
@@ -133,61 +141,65 @@ export default function Stock() {
           </div>
         </div>
 
-        <div className="w-full sm:w-[30%] mt-5">
+        <div className="w-full sm:w-[30%] mt-8">
           <div className="relative">
-            <form className="flex flex-row gap-1.5">
-              <Input
-                placeholder="Buscar produto..."
-                className="w-full bg-white placeholder:text-[#081534] px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-              />
-              <Button type="button" className="bg-[#1E3A8A]">
-                <Search />
-              </Button>
-            </form>
+            <Input
+              placeholder="Buscar produto..."
+              className="w-full bg-white placeholder:text-[#081534] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={busca}
+              onChange={(e) => setBusca(e.target.value)}
+            />
+            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
           </div>
         </div>
 
-        <div className="w-full bg-white mt-4 rounded-2xl">
-          <TableData
-            onEdit={(produtoSelecionado) => editarProduto(produtoSelecionado)}
-            onDelete={(id) => {
-              deleteProduct(id);
-              toast.success('Produto excluído com sucesso!', {
-                description: 'O item foi removido do estoque.',
-                duration: 2000,
-                position: 'bottom-right',
-                richColors: true,
-              });
-            }}
-            items={produtosFiltrados.map((item) => {
-              const precoUnit = item.precoCusto ?? 0;
-              const qtd = item.estoque ?? 0;
-              const valorTotal = precoUnit * qtd;
-              return {
-                id: item.id, // <- necessário
-                produto: item.nome || 'Sem nome',
-                quantidade: qtd,
-                preco: precoUnit.toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }),
-                valor_total: valorTotal.toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }),
-              };
-            })}
-          />
+        <div className="w-full mt-4 rounded-2xl overflow-hidden sm:bg-white">
+          <div className="">
+            <TableData
+              onEdit={(produtoSelecionado) => editarProduto(produtoSelecionado)}
+              onDelete={(id) => {
+                deleteProduct(id);
+                toast.success('Produto excluído com sucesso!', {
+                  description: 'O item foi removido do estoque.',
+                  duration: 2000,
+                  position: 'bottom-right',
+                  richColors: true,
+                });
+              }}
+              items={produtosFiltrados.map((item) => {
+                const precoUnit = item.precoCusto ?? 0;
+                const qtd = item.estoque ?? 0;
+                const valorTotal = precoUnit * qtd;
+                return {
+                  id: item.id, // <- necessário
+                  produto: item.nome || 'Sem nome',
+                  quantidade: qtd,
+                  preco: precoUnit.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }),
+                  valor_total: valorTotal.toLocaleString('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL',
+                  }),
+                };
+              })}
+            />
+          </div>
         </div>
       </div>
 
       {isOpen && (
         <DialogModal
-          title="Adicionar ao Estoque"
-          description="Preencha os detalhes do item abaixo"
-          titleButton="Adicionar"
+          title={
+            produtoEditando ? 'Editar Item do Estoque' : 'Adicionar ao Estoque'
+          }
+          description={
+            produtoEditando
+              ? 'Edite os detalhes do item abaixo'
+              : 'Preencha os detalhes do item abaixo'
+          }
+          titleButton={produtoEditando ? 'Editar' : 'Adicionar'}
           isOpen={isOpen}
           onOpen={() => setIsOpen(true)}
           onClose={() => setIsOpen(false)}
@@ -280,7 +292,7 @@ export default function Stock() {
                 <Button
                   type="button"
                   className="bg-white text-gray-700 px-4 py-2 rounded-full border border-[#152C6B] hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
-                  onClick={() => setIsOpen(false)}
+                  onClick={closeModal}
                 >
                   Cancelar
                 </Button>
