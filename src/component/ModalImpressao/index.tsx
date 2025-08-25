@@ -1,5 +1,5 @@
 // src/components/modals/ModalImpressao.tsx
-import { OrcamentoModalDetails } from '@/component/TableOrcamento/EmpresaInfo';
+import { OrcamentoModalDetails } from '@/component/Orcamento/TableOrcamento/EmpresaInfo';
 
 import { useModalImpressao } from '@/hooks/useModalOrcamento';
 import { useStore } from '@/hooks/useLoja';

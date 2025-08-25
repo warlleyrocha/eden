@@ -5,7 +5,7 @@ import {
   formatPhone,
   formatCnpj,
   toTitleCase,
-} from '../../utils/formatters';
+} from '../../../utils/formatters';
 
 type OrcamentoModalDetailsProps = Readonly<{
   empresaInfo?: Readonly<{
