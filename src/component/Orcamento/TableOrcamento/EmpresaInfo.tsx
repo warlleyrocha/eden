@@ -99,9 +99,7 @@ export function OrcamentoModalDetails({
       : orcamentoInfo.orcamentoId;
   };
 
-  const produtos = orcamentoInfo.itens.filter((item) =>
-    item.nome?.includes('Produto:')
-  );
+  const produtos = orcamentoInfo.itens;
 
   return (
     <div className="fixed inset-0 z-60 flex items-center justify-center p-2 sm:p-4">
@@ -229,9 +227,7 @@ export function OrcamentoModalDetails({
                             >
                               <td className="px-3 py-2">
                                 <span className="text-sm text-gray-900 break-words">
-                                  {item.nome
-                                    ? item.nome.replace('Produto: ', '')
-                                    : 'Produto sem nome'}
+                                  {item.nome ?? 'Produto sem nome'}
                                 </span>
                               </td>
                               <td className="text-center px-3 py-2">

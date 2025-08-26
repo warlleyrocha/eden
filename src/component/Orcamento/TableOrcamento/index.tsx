@@ -18,15 +18,20 @@ import { TableRowOrcamento } from '../TableRowOrcamento';
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
 import { formatarDataSegura } from '@/utils/date';
 import { formatarMoeda } from '@/utils/formatters';
+import {
+  updateItem,
+  removeItem,
+  addItem,
+} from '@/utils/handlersOrcamentoForms';
 
 import { useTableLogic } from './useTableLogic';
 
+import type { Client } from '@/@types/clients';
+import type { ProductType } from '@/@types/product';
 import type {
   OrcamentoRenderDetails,
   CreateOrcamento,
 } from '@/@types/orcamento';
-import type { Client } from '@/@types/clients';
-import type { ProductType } from '@/@types/product';
 
 interface TableProps {
   formattedClients?: Client[];
@@ -56,6 +61,7 @@ function TableOrcamento({
   const products = useMemo(() => {
     return externalProducts || [];
   }, [externalProducts]);
+
   // Hooks personalizados para lógica da tabela
   const {
     //Estados
@@ -141,76 +147,65 @@ function TableOrcamento({
     ]
   );
 
-  // Handlers memorizados para produtos
-  const handleProductUpdate = useCallback(
-    (index: number, field: string, value: string) => {
-      setOrcamentoProdutos((prev) => {
-        const copy = [...prev];
-        copy[index] = { ...copy[index], [field]: value };
-        return copy;
-      });
-    },
-    [setOrcamentoProdutos]
-  );
+  const orcamentoInfo = useMemo(() => {
+    const o = selectedOrcamento;
 
-  const handleProductRemove = useCallback(
-    (index: number) => {
-      setOrcamentoProdutos((prev) => prev.filter((_, i) => i !== index));
-    },
-    [setOrcamentoProdutos]
-  );
-
-  // Handlers memoizados para serviços
-  const handleServiceUpdate = useCallback(
-    (index: number, field: string, value: string) => {
-      setServices((prev) => {
-        const copy = [...prev];
-        copy[index] = { ...copy[index], [field]: value };
-        return copy;
-      });
-    },
-    [setServices]
-  );
-
-  const handleServiceRemove = useCallback(
-    (index: number) => {
-      setServices((prev) => prev.filter((_, i) => i !== index));
-    },
-    [setServices]
-  );
-
-  // Handlers para adicionar itens
-  const handleAddProduct = useCallback(() => {
-    setOrcamentoProdutos((prev) => [
-      ...prev,
-      { name: '', value: '', unitPrice: '', quantity: '' },
-    ]);
-  }, [setOrcamentoProdutos]);
-
-  const handleAddService = useCallback(() => {
-    setServices((prev) => [...prev, { description: '', value: '' }]);
-  }, [setServices]);
+    return {
+      index: o ? filteredOrcamentos.findIndex((x) => x.id === o.id) : 0,
+      totalOrcamentos: o ? filteredOrcamentos.length : 0,
+      orcamentoId: o?.id ?? '',
+      cliente: {
+        id: o?.cliente?.id ?? '',
+        nome: o?.cliente?.nome ?? 'Cliente não informado',
+        telefone: o?.cliente?.telefone ?? 'Não informado',
+        endereco: o?.cliente?.endereco ?? 'Não informado',
+      },
+      date: o?.criadoEm
+        ? new Date(o.criadoEm).toLocaleDateString('pt-BR')
+        : 'Data não informada',
+      itens:
+        o?.itens?.map((item) => ({
+          produtoId: item.produtoId,
+          nome: item.nomeProduto ?? 'Produto sem nome',
+          precoUnitario: item.precoUnitario,
+          quantidade: item.quantidade,
+          valorTotal: item.precoUnitario * item.quantidade,
+        })) || [],
+      servicos:
+        o?.servicos?.map((s) => ({
+          descricao: s.descricao,
+          valor: s.valor,
+        })) || [],
+      total: o?.total ?? 0,
+      lojaId: o?.lojaId ?? '',
+      descricao: o?.descricao ?? '',
+      metodoPagamento: o?.metodoPagamento ?? '',
+      numeroParcelas: o?.numeroParcelas ?? 1,
+      status: o?.status ?? 'pendente',
+    };
+  }, [selectedOrcamento, filteredOrcamentos]);
 
   // Handler para mudança do cliente
   const handleClientChange = useCallback(
-    (e: React.ChangeEvent<HTMLSelectElement>) => {
-      setSelectedClient(e.target.value);
-    },
+    (e: React.ChangeEvent<HTMLSelectElement>) =>
+      setSelectedClient(e.target.value),
     [setSelectedClient]
   );
 
-  // Handler para busca
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
-    },
-    [setSearchTerm]
-  );
+  // Produtos
+  const handleProductUpdate = updateItem(setOrcamentoProdutos);
+  const handleProductRemove = removeItem(setOrcamentoProdutos);
+  const handleAddProduct = addItem(setOrcamentoProdutos, {
+    name: '',
+    value: '',
+    unitPrice: '',
+    quantity: '',
+  });
 
-  // Handler para gerar orçamento
-  const handleGenerateClick = () => {
-    handleGenerateOrcamento();
-  };
+  // Serviços
+  const handleServiceUpdate = updateItem(setServices);
+  const handleServiceRemove = removeItem(setServices);
+  const handleAddService = addItem(setServices, { description: '', value: '' });
 
   return (
     <div className="flex-1">
@@ -222,7 +217,9 @@ function TableOrcamento({
             type="text"
             placeholder="Buscar orçamentos"
             value={searchTerm}
-            onChange={handleSearchChange}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setSearchTerm(e.target.value)
+            }
             className="w-full bg-white placeholder:text-[#55575c] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
@@ -363,7 +360,7 @@ function TableOrcamento({
           onAddService={handleAddService}
           onOpenPaymentModal={handleOpenPaymentModal}
           onEntradaSubmit={handleEntradaSubmit}
-          onGenerateClick={handleGenerateClick}
+          onGenerateClick={handleGenerateOrcamento}
           // Setters
           setShowExitModal={setShowExitModal}
           setValorEntrada={setValorEntrada}
@@ -380,43 +377,7 @@ function TableOrcamento({
           isOpen={isModalOpenDetails}
           onClose={toggleModalDetails}
           empresaInfo={empresaInfo}
-          orcamentoInfo={{
-            index: filteredOrcamentos.findIndex(
-              (o) => o.id === selectedOrcamento.id
-            ),
-            totalOrcamentos: filteredOrcamentos.length,
-            orcamentoId: selectedOrcamento.id,
-            cliente: {
-              id: selectedOrcamento.cliente?.id ?? '',
-              nome: selectedOrcamento.cliente?.nome ?? 'Cliente não informado',
-              telefone: selectedOrcamento.cliente?.telefone ?? 'Não informado',
-              endereco: selectedOrcamento.cliente?.endereco ?? 'Não informado',
-            },
-            date: selectedOrcamento.criadoEm
-              ? new Date(selectedOrcamento.criadoEm).toLocaleDateString('pt-BR')
-              : 'Data não informada',
-            itens:
-              selectedOrcamento.itens?.map((item) => ({
-                produtoId: item.produtoId,
-                nome: item.nomeProduto
-                  ? `Produto: ${item.nomeProduto}`
-                  : 'Produto: Produto sem nome informado',
-                precoUnitario: item.precoUnitario,
-                quantidade: item.quantidade,
-                valorTotal: item.precoUnitario * item.quantidade,
-              })) || [],
-            servicos:
-              selectedOrcamento.servicos?.map((servico) => ({
-                descricao: servico.descricao,
-                valor: servico.valor,
-              })) || [],
-            total: selectedOrcamento.total ?? 0,
-            lojaId: selectedOrcamento.lojaId ?? '',
-            descricao: selectedOrcamento.descricao ?? '',
-            metodoPagamento: selectedOrcamento.metodoPagamento ?? '',
-            numeroParcelas: selectedOrcamento.numeroParcelas ?? 1,
-            status: selectedOrcamento.status ?? 'pendente',
-          }}
+          orcamentoInfo={orcamentoInfo}
           autoPrint={true}
         />
       )}
