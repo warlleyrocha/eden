@@ -546,6 +546,7 @@ export function useTableLogic({
       // Setters básicos (estes podem causar re-render, mas são necessários)
       setSearchTerm,
       setSelectedClient,
+      setSelectedOrcamento,
       setOrcamentoSelecionadoId,
       setOrcamentoProdutos,
       setServices,
