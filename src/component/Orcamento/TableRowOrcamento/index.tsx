@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { Printer, Trash } from 'lucide-react';
 
-// Defina o tipo aqui ou importe de um arquivo de tipos compartilhado
 export interface OrcamentoRenderDetails {
   id: string;
   criadoEm: string | Date;
@@ -17,15 +16,15 @@ export interface OrcamentoRenderDetails {
 export interface TableRowOrcamentoProps {
   orcamento: OrcamentoRenderDetails;
   numeroSequencial: number;
-  onOpenModalDetails: (id: string) => void;
+  onPrint: (id: string) => void;
   onDeleteOrcamento: (id: string) => void;
 }
 
 export const TableRowOrcamento = memo<TableRowOrcamentoProps>(
-  ({ orcamento, numeroSequencial, onOpenModalDetails, onDeleteOrcamento }) => {
+  ({ orcamento, numeroSequencial, onPrint, onDeleteOrcamento }) => {
     const handleClick = useCallback(() => {
-      onOpenModalDetails(orcamento.id);
-    }, [orcamento.id, onOpenModalDetails]);
+      onPrint(orcamento.id);
+    }, [orcamento.id, onPrint]);
 
     const formattedDate = useMemo(() => {
       return new Date(orcamento.criadoEm).toLocaleDateString('pt-BR');
