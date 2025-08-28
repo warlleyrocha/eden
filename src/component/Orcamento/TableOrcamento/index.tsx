@@ -1,5 +1,6 @@
-import { memo, useMemo, useCallback } from 'react';
+import { memo, useMemo, useCallback, useRef, useEffect, useState } from 'react';
 import { FileText, Search, Trash } from 'lucide-react';
+import { useReactToPrint } from 'react-to-print';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
-import { OrcamentoModalDetails } from './EmpresaInfo';
+import OrcamentoPrintContent from '../PrintOrcamento';
 import FormOrcamento from '../FormOrcamento';
 import { TableRowOrcamento } from '../TableRowOrcamento';
 
@@ -68,8 +69,8 @@ function TableOrcamento({
     isModalOpen,
     isSubmitting,
     stockErrors,
-    isModalOpenDetails,
     searchTerm,
+    selectedOrcamento,
     selectedClient,
     orcamentoProdutos,
     services,
@@ -85,6 +86,7 @@ function TableOrcamento({
     // Setters
     setSearchTerm,
     setSelectedClient,
+    setSelectedOrcamento,
     setOrcamentoProdutos,
     setServices,
     setShowExitModal,
@@ -97,18 +99,18 @@ function TableOrcamento({
 
     // Funções
     toggleModal,
-    toggleModalDetails,
     handleGenerateOrcamento,
     handleEntradaSubmit,
     handleOpenPaymentModal,
     handleOpenModalDetails,
-    selectedOrcamento,
   } = useTableLogic({
     products,
     formattedClients,
     formattedOrcamentos,
     onSubmitOrcamento,
   });
+
+  const [shouldPrint, setShouldPrint] = useState(false);
 
   // Usar dados da loja externos se disponíveis
   const storeData = useMemo(() => {
@@ -207,6 +209,36 @@ function TableOrcamento({
   const handleServiceRemove = removeItem(setServices);
   const handleAddService = addItem(setServices, { description: '', value: '' });
 
+  const printRef = useRef<HTMLDivElement>(null);
+
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: 'Orcamento',
+    onAfterPrint: () => {
+      // Limpar o estado depois da impressão
+      setSelectedOrcamento(null);
+      setShouldPrint(false);
+    },
+  });
+
+  const onPrint = useCallback(
+    (orcamentoId: string) => {
+      console.log('Imprimindo orçamento: ', orcamentoId);
+      // Atualiza o selectedOrcamento primeiro
+      handleOpenModalDetails(orcamentoId);
+      setShouldPrint(true); // Marca que queremos imprimir assim que os dados carregarem
+    },
+    [handleOpenModalDetails]
+  );
+
+  // Assim que selectedOrcamento mudar, dispara o print
+  useEffect(() => {
+    if (shouldPrint && selectedOrcamento) {
+      handlePrint();
+      setShouldPrint(false); // Reseta o gatilho
+    }
+  }, [shouldPrint, selectedOrcamento, handlePrint]);
+
   return (
     <div className="flex-1">
       {/* 🔍 Barra de busca e botão */}
@@ -264,7 +296,7 @@ function TableOrcamento({
                   key={orcamento.id}
                   orcamento={orcamento}
                   numeroSequencial={orcamento.numeroSequencial}
-                  onOpenModalDetails={handleOpenModalDetails}
+                  onPrint={onPrint}
                   onDeleteOrcamento={onDeleteOrcamento}
                 />
               ))}
@@ -372,15 +404,15 @@ function TableOrcamento({
         />
       )}
 
-      {isModalOpenDetails && selectedOrcamento && (
-        <OrcamentoModalDetails
-          isOpen={isModalOpenDetails}
-          onClose={toggleModalDetails}
-          empresaInfo={empresaInfo}
-          orcamentoInfo={orcamentoInfo}
-          autoPrint={true}
-        />
-      )}
+      {/* Conteúdo que será impresso */}
+      <div style={{ display: 'none' }}>
+        <div ref={printRef}>
+          <OrcamentoPrintContent
+            empresaInfo={empresaInfo}
+            orcamentoInfo={orcamentoInfo}
+          />
+        </div>
+      </div>
     </div>
   );
 }
