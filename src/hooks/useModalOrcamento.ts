@@ -37,15 +37,10 @@ export const useModalImpressao = () => {
         : 'Data não informada',
       itens:
         orcamentoParaImprimir.itens?.map((item) => {
-          // Obter o nome do produto de diferentes possíveis campos
-          const nomeProduto = item.nomeProduto ?? 'Produto não especificado';
-
           const itemFormatado = {
             produtoId: item.produtoId,
             // CORREÇÃO: Usar 'nome' em vez de 'nomeProduto' para compatibilidade com o componente
-            nome: nomeProduto.startsWith('Produto:')
-              ? nomeProduto
-              : `Produto: ${nomeProduto}`,
+            nome: item.nomeProduto ?? 'Produto sem nome',
             precoUnitario: item.precoUnitario,
             quantidade: item.quantidade,
             valorTotal: item.precoUnitario * item.quantidade,

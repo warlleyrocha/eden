@@ -25,3 +25,10 @@ export interface ProductUpdatePayload {
   /*categoria?: string;
   descricao?: string;*/
 }
+
+export interface ProductType {
+  id: string;
+  nome: string;
+  precoCusto: number;
+  estoque?: number;
+}

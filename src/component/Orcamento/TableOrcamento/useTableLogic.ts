@@ -19,6 +19,7 @@ import type {
   CreateOrcamento,
 } from '@/@types/orcamento';
 import type { SetStateAction, Dispatch } from 'react';
+import type { ProductType } from '@/@types/product';
 
 import axios from 'axios';
 interface OrcamentoProduto {
@@ -31,13 +32,6 @@ interface OrcamentoProduto {
 interface Servico {
   description: string;
   value: string;
-}
-
-interface ProductType {
-  id: string;
-  nome: string;
-  precoCusto: number;
-  estoque?: number; // Adicionado campo de estoque
 }
 
 type PagamentoAction =
@@ -552,6 +546,7 @@ export function useTableLogic({
       // Setters básicos (estes podem causar re-render, mas são necessários)
       setSearchTerm,
       setSelectedClient,
+      setSelectedOrcamento,
       setOrcamentoSelecionadoId,
       setOrcamentoProdutos,
       setServices,

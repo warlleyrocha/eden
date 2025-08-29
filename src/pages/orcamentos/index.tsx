@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 
 import Forms from '@/component/Forms';
 
-import TableOrcamento from '@/component/TableOrcamento';
+import TableOrcamento from '@/component/Orcamento/TableOrcamento';
 import TableClient from '@/component/TableClients';
 
 import { useClients } from '@/hooks/useCliente';

@@ -137,6 +137,26 @@ export const formatCnpj = (value: string): string => {
   }
 };
 
+export const toTitleCase = (str: string) => {
+  const minorWords = ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no'];
+
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map((word, index) => {
+      // Primeira palavra sempre maiúscula
+      if (index === 0 || !minorWords.includes(word)) {
+        // Se a palavra tem 2 letras ou menos, provavelmente é abreviação
+        if (word.length <= 2) {
+          return word.toUpperCase();
+        }
+        return word.charAt(0).toUpperCase() + word.slice(1);
+      }
+      return word;
+    })
+    .join(' ');
+};
+
 /**
  * Formata CEP no padrão 00000-000
  * @param value - String com números do CEP

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, LogInIcon } from 'lucide-react';
 
 export default function SignIn() {
   const { setAuthenticated } = useAuth(); // Hook para gerenciar autenticação
@@ -74,6 +74,15 @@ export default function SignIn() {
 
   return (
     <div className="flex flex-col items-center p-4 justify-center h-screen bg-[linear-gradient(90deg,rgba(42,123,155,1)_37%,rgba(87,199,133,1)_98%)]">
+      <div className="absolute top-5 right-5 bg-gradient-to-br from-blue-400 to-[#1E3A8A] p-3 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 group cursor-text">
+        <LogInIcon color="white" size={20} />
+        <div className="absolute top-5 right-5 bg-white rounded-2xl p-4 text-center opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none group-hover:pointer-events-auto shadow-2xl border border-gray-100">
+          <p className="text-gray-800 font-semibold mb-1">User Test</p>
+          <p className="text-gray-600 text-sm mb-1">front@dev.com</p>
+          <p className="text-gray-600 text-sm">Npmrundev!</p>
+        </div>
+      </div>
+
       <div className="bg-white shadow-lg rounded-lg p-6 max-w-md w-full">
         <h2 className="text-3xl font-bold mb-6 text-center text-[#1E3A8A]">
           Login
@@ -106,7 +115,9 @@ export default function SignIn() {
             >
               Password:
             </label>
-            <div className="relative"> {/* Container relativo para posicionar o ícone */}
+            <div className="relative">
+              {' '}
+              {/* Container relativo para posicionar o ícone */}
               <Input
                 type={showPassword ? 'text' : 'password'}
                 required
@@ -126,11 +137,7 @@ export default function SignIn() {
                          text-[#1E3A8A] hover:text-[#152C6B] transition-colors duration-200
                          focus:outline-none focus:ring-2 focus:ring-[#3A5AAA] focus:ring-offset-1 rounded"
               >
-                {showPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
