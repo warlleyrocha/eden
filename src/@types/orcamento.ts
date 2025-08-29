@@ -68,3 +68,15 @@ export interface OrcamentoRenderDetails {
   status: string;
   numeroSequencial?: number;
 }
+
+export interface OrcamentoProduto {
+  name: string;
+  value: string;
+  unitPrice: string;
+  quantity?: string;
+}
+
+export interface OrcamentoService {
+  description: string;
+  value: string;
+}

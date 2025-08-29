@@ -12,21 +12,9 @@ import { ServiceItem } from '../ServiceItem';
 import ModalEntrada from '../../ModalEntrada';
 
 import type { ProductType } from '@/@types/product';
+import type { OrcamentoProduto, OrcamentoService } from '@/@types/orcamento';
 
 // Interfaces
-
-interface Servico {
-  description: string;
-  value: string;
-}
-
-interface OrcamentoProduto {
-  name: string;
-  value: string;
-  unitPrice: string;
-  quantity?: string;
-}
-
 interface ClientType {
   id: string;
   nome: string;
@@ -41,7 +29,7 @@ interface FormOrcamentoProps {
   selectedClient: string;
   formattedClients: ClientType[];
   orcamentoProdutos: OrcamentoProduto[];
-  services: Servico[];
+  services: OrcamentoService[];
   products: ProductType[];
   stockErrors: Record<string, string>;
 

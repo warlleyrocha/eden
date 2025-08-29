@@ -40,6 +40,7 @@ type OrcamentoPrintContentProps = Readonly<{
     >;
     servicos: ReadonlyArray<
       Readonly<{
+        id?: string;
         descricao: string;
         valor: number;
       }>
@@ -155,8 +156,8 @@ export default function OrcamentoPrintContent({
                     Serviços
                   </td>
                 </tr>
-                {orcamentoInfo.servicos.map((item, index) => (
-                  <tr key={`servico-${index}`} className="border-t">
+                {orcamentoInfo.servicos.map((item) => (
+                  <tr key={`servico-${item.id}`} className="border-t">
                     <td className="px-3 py-2">
                       {item.descricao.replace('Serviço: ', '')}
                     </td>
