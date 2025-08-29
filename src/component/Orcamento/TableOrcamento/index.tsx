@@ -321,7 +321,7 @@ function TableOrcamento({
                   variant="outline"
                   size="sm"
                   className="text-blue-600 hover:bg-blue-100 min-w-[32px] px-1.5 h-8"
-                  onClick={() => handleOpenModalDetails(orcamento.id)}
+                  onClick={() => onPrint(orcamento.id)}
                 >
                   <FileText className="w-3.5 h-3.5" />
                 </Button>
