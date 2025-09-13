@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useContext } from 'react';
-import { clientsAPI } from '@/services/cliente.api';
+import type { Client, CreateClient } from '@/@types/clients';
 import { ClientContext } from '@/contexts/client/client.context';
+import { clientsAPI } from '@/services/cliente.api';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import type { Client } from '@/@types/clients';
 
 export function useClients() {
   const context = useContext(ClientContext);
@@ -71,6 +71,31 @@ export function useClients() {
       return client;
     },
     [fetchClientsById, selectClient]
+  );
+
+  // Criar cliente
+  const createClient = useCallback(
+    async (data: CreateClient) => {
+      setLoading(true);
+      try {
+        const newClient = await clientsAPI.createClient({ payload: data });
+        await fetchClients(); // Atualiza lista
+        toast.success('Cliente cadastrado com sucesso!', {
+          description: 'Os dados do cliente foram salvos com sucesso.',
+          duration: 2000,
+          position: 'bottom-right',
+          richColors: true,
+        });
+        return newClient;
+      } catch (error) {
+        setError(error as Error);
+        toast.error('Erro ao cadastrar cliente');
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fetchClients]
   );
 
   // Atualizar cliente
@@ -144,14 +169,17 @@ export function useClients() {
     loading,
     clients,
     error,
+    selectClient,
+    selectClientById,
     fetchClients,
     fetchClientsById,
+    createClient,
     updateClient,
     deleteClient,
     selectedClient,
     setSelectedClient,
-    selectClient,
-    selectClientById,
+    setLoading,
+
     clearSelection: () => setSelectedClient(null),
   };
 }
