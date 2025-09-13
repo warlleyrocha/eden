@@ -1,271 +1,256 @@
-import React, { useState, useEffect } from 'react';
-import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
+import type { FormValues } from '@/@types/clients';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-
-import { clientsAPI } from '@/services/cliente.api';
-import { useClients } from '@/hooks/useCliente';
-
-// Importa as funções utilitárias de formatação
+import { Label } from '@/components/ui/label';
 import {
-  formatPhone,
   formatCpfCnpj,
-  removePhoneFormatting,
+  formatPhone,
   removeCpfCnpjFormatting,
+  removePhoneFormatting,
 } from '@/utils/formatters';
+import { useEffect } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  IconAddress,
+  IconDocument,
+  IconEmail,
+  IconName,
+  IconPhone,
+} from '../Icons/FormIcons';
+import { useFormClient } from './useFormClient';
 
 type FormsProps = Readonly<{
   showModal: boolean;
   setShowModal: (value: boolean) => void;
 }>;
 
-export default function Forms({ showModal, setShowModal }: FormsProps) {
-  const { fetchClients, selectedClient, setSelectedClient } = useClients();
+const INITIAL_FORM: FormValues = {
+  name: '',
+  phone: '',
+  email: '',
+  cpfCnpj: '',
+  address: '',
+};
 
-  const [formData, setFormData] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    cpfCnpj: '',
-    address: '',
+export default function Forms({ showModal, setShowModal }: FormsProps) {
+  const { onSubmit, handleCloseModal, loading, selectedClient } = useFormClient(
+    { reset: () => reset(INITIAL_FORM), setShowModal }
+  );
+
+  const { control, handleSubmit, reset } = useForm<FormValues>({
+    defaultValues: INITIAL_FORM,
   });
 
   useEffect(() => {
-    if (showModal && selectedClient) {
-      setFormData({
+    if (!showModal) return;
+
+    if (selectedClient) {
+      reset({
         name: selectedClient.nome ?? '',
-        phone: selectedClient.telefone ? formatPhone(selectedClient.telefone) : '',
+        phone: selectedClient.telefone
+          ? formatPhone(selectedClient.telefone)
+          : '',
         email: selectedClient.email ?? '',
-        cpfCnpj: selectedClient.cpfCnpj ? formatCpfCnpj(selectedClient.cpfCnpj) : '',
+        cpfCnpj: selectedClient.cpfCnpj
+          ? formatCpfCnpj(selectedClient.cpfCnpj)
+          : '',
         address: selectedClient.endereco ?? '',
       });
-    } else if (showModal && !selectedClient) {
-      // modo novo
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        cpfCnpj: '',
-        address: '',
-      });
+    } else {
+      reset(INITIAL_FORM);
     }
-  }, [showModal, selectedClient]);
-
-  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatPhone(value);
-    
-    // Limita o tamanho máximo (formato celular completo)
-    if (removePhoneFormatting(value).length <= 11) {
-      setFormData((prev) => ({ ...prev, phone: formattedValue }));
-    }
-  };
-
-  const handleCpfCnpjChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    const formattedValue = formatCpfCnpj(value);
-    
-    // Limita o tamanho máximo (CNPJ completo tem 14 dígitos)
-    if (removeCpfCnpjFormatting(value).length <= 14) {
-      setFormData((prev) => ({ ...prev, cpfCnpj: formattedValue }));
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-
-    const lojaId = localStorage.getItem('storeId');
-    if (!lojaId) {
-      toast.error('Erro ao cadastrar', {
-        description: 'ID da loja não encontrado.',
-        duration: 2000,
-      });
-      return;
-    }
-
-    // Remove a formatação antes de enviar para a API
-    const payload = {
-      nome: formData.name,
-      email: formData.email,
-      telefone: removePhoneFormatting(formData.phone),
-      cpfCnpj: removeCpfCnpjFormatting(formData.cpfCnpj),
-      endereco: formData.address,
-      lojaId,
-    };
-
-    try {
-      if (selectedClient?.id) {
-        // Atualização de cliente existente
-        await clientsAPI.updateClient({
-          id: selectedClient.id,
-          payload,
-        });
-        toast.success('Cliente atualizado com sucesso!', {
-          description: 'Dados atualizados.',
-          duration: 2000,
-          position: 'bottom-right',
-          richColors: true,
-        });
-      } else {
-        // Cadastro de novo cliente
-        await clientsAPI.createClient({
-          payload,
-        });
-        toast.success('Cliente cadastrado com sucesso!', {
-          description: 'Os dados do cliente foram salvos com sucesso.',
-          duration: 2000,
-          position: 'bottom-right',
-          richColors: true,
-        });
-      }
-
-      // Atualiza a lista de clientes
-      await fetchClients();
-
-      // Reseta o formulário e fecha o modal
-      setFormData({
-        name: '',
-        phone: '',
-        email: '',
-        cpfCnpj: '',
-        address: '',
-      });
-      setSelectedClient(null);
-      setShowModal(false);
-    } catch (error) {
-      let errorMessage = 'Erro inesperado ao processar a requisição.';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-
-      toast.error('Erro ao cadastrar cliente', {
-        description: errorMessage,
-        duration: 2000,
-      });
-    }
-  };
-
-  const handleCloseModal = () => {
-    setFormData({
-      name: '',
-      phone: '',
-      email: '',
-      cpfCnpj: '',
-      address: '',
-    });
-    setShowModal(false);
-    setSelectedClient(null);
-  };
+  }, [showModal, selectedClient, reset]);
 
   if (!showModal) return null;
 
+  let buttonLabel: string;
+
+  if (loading) {
+    buttonLabel = 'Salvando...';
+  } else if (selectedClient) {
+    buttonLabel = 'Atualizar Cliente';
+  } else {
+    buttonLabel = 'Cadastrar Cliente';
+  }
+
   return (
-    <div>
-      <form onSubmit={handleSubmit}>
-        <h2 className="text-xl font-semibold text-gray-900">
-          {selectedClient ? 'Atualizar Cliente' : 'Cadastrar Cliente'}
-        </h2>
-        <div className="mb-4">
-          <Label
-            htmlFor="name"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Nome:
-          </Label>
-          <Input
-            type="text"
-            required
-            value={formData.name}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, name: e.target.value }))
-            }
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
-          />
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Header */}
+        <div className="text-center border-b border-gray-200 pb-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+            {selectedClient ? 'Atualizar Cliente' : 'Novo Cliente'}
+          </h2>
+          <p className="text-sm text-gray-600">
+            {selectedClient
+              ? 'Atualize as informações do cliente'
+              : 'Preencha os dados para cadastrar um novo cliente'}
+          </p>
         </div>
 
-        <div className="mb-4">
-          <Label
-            htmlFor="phone"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Telefone:
-          </Label>
-          <Input
-            type="text"
-            required
-            value={formData.phone}
-            onChange={handlePhoneChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
-          />
+        {/* Form Fields */}
+        <div className="space-y-5">
+          {/* Nome */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="name"
+              className="text-sm font-semibold text-gray-700 flex items-center"
+            >
+              <IconName />
+              Nome Completo
+            </Label>
+            <Controller
+              name="name"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  id="name"
+                  type="text"
+                  placeholder="Digite o nome completo"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                />
+              )}
+            />
+          </div>
+
+          {/* Telefone e Email - Layout em Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Telefone */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="phone"
+                className="text-sm font-semibold text-gray-700 flex items-center"
+              >
+                <IconPhone />
+                Telefone
+              </Label>
+              <Controller
+                name="phone"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    id="phone"
+                    type="text"
+                    placeholder="(00) 00000-0000"
+                    value={field.value}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (removePhoneFormatting(value).length <= 11) {
+                        field.onChange(formatPhone(value));
+                      }
+                    }}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                  />
+                )}
+              />
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label
+                htmlFor="email"
+                className="text-sm font-semibold text-gray-700 flex items-center"
+              >
+                <IconEmail />
+                Email
+              </Label>
+              <Controller
+                name="email"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <Input
+                    {...field}
+                    id="email"
+                    type="email"
+                    placeholder="exemplo@email.com"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                  />
+                )}
+              />
+            </div>
+          </div>
+
+          {/* CPF/CNPJ */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="cpfCnpj"
+              className="text-sm font-semibold text-gray-700 flex items-center"
+            >
+              <IconDocument />
+              CPF/CNPJ
+            </Label>
+
+            <Controller
+              name="cpfCnpj"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  id="cpfCnpj"
+                  type="text"
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00"
+                  value={field.value}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (removeCpfCnpjFormatting(value).length <= 14) {
+                      field.onChange(formatCpfCnpj(value));
+                    }
+                  }}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                />
+              )}
+            />
+          </div>
+
+          {/* Endereço */}
+          <div className="space-y-2">
+            <Label
+              htmlFor="address"
+              className="text-sm font-semibold text-gray-700 flex items-center"
+            >
+              <IconAddress />
+              Endereço Completo
+            </Label>
+            <Controller
+              name="address"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  id="address"
+                  type="text"
+                  placeholder="Rua, número, bairro, cidade - UF"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                />
+              )}
+            />
+          </div>
         </div>
 
-        <div className="mb-4">
-          <Label
-            htmlFor="email"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Email:
-          </Label>
-          <Input
-            type="email"
-            required
-            value={formData.email}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, email: e.target.value }))
-            }
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
-          />
-        </div>
-
-        <div className="mb-4">
-          <Label
-            htmlFor="cpfCnpj"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            CPF/CNPJ:
-          </Label>
-          <Input
-            type="text"
-            required
-            value={formData.cpfCnpj}
-            onChange={handleCpfCnpjChange}
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
-          />
-        </div>
-
-        <div className="mb-4">
-          <Label
-            htmlFor="address"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Endereço:
-          </Label>
-          <Input
-            type="text"
-            required
-            value={formData.address}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, address: e.target.value }))
-            }
-            className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50 p-2"
-          />
-        </div>
-
-        <div className="flex justify-end gap-4">
+        {/* Action Buttons */}
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-gray-200">
           <Button
             type="button"
-            className="bg-gradient-to-r from-red-500 to-red-700 text-white px-5 py-3 rounded-full hover:from-red-600 hover:to-red-800"
             onClick={handleCloseModal}
+            variant="outline"
+            className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
           >
             Cancelar
           </Button>
+
           <Button
             type="submit"
-            className="bg-gradient-to-r from-blue-500 to-blue-700 text-white px-5 py-3 rounded-full hover:from-blue-600 hover:to-blue-800"
+            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
+            disabled={loading}
           >
-            {selectedClient ? 'Atualizar' : 'Cadastrar'}
+            {buttonLabel}
           </Button>
         </div>
       </form>
