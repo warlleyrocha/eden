@@ -15,3 +15,11 @@ export interface CreateClient {
   endereco: string;
   lojaId: string;
 }
+
+export interface FormValues {
+  name: string;
+  phone: string;
+  email: string;
+  cpfCnpj: string;
+  address: string;
+}
