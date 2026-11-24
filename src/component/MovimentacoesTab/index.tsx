@@ -3,11 +3,9 @@ import {
   Banknote,
   CreditCard,
   Landmark,
-  Pencil,
   Plus,
   QrCode,
   Receipt,
-  Trash2,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -21,6 +19,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { EmptyState } from '@/components/app/empty-state';
+import { RowActions } from '@/components/app/row-actions';
 import { cn } from '@/lib/utils';
 import { ConfirmDialog } from '../ConfirmDialog';
 
@@ -176,27 +175,11 @@ export default function MovimentacoesTab({
                   {formatarMoeda(mov.valor)}
                 </TableCell>
                 <TableCell className="pr-6">
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => onDoubleClick(mov.id)}
-                      aria-label="Editar movimentação"
-                      title="Editar"
-                    >
-                      <Pencil />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="icon-sm"
-                      onClick={() => setDeleteId(mov.id)}
-                      aria-label="Excluir movimentação"
-                      title="Excluir"
-                      className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
-                    >
-                      <Trash2 />
-                    </Button>
-                  </div>
+                  <RowActions
+                    label={mov.descricao || (isEntrada ? 'entrada' : 'saída')}
+                    onEdit={() => onDoubleClick(mov.id)}
+                    onDelete={() => setDeleteId(mov.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}

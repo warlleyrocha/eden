@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { type ReactNode, useState, useEffect, useMemo } from 'react';
+import { lerSessao, limparSessao } from '@/lib/session';
 import { AuthContext } from './auth.context';
 
 interface AuthProviderProps {
@@ -29,8 +30,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setAuthenticated(false);
     setUser(null);
-    localStorage.removeItem('token');
+    limparSessao();
   };
+
+  // role/usuario só mudam no login e no logout, que sempre alternam
+  // `authenticated`; por isso basta reler o localStorage quando ele muda.
+  const sessao = useMemo(
+    () => (authenticated ? lerSessao() : null),
+    [authenticated]
+  );
 
   const contextValue = useMemo(
     () => ({
@@ -40,8 +48,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       login,
       logout,
       user,
+      sessao,
     }),
-    [authenticated, loading, user]
+    [authenticated, loading, user, sessao]
   );
 
   return (

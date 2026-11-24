@@ -17,12 +17,15 @@ import { useHeaderLogic } from '@/component/Header/useHeaderLogic';
 import { useModalImpressao } from '@/hooks/useModalOrcamento';
 import { useOrcamentoContext } from '@/hooks/useOrcamento';
 import { formatarMoeda } from '@/utils/formatters';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 /** Sino do header: lista de orçamentos com ações rápidas de aprovar/rejeitar. */
 export function NotificationsSheet() {
   const [open, setOpen] = useState(false);
   const { definirLista, getNumeroSequencial } = useOrcamentoContext();
   const { abrirModalImpressao, modalAberto } = useModalImpressao();
+  // Aprovar/rejeitar exige gerar_orcamento; sem ela o sino fica só leitura.
+  const podeAprovar = usePermissoes().pode('gerar_orcamento');
 
   const {
     orcamentos,
@@ -143,7 +146,7 @@ export function NotificationsSheet() {
                     </div>
                   </button>
 
-                  {orcamento.status === 'ABERTO' && (
+                  {podeAprovar && orcamento.status === 'ABERTO' && (
                     <div className="mt-3 flex gap-2">
                       <Button
                         size="sm"

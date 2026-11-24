@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, MapPin, Pencil, Phone, Trash2 } from 'lucide-react';
+import { Mail, MapPin, Phone } from 'lucide-react';
 
 import {
   Table,
@@ -9,9 +9,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { getInitials } from '@/components/layout/use-logout';
+import { EntityIdentity } from '@/components/app/entity-identity';
+import { RowActions } from '@/components/app/row-actions';
 
 import type { Client } from '@/@types/clients';
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
@@ -23,50 +22,6 @@ interface TableClientProps {
   clients: Client[];
   onSelectClientForEdit: (client: Client) => void;
   onDelete?: (id: string) => void;
-}
-
-function ClientAvatar({ nome }: { nome: string }) {
-  return (
-    <Avatar className="size-10 rounded-md border border-border">
-      <AvatarFallback className="rounded-md bg-surface-secondary text-xs font-semibold text-foreground-secondary">
-        {getInitials(nome)}
-      </AvatarFallback>
-    </Avatar>
-  );
-}
-
-function RowActions({
-  client,
-  onEdit,
-  onDelete,
-}: {
-  client: Client;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <div className="flex justify-end gap-2">
-      <Button
-        variant="outline"
-        size="icon-sm"
-        onClick={onEdit}
-        aria-label={`Editar ${client.nome}`}
-        title="Editar"
-      >
-        <Pencil />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon-sm"
-        onClick={onDelete}
-        aria-label={`Excluir ${client.nome}`}
-        title="Excluir"
-        className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
-      >
-        <Trash2 />
-      </Button>
-    </div>
-  );
 }
 
 export default function TableClient({
@@ -102,22 +57,7 @@ export default function TableClient({
                 onDoubleClick={() => onSelectClientForEdit(client)}
               >
                 <TableCell className="max-w-[300px] pl-6">
-                  <div className="flex items-center gap-3">
-                    <ClientAvatar nome={client.nome} />
-                    <div className="min-w-0">
-                      <p className="truncate font-medium" title={client.nome}>
-                        {client.nome}
-                      </p>
-                      {client.email && (
-                        <p
-                          className="truncate text-xs text-foreground-secondary"
-                          title={client.email}
-                        >
-                          {client.email}
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                  <EntityIdentity nome={client.nome} subtitle={client.email} />
                 </TableCell>
                 <TableCell className="tabular text-foreground-secondary">
                   {client.telefone ? formatPhone(client.telefone) : '—'}
@@ -132,7 +72,7 @@ export default function TableClient({
                 </TableCell>
                 <TableCell className="pr-6">
                   <RowActions
-                    client={client}
+                    label={client.nome}
                     onEdit={() => onSelectClientForEdit(client)}
                     onDelete={() => setSelectedId(client.id)}
                   />
@@ -148,17 +88,13 @@ export default function TableClient({
         {clients.map((client) => (
           <li key={client.id} className="flex flex-col gap-3 px-5 py-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <ClientAvatar nome={client.nome} />
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{client.nome}</p>
-                  <p className="tabular truncate text-xs text-foreground-secondary">
-                    {client.cpfCnpj ? formatCpfCnpj(client.cpfCnpj) : '—'}
-                  </p>
-                </div>
-              </div>
+              <EntityIdentity
+                nome={client.nome}
+                subtitle={client.cpfCnpj ? formatCpfCnpj(client.cpfCnpj) : '—'}
+                subtitleClassName="tabular"
+              />
               <RowActions
-                client={client}
+                label={client.nome}
                 onEdit={() => onSelectClientForEdit(client)}
                 onDelete={() => setSelectedId(client.id)}
               />

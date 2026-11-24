@@ -1,13 +1,14 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
+import { limparSessao } from '@/lib/session';
 
 export function useLogout() {
   const { setAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   return useCallback(() => {
-    localStorage.removeItem('token');
+    limparSessao();
     setAuthenticated(false);
     navigate('/signin');
   }, [setAuthenticated, navigate]);

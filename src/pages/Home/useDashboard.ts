@@ -44,8 +44,10 @@ function somar(
   }, 0);
 }
 
-export function useDashboard() {
-  const { movimentacoes, loading: loadingFin } = useFinanceiro();
+export function useDashboard({ financeiro = true }: { financeiro?: boolean } = {}) {
+  const { movimentacoes, loading: loadingFin } = useFinanceiro({
+    enabled: financeiro,
+  });
   const { products, loading: loadingEstoque } = useEstoque();
   const { orcamentos, loading: loadingOrc } = useOrcamento();
 

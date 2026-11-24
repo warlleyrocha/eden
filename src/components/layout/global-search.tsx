@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/command';
 import { useEstoque } from '@/hooks/useEstoque';
 import { useClients } from '@/hooks/useCliente';
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { cn } from '@/lib/utils';
 
 import { NAV_ITEMS } from './nav-items';
@@ -23,6 +24,12 @@ import { NAV_ITEMS } from './nav-items';
 function SearchResults({ onSelect }: { onSelect: (url: string) => void }) {
   const { products, loading: loadingProducts } = useEstoque();
   const { clients, loading: loadingClients } = useClients();
+  const { podeAcessar } = usePermissoes();
+
+  // Só sugere o que leva a módulos que a pessoa consegue abrir.
+  const paginas = NAV_ITEMS.filter(podeAcessar);
+  const verProdutos = paginas.some((p) => p.url === '/estoque');
+  const verClientes = paginas.some((p) => p.url === '/clientes');
 
   return (
     <CommandList className="max-h-[360px]">
@@ -33,7 +40,7 @@ function SearchResults({ onSelect }: { onSelect: (url: string) => void }) {
       </CommandEmpty>
 
       <CommandGroup heading="Páginas">
-        {NAV_ITEMS.map((item) => (
+        {paginas.map((item) => (
           <CommandItem
             key={item.url}
             value={`pagina ${item.title}`}
@@ -45,7 +52,7 @@ function SearchResults({ onSelect }: { onSelect: (url: string) => void }) {
         ))}
       </CommandGroup>
 
-      {products.length > 0 && (
+      {verProdutos && products.length > 0 && (
         <CommandGroup heading="Produtos">
           {products.map((p) => (
             <CommandItem
@@ -65,7 +72,7 @@ function SearchResults({ onSelect }: { onSelect: (url: string) => void }) {
         </CommandGroup>
       )}
 
-      {clients.length > 0 && (
+      {verClientes && clients.length > 0 && (
         <CommandGroup heading="Clientes">
           {clients.map((c) => (
             <CommandItem
