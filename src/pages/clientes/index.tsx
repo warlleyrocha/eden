@@ -2,12 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { UserPlus, Users } from 'lucide-react';
 
-import { SectionCard } from '@/components/app/section-card';
-import { SearchInput } from '@/components/app/search-input';
-import { EmptyState } from '@/components/app/empty-state';
-import { Button } from '@/components/ui/button';
+import { EntityListSection } from '@/components/app/entity-list-section';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
 
 import Forms from '@/component/Forms';
 import TableClient from '@/component/TableClients';
@@ -88,69 +84,36 @@ export default function Clientes() {
     [fetchClients, setSelectedClient]
   );
 
-  const temBusca = busca.trim() !== '';
-
   return (
     <>
-      <SectionCard
+      <EntityListSection
         title="Clientes"
-        description={
-          carregando
-            ? 'Carregando...'
-            : temBusca
-              ? `${filtrados.length} de ${clients.length} clientes`
-              : `${clients.length} cliente${clients.length === 1 ? '' : 's'} cadastrado${clients.length === 1 ? '' : 's'}`
-        }
-        flush
-        actions={
-          <>
-            <SearchInput
-              value={busca}
-              onChange={setBusca}
-              placeholder="Buscar por nome, e-mail ou documento..."
-              className="sm:w-80"
-            />
-            <Button onClick={openNew}>
-              <UserPlus /> Novo cliente
-            </Button>
-          </>
-        }
+        noun={{ singular: 'cliente', plural: 'clientes' }}
+        total={clients.length}
+        filtered={filtrados.length}
+        loading={carregando}
+        search={busca}
+        onSearchChange={setBusca}
+        searchPlaceholder="Buscar por nome, e-mail ou documento..."
+        createLabel="Novo cliente"
+        createIcon={<UserPlus />}
+        onCreate={openNew}
+        emptyIcon={<Users />}
+        empty={{
+          title: 'Nenhum cliente cadastrado',
+          description: 'Cadastre clientes para usá-los nos orçamentos.',
+        }}
+        emptySearch={{
+          title: 'Nenhum cliente encontrado',
+          description: 'Tente buscar por outro nome, e-mail ou documento.',
+        }}
       >
-        {carregando ? (
-          <div className="space-y-2 px-6 pb-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <Skeleton key={i} className="h-14 w-full" />
-            ))}
-          </div>
-        ) : filtrados.length === 0 ? (
-          <EmptyState
-            icon={<Users />}
-            title={temBusca ? 'Nenhum cliente encontrado' : 'Nenhum cliente cadastrado'}
-            description={
-              temBusca
-                ? 'Tente buscar por outro nome, e-mail ou documento.'
-                : 'Cadastre clientes para usá-los nos orçamentos.'
-            }
-            action={
-              temBusca ? (
-                <Button variant="outline" size="sm" onClick={() => setBusca('')}>
-                  Limpar busca
-                </Button>
-              ) : (
-                <Button size="sm" onClick={openNew}>
-                  <UserPlus /> Novo cliente
-                </Button>
-              )
-            }
-          />
-        ) : (
-          <TableClient
-            clients={filtrados}
-            onDelete={deleteClient}
-            onSelectClientForEdit={openEdit}
-          />
-        )}
-      </SectionCard>
+        <TableClient
+          clients={filtrados}
+          onDelete={deleteClient}
+          onSelectClientForEdit={openEdit}
+        />
+      </EntityListSection>
 
       <Dialog open={formOpen} onOpenChange={handleFormOpenChange}>
         <DialogContent className="sm:max-w-xl">
