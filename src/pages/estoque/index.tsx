@@ -1,69 +1,125 @@
-// File: src/pages/estoque/index.tsx
-
-import { useMemo, useState } from 'react';
-import { PlusCircle, Search } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { PackageOpen, Plus } from 'lucide-react';
 import { toast } from 'sonner';
 
-import DialogModal from '@/component/DialogModal';
-import { Header } from '@/component/Header';
+import { KpiCard } from '@/components/app/kpi-card';
+import { SectionCard } from '@/components/app/section-card';
+import { SearchInput } from '@/components/app/search-input';
+import { EmptyState } from '@/components/app/empty-state';
 import { TableData } from '@/component/TableData';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { useEstoque } from '@/hooks/useEstoque';
+import { getStockStatus, STOCK_STATUS, type StockStatus } from '@/lib/status';
+import { formatarMoeda } from '@/utils/formatters';
 
 import type { Produto } from '@/@types/product';
 
+type FiltroStatus = 'todos' | StockStatus;
+
+// Capitaliza cada palavra do nome do produto
+const capitalize = (text: string): string =>
+  text
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
+const toastOk = (title: string, description: string) =>
+  toast.success(title, {
+    description,
+    duration: 2000,
+    position: 'bottom-right',
+    richColors: true,
+  });
+
 export default function Stock() {
+  const [searchParams] = useSearchParams();
   const [isOpen, setIsOpen] = useState(false);
   const [nome, setNome] = useState('');
   const [quantidade, setQuantidade] = useState('');
   const [preco, setPreco] = useState('');
-  const [busca, setBusca] = useState('');
+  const [busca, setBusca] = useState(() => searchParams.get('busca') ?? '');
+  const [filtro, setFiltro] = useState<FiltroStatus>('todos');
   const [produtoEditando, setProdutoEditando] = useState<Produto | null>(null);
+  const [salvando, setSalvando] = useState(false);
 
-  const { products, addProduct, updateProduct, deleteProduct } = useEstoque();
+  // Busca vinda da busca global (?busca=...)
+  const buscaParam = searchParams.get('busca');
+  useEffect(() => {
+    if (buscaParam !== null) setBusca(buscaParam);
+  }, [buscaParam]);
+
+  const { products, loading, addProduct, updateProduct, deleteProduct } =
+    useEstoque();
+  const carregando = loading && products.length === 0;
 
   const produtosFiltrados = useMemo(() => {
-    if (!busca.trim()) {
-      return products.sort((a, b) => a.nome.localeCompare(b.nome));
-    }
-
-    const termoBusca = busca.toLowerCase();
+    const termo = busca.trim().toLowerCase();
     return products
-      .filter((item) => item.nome.toLowerCase().includes(termoBusca))
+      .filter((p) => !termo || p.nome.toLowerCase().includes(termo))
+      .filter((p) => filtro === 'todos' || getStockStatus(p.estoque) === filtro)
       .sort((a, b) => a.nome.localeCompare(b.nome));
-  }, [busca, products]);
+  }, [busca, filtro, products]);
 
-  const stats = useMemo(
-    () => ({
+  const stats = useMemo(() => {
+    let reposicao = 0;
+    let esgotados = 0;
+    for (const p of products) {
+      const s = getStockStatus(p.estoque);
+      if (s !== 'in_stock') reposicao += 1;
+      if (s === 'out_of_stock') esgotados += 1;
+    }
+    return {
       totalProdutos: products.length,
       totalEstoque: products.reduce((sum, p) => sum + (p.estoque ?? 0), 0),
       valorTotalEstoque: products.reduce(
         (sum, p) => sum + (p.estoque ?? 0) * (p.precoCusto ?? 0),
         0
       ),
-    }),
-    [products]
-  );
+      reposicao,
+      esgotados,
+    };
+  }, [products]);
 
-  const openModal = () => {
-    setIsOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsOpen(false);
+  const resetForm = () => {
     setProdutoEditando(null);
     setNome('');
     setPreco('');
     setQuantidade('');
   };
 
+  const openNew = () => {
+    resetForm();
+    setIsOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsOpen(false);
+    resetForm();
+  };
+
   const editarProduto = (id: string) => {
     const produto = products.find((p) => p.id === id);
     if (!produto) return;
-
     setProdutoEditando(produto);
     setNome(produto.nome || '');
     setQuantidade(produto.estoque?.toString() || '');
@@ -71,242 +127,219 @@ export default function Stock() {
     setIsOpen(true);
   };
 
-  // Função de capitalização automática
-  const capitalize = (text: string): string => {
-    return text
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const dados = {
+      nome: capitalize(nome),
+      quantidadeInicial: parseInt(quantidade),
+      precoCusto: parseFloat(preco),
+    };
+
+    setSalvando(true);
+    try {
+      if (produtoEditando) {
+        await updateProduct(produtoEditando.id, dados);
+        toastOk('Produto atualizado com sucesso!', 'As alterações foram salvas.');
+      } else {
+        await addProduct(dados);
+        toastOk(
+          'Produto adicionado ao estoque com sucesso!',
+          'O item foi incluído corretamente no seu inventário.'
+        );
+      }
+      closeModal();
+    } finally {
+      setSalvando(false);
+    }
   };
 
-  // Modificação no handler do input do nome do produto
-  const handleNomeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setNome(capitalize(value));
+  const handleDelete = async (id: string) => {
+    await deleteProduct(id);
+    toastOk('Produto excluído com sucesso!', 'O item foi removido do estoque.');
   };
+
+  const temFiltro = busca.trim() !== '' || filtro !== 'todos';
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(90deg,rgba(42,123,155,1)_37%,rgba(87,199,133,1)_98%)] text-[#333] flex flex-col h-full">
-      <div className="flex flex-row">
-        <Header />
+    <>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <KpiCard
+          label="Total de produtos"
+          value={stats.totalProdutos.toLocaleString('pt-BR')}
+          loading={carregando}
+        />
+        <KpiCard
+          label="Unidades em estoque"
+          value={stats.totalEstoque.toLocaleString('pt-BR')}
+          loading={carregando}
+        />
+        <KpiCard
+          label="Valor em estoque"
+          value={formatarMoeda(stats.valorTotalEstoque)}
+          hint="Calculado pelo preço de custo"
+          loading={carregando}
+        />
+        <KpiCard
+          label="Precisam de reposição"
+          value={stats.reposicao.toLocaleString('pt-BR')}
+          badge={
+            stats.esgotados > 0 ? (
+              <span className="tabular rounded-sm bg-danger-bg px-1.5 py-0.5 text-xs font-medium text-danger-foreground">
+                {stats.esgotados} esgotado{stats.esgotados > 1 ? 's' : ''}
+              </span>
+            ) : undefined
+          }
+          loading={carregando}
+        />
       </div>
-      <div className="max-w-7xl mx-auto mt-8 w-full px-2 sm:px-4 lg:px-6">
-        <div className="flex flex-row justify-between items-center mb-6 p-3 sm:p-4 bg-white rounded-lg shadow-md">
-          <h1 className="text-xl sm:text-2xl font-bold text-[#1E3A8A]">
-            Gerenciador de Estoque
-          </h1>
-          <Button
-            className="flex items-center sm:space-x-2 bg-[#1E3A8A] text-white hover:bg-[#152C6B] transition-colors duration-200 px-3 sm:px-4 py-2 rounded-lg cursor-pointer text-sm sm:text-base"
-            onClick={openModal}
-          >
-            <PlusCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-            <span className="hidden sm:inline">Adicionar no Estoque</span>
-          </Button>
-        </div>
 
-        <div className="px-3 sm:px-5 py-5 border-2 rounded-2xl shadow-lg border-gray-200 bg-white">
-          <h1 className="text-2xl font-bold text-[#1E3A8A] mb-2">
-            Resumo do estoque
-          </h1>
-          <p className="text-lg text-[#1E3A8A] mb-4">
-            Visão geral dos produtos
-          </p>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center mb-6 p-4 bg-white rounded-lg">
-            <div className="card-body p-4 rounded-lg border border-[#081534]">
-              <p className="card-title text-[#1E3A8A] text-lg font-semibold">
-                Total de Produtos
-              </p>
-              <h3 className="card-text text-[#2A4A9A]">
-                {stats.totalProdutos}
-              </h3>
-            </div>
-            <div className="card-body p-4 rounded-lg border border-[#081534]">
-              <p className="card-title text-[#1E3A8A] text-lg font-semibold">
-                Itens em Estoque
-              </p>
-              <h3 className="card-text text-[#2A4A9A]">{stats.totalEstoque}</h3>
-            </div>
-            <div className="card-body p-4 rounded-lg border border-[#081534]">
-              <p className="card-title text-[#1E3A8A] text-lg font-semibold">
-                Valor Total em Estoque
-              </p>
-              <h3 className="card-text text-[#2A4A9A]">
-                {stats.valorTotalEstoque.toLocaleString('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                })}
-              </h3>
-            </div>
-          </div>
-        </div>
-
-        <div className="w-full sm:w-[30%] mt-8">
-          <div className="relative">
-            <Input
-              placeholder="Buscar produto..."
-              className="w-full bg-white placeholder:text-[#081534] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      <SectionCard
+        title="Produtos"
+        description={
+          carregando
+            ? 'Carregando...'
+            : `${produtosFiltrados.length} de ${products.length} produtos`
+        }
+        flush
+        actions={
+          <>
+            <SearchInput
               value={busca}
-              onChange={(e) => setBusca(e.target.value)}
+              onChange={setBusca}
+              placeholder="Buscar produto..."
             />
-            <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-          </div>
-        </div>
-
-        <div className="w-full mt-4 rounded-2xl overflow-hidden sm:bg-white">
-          <div className="">
-            <TableData
-              onEdit={(produtoSelecionado) => editarProduto(produtoSelecionado)}
-              onDelete={(id) => {
-                deleteProduct(id);
-                toast.success('Produto excluído com sucesso!', {
-                  description: 'O item foi removido do estoque.',
-                  duration: 2000,
-                  position: 'bottom-right',
-                  richColors: true,
-                });
-              }}
-              items={produtosFiltrados.map((item) => {
-                const precoUnit = item.precoCusto ?? 0;
-                const qtd = item.estoque ?? 0;
-                const valorTotal = precoUnit * qtd;
-                return {
-                  id: item.id, // <- necessário
-                  produto: item.nome || 'Sem nome',
-                  quantidade: qtd,
-                  preco: precoUnit.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                  }),
-                  valor_total: valorTotal.toLocaleString('pt-BR', {
-                    style: 'currency',
-                    currency: 'BRL',
-                  }),
-                };
-              })}
-            />
-          </div>
-        </div>
-      </div>
-
-      {isOpen && (
-        <DialogModal
-          title={
-            produtoEditando ? 'Editar Item do Estoque' : 'Adicionar ao Estoque'
-          }
-          description={
-            produtoEditando
-              ? 'Edite os detalhes do item abaixo'
-              : 'Preencha os detalhes do item abaixo'
-          }
-          titleButton={produtoEditando ? 'Editar' : 'Adicionar'}
-          isOpen={isOpen}
-          onOpen={() => setIsOpen(true)}
-          onClose={() => setIsOpen(false)}
-          customStyles={{
-            width: '400px',
-            height: 'full',
-            padding: '20px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-            textAlign: 'left',
-            color: '#1E3A8A',
-            paddingBottom: '3px',
-          }}
-        >
-          <div className="text-center text-[#1E3A8A]">
-            <form
-              className="space-y-4"
-              onSubmit={async (e) => {
-                e.preventDefault();
-
-                const dados = {
-                  nome: capitalize(nome),
-                  quantidadeInicial: parseInt(quantidade),
-                  precoCusto: parseFloat(preco),
-                };
-
-                if (produtoEditando) {
-                  // Aqui você deve chamar o updateProduct() com o ID correto
-                  await updateProduct(produtoEditando.id, dados);
-                  toast.success('Produto atualizado com sucesso!', {
-                    description: 'As alterações foram salvas.',
-                    duration: 2000,
-                    position: 'bottom-right',
-                    richColors: true,
-                  });
-                } else {
-                  await addProduct(dados);
-                  toast.success('Produto adicionado ao estoque com sucesso!', {
-                    description:
-                      'O item foi incluído corretamente no seu inventário.',
-                    duration: 2000,
-                    position: 'bottom-right',
-                    richColors: true,
-                  });
-                }
-
-                // Limpa tudo
-                setIsOpen(false);
-                setProdutoEditando(null);
-                setNome('');
-                setQuantidade('');
-                setPreco('');
-              }}
+            <Select
+              value={filtro}
+              onValueChange={(v) => setFiltro(v as FiltroStatus)}
             >
-              <Label>Nome do produto</Label>
-              <Input
-                type="text"
-                placeholder="Nome do Item"
-                value={nome}
-                className="w-full px-3 py-2 mb-8 border rounded"
-                onChange={handleNomeChange}
-                required
-              />
-              <div className="w-full flex flex-col sm:flex-row gap-6">
-                <div className="flex-1">
-                  <Label className="py-3">Quantidade</Label>
-                  <Input
-                    type="number"
-                    placeholder="Quantidade"
-                    value={quantidade}
-                    className="w-full px-3 py-2 border rounded"
-                    onChange={(e) => setQuantidade(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="flex-1">
-                  <Label className="py-3">Preço (R$)</Label>
-                  <Input
-                    type="number"
-                    placeholder="Preço"
-                    value={preco}
-                    className="w-full px-3 py-2 border rounded"
-                    onChange={(e) => setPreco(e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-between space-x-2 pb-6 pt-4 gap-3 flex-col sm:flex-row">
-                <Button
-                  type="button"
-                  className="bg-white text-gray-700 px-4 py-2 rounded-full border border-[#152C6B] hover:bg-gray-100 hover:text-gray-800 cursor-pointer"
-                  onClick={closeModal}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-[#1E3A8A] text-white px-4 py-2 rounded-full hover:bg-[#152C6B] transition-colors duration-200 cursor-pointer"
-                >
-                  {produtoEditando ? 'Salvar Alterações' : 'Adicionar'}
-                </Button>
-              </div>
-            </form>
+              <SelectTrigger className="w-full sm:w-[160px]" aria-label="Filtrar por status">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos os status</SelectItem>
+                {(Object.keys(STOCK_STATUS) as StockStatus[]).map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {STOCK_STATUS[s].label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button onClick={openNew}>
+              <Plus /> Adicionar produto
+            </Button>
+          </>
+        }
+      >
+        {carregando ? (
+          <div className="space-y-2 px-6 pb-6">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
           </div>
-        </DialogModal>
-      )}
-    </div>
+        ) : produtosFiltrados.length === 0 ? (
+          <EmptyState
+            icon={<PackageOpen />}
+            title={temFiltro ? 'Nenhum produto encontrado' : 'Nenhum produto cadastrado'}
+            description={
+              temFiltro
+                ? 'Tente outro termo de busca ou altere o filtro de status.'
+                : 'Adicione o primeiro produto para começar a controlar o estoque.'
+            }
+            action={
+              temFiltro ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setBusca('');
+                    setFiltro('todos');
+                  }}
+                >
+                  Limpar filtros
+                </Button>
+              ) : (
+                <Button size="sm" onClick={openNew}>
+                  <Plus /> Adicionar produto
+                </Button>
+              )
+            }
+          />
+        ) : (
+          <TableData
+            items={produtosFiltrados}
+            onEdit={editarProduto}
+            onDelete={handleDelete}
+          />
+        )}
+      </SectionCard>
+
+      <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {produtoEditando ? 'Editar produto' : 'Adicionar produto'}
+            </DialogTitle>
+            <DialogDescription>
+              {produtoEditando
+                ? 'Atualize os dados do produto.'
+                : 'Preencha os dados do novo item do estoque.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-2">
+              <Label htmlFor="produto-nome">Nome do produto</Label>
+              <Input
+                id="produto-nome"
+                type="text"
+                placeholder="Ex.: Fone sem fio"
+                value={nome}
+                onChange={(e) => setNome(capitalize(e.target.value))}
+                required
+                autoFocus
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="produto-qtd">Quantidade</Label>
+                <Input
+                  id="produto-qtd"
+                  type="number"
+                  inputMode="numeric"
+                  min={0}
+                  placeholder="0"
+                  value={quantidade}
+                  onChange={(e) => setQuantidade(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="produto-preco">Preço de custo (R$)</Label>
+                <Input
+                  id="produto-preco"
+                  type="number"
+                  inputMode="decimal"
+                  min={0}
+                  step="0.01"
+                  placeholder="0,00"
+                  value={preco}
+                  onChange={(e) => setPreco(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+
+            <DialogFooter className="pt-2">
+              <Button type="button" variant="outline" onClick={closeModal}>
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={salvando}>
+                {produtoEditando ? 'Salvar alterações' : 'Adicionar'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

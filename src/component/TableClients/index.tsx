@@ -1,23 +1,22 @@
-// TableClient.tsx
+import { useState } from 'react';
+import { Mail, MapPin, Pencil, Phone, Trash2 } from 'lucide-react';
+
 import {
   Table,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash, Search } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { getInitials } from '@/components/layout/use-logout';
 
 import type { Client } from '@/@types/clients';
-
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
 import { formatPhone } from '@/utils/formatPhone';
 
-import useTableClientLogic from './useTableClientLogic';
-
-import { useState } from 'react';
 import { ConfirmDialog } from '../ConfirmDialog';
 
 interface TableClientProps {
@@ -26,204 +25,174 @@ interface TableClientProps {
   onDelete?: (id: string) => void;
 }
 
+function ClientAvatar({ nome }: { nome: string }) {
+  return (
+    <Avatar className="size-10 rounded-md border border-border">
+      <AvatarFallback className="rounded-md bg-surface-secondary text-xs font-semibold text-foreground-secondary">
+        {getInitials(nome)}
+      </AvatarFallback>
+    </Avatar>
+  );
+}
+
+function RowActions({
+  client,
+  onEdit,
+  onDelete,
+}: {
+  client: Client;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div className="flex justify-end gap-2">
+      <Button
+        variant="outline"
+        size="icon-sm"
+        onClick={onEdit}
+        aria-label={`Editar ${client.nome}`}
+        title="Editar"
+      >
+        <Pencil />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon-sm"
+        onClick={onDelete}
+        aria-label={`Excluir ${client.nome}`}
+        title="Excluir"
+        className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
+      >
+        <Trash2 />
+      </Button>
+    </div>
+  );
+}
+
 export default function TableClient({
   clients,
   onDelete,
   onSelectClientForEdit,
 }: TableClientProps) {
-  // Lógica de busca e filtragem
-  const { searchTerm, setSearchTerm, filteredClients } = useTableClientLogic({
-    formattedClients: clients,
-  });
-
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-
-  const openConfirmDialog = (id: string) => {
-    setSelectedId(id);
-    setDialogOpen(true);
-  };
 
   const handleConfirmDelete = async () => {
-    if (selectedId && onDelete) {
-      await onDelete(selectedId);
-    }
-    setDialogOpen(false);
+    if (selectedId && onDelete) await onDelete(selectedId);
     setSelectedId(null);
   };
 
   return (
-    <div className="w-full space-y-6 ">
-      <div className="relative w-full sm:w-[30%]">
-        <Input
-          type="text"
-          placeholder="Buscar clientes"
-          className="w-full bg-white placeholder:text-[#55575c] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-            setSearchTerm(e.target.value)
-          }
-        />
-        <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-      </div>
-
-      {/* Versão Desktop/Tablet */}
-      <div className="hidden md:block bg-white rounded-lg shadow-md">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
-          <Table className="w-full min-w-[800px]">
-            <TableHeader>
-              <TableRow className="bg-gray-100 text-center">
-                <TableCell className="py-3 px-4  font-semibold">Nome</TableCell>
-                <TableCell className="py-3 px-4  font-semibold">
-                  Telefone
+    <>
+      {/* Desktop / tablet */}
+      <div className="hidden md:block">
+        <Table className="min-w-[820px]">
+          <TableHeader>
+            <TableRow>
+              <TableHead className="pl-6">Cliente</TableHead>
+              <TableHead>Telefone</TableHead>
+              <TableHead>CPF/CNPJ</TableHead>
+              <TableHead>Endereço</TableHead>
+              <TableHead className="pr-6 text-right">Ações</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {clients.map((client) => (
+              <TableRow
+                key={client.id}
+                onDoubleClick={() => onSelectClientForEdit(client)}
+              >
+                <TableCell className="max-w-[300px] pl-6">
+                  <div className="flex items-center gap-3">
+                    <ClientAvatar nome={client.nome} />
+                    <div className="min-w-0">
+                      <p className="truncate font-medium" title={client.nome}>
+                        {client.nome}
+                      </p>
+                      {client.email && (
+                        <p
+                          className="truncate text-xs text-foreground-secondary"
+                          title={client.email}
+                        >
+                          {client.email}
+                        </p>
+                      )}
+                    </div>
+                  </div>
                 </TableCell>
-                <TableCell className="py-3 px-4  font-semibold">
-                  E-mail
+                <TableCell className="tabular text-foreground-secondary">
+                  {client.telefone ? formatPhone(client.telefone) : '—'}
                 </TableCell>
-                <TableCell className="py-3 px-4  font-semibold">
-                  Endereço
+                <TableCell className="tabular text-foreground-secondary">
+                  {client.cpfCnpj ? formatCpfCnpj(client.cpfCnpj) : '—'}
                 </TableCell>
-                <TableCell className="py-3 px-4  font-semibold">
-                  CPF/CNPJ
+                <TableCell className="max-w-[260px] text-foreground-secondary">
+                  <p className="truncate" title={client.endereco}>
+                    {client.endereco || '—'}
+                  </p>
                 </TableCell>
-                <TableCell className="py-3 px-4 text-center font-semibold">
-                  Ações
+                <TableCell className="pr-6">
+                  <RowActions
+                    client={client}
+                    onEdit={() => onSelectClientForEdit(client)}
+                    onDelete={() => setSelectedId(client.id)}
+                  />
                 </TableCell>
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredClients.map((client) => (
-                <TableRow
-                  key={client.id}
-                  className="hover:bg-gray-50 text-center cursor-pointer"
-                  onDoubleClick={() => onSelectClientForEdit(client)}
-                >
-                  <TableCell className="py-3 px-4 max-w-[150px]">
-                    <div className="truncate" title={client.nome}>
-                      {client.nome}
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3 px-4">
-                    {formatPhone(client.telefone)}
-                  </TableCell>
-                  <TableCell className="py-3 px-4 max-w-[200px]">
-                    <div className="truncate" title={client.email}>
-                      {client.email}
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3 px-4 max-w-[200px]">
-                    <div className="truncate" title={client.endereco}>
-                      {client.endereco}
-                    </div>
-                  </TableCell>
-                  <TableCell className="py-3 px-4">
-                    {formatCpfCnpj(client.cpfCnpj)}
-                  </TableCell>
-                  <TableCell className="py-3 px-4">
-                    <div className="flex justify-center space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center text-blue-600 hover:bg-blue-100 min-w-[36px] px-2"
-                        onClick={() => onSelectClientForEdit(client)}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="flex items-center text-red-600 hover:bg-red-100 min-w-[36px] px-2"
-                        onClick={() => openConfirmDialog(client.id)}
-                      >
-                        <Trash className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+            ))}
+          </TableBody>
+        </Table>
       </div>
 
-      {/* Versão Mobile - Cards */}
-      <div className="block md:hidden space-y-4">
-        {filteredClients.map((client) => (
-          <button
-            key={client.id}
-            className="bg-white w-full border border-gray-200 rounded-lg p-4 shadow-sm cursor-pointer hover:bg-gray-50"
-            onDoubleClick={() => onSelectClientForEdit(client)}
-          >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-gray-900 text-lg flex-1 mr-2">
-                {client.nome}
-              </h3>
-              <div className="flex space-x-1 flex-shrink-0">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center text-blue-600 hover:bg-blue-100 min-w-[32px] px-1.5 h-8"
-                  onClick={() => onSelectClientForEdit(client)}
-                >
-                  <Edit className="w-3.5 h-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center text-red-600 hover:bg-red-100 min-w-[32px] px-1.5 h-8"
-                  onClick={() => openConfirmDialog(client.id)}
-                >
-                  <Trash className="w-3.5 h-3.5" />
-                </Button>
+      {/* Mobile: cards */}
+      <ul className="divide-y divide-border border-t border-border md:hidden">
+        {clients.map((client) => (
+          <li key={client.id} className="flex flex-col gap-3 px-5 py-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <ClientAvatar nome={client.nome} />
+                <div className="min-w-0">
+                  <p className="truncate font-medium">{client.nome}</p>
+                  <p className="tabular truncate text-xs text-foreground-secondary">
+                    {client.cpfCnpj ? formatCpfCnpj(client.cpfCnpj) : '—'}
+                  </p>
+                </div>
               </div>
+              <RowActions
+                client={client}
+                onEdit={() => onSelectClientForEdit(client)}
+                onDelete={() => setSelectedId(client.id)}
+              />
             </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center">
-                <span className="text-gray-600 w-20">Telefone:</span>
-                <span className="text-gray-900 font-medium">
-                  {formatPhone(client.telefone)}
-                </span>
-              </div>
-
-              <div className="flex items-start">
-                <span className="text-gray-600 w-20 flex-shrink-0">
-                  E-mail:
-                </span>
-                <span className="text-gray-900 font-medium break-all">
-                  {client.email}
-                </span>
-              </div>
-
-              <div className="flex items-start">
-                <span className="text-gray-600 w-20 flex-shrink-0">
-                  Endereço:
-                </span>
-                <span className="text-gray-900 font-medium">
-                  {client.endereco}
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <span className="text-gray-600 w-20">CPF/CNPJ:</span>
-                <span className="text-gray-900 font-medium">
-                  {formatCpfCnpj(client.cpfCnpj)}
-                </span>
-              </div>
-            </div>
-          </button>
+            <ul className="space-y-1.5 text-sm text-foreground-secondary [&_svg]:size-3.5 [&_svg]:shrink-0">
+              {client.telefone && (
+                <li className="flex items-center gap-2">
+                  <Phone /> {formatPhone(client.telefone)}
+                </li>
+              )}
+              {client.email && (
+                <li className="flex items-center gap-2 break-all">
+                  <Mail /> {client.email}
+                </li>
+              )}
+              {client.endereco && (
+                <li className="flex items-start gap-2">
+                  <MapPin className="mt-0.5" /> {client.endereco}
+                </li>
+              )}
+            </ul>
+          </li>
         ))}
-      </div>
-      {/* ConfirmDialog do Radix UI */}
+      </ul>
+
       <ConfirmDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        title="Excluir Cliente"
+        open={selectedId !== null}
+        onOpenChange={(open) => !open && setSelectedId(null)}
+        title="Excluir cliente"
         description="Tem certeza que deseja remover este cliente? Esta ação não pode ser desfeita."
         onConfirm={handleConfirmDelete}
         cancelLabel="Cancelar"
         confirmLabel="Excluir"
       />
-    </div>
+    </>
   );
 }

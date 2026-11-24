@@ -49,23 +49,23 @@ export default function ModalEntrada({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
       <div
-        className="bg-black opacity-60 absolute inset-0"
+        className="bg-slate-900/40 backdrop-blur-[2px] absolute inset-0"
         onClick={() => setShowExitModal(false)}
       ></div>
-      <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg">
-        <h2 className="text-xl font-semibold text-black mb-4">
+      <div className="bg-white rounded-card p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-modal">
+        <h2 className="text-xl font-semibold text-foreground mb-4">
           Registrar Nova Entrada
         </h2>
         <form className="space-y-4">
           <div></div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Descrição
             </label>
             <input
               type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
               placeholder="Descrição da entrada"
               value={descricaoEntrada}
               onChange={(e) => setDescricaoEntrada(e.target.value)}
@@ -73,7 +73,7 @@ export default function ModalEntrada({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label className="block text-sm font-medium text-foreground mb-1">
               Método de Pagamento
             </label>
             <div className="grid grid-cols-2 gap-4">
@@ -107,7 +107,7 @@ export default function ModalEntrada({
                     value={id}
                     checked={metodoPagamento === id}
                     onChange={() => setMetodoPagamento(id)}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    className="h-4 w-4 accent-primary focus:ring-brand/30 border-border"
                   />
                   <label htmlFor={id} className="flex items-center gap-2">
                     {icon} {label}
@@ -122,13 +122,13 @@ export default function ModalEntrada({
               <div>
                 <label
                   htmlFor="parcelas-select"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-foreground mb-1"
                 >
                   Número de Parcelas
                 </label>
                 <select
                   id="parcelas-select"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
                   value={parcelas}
                   onChange={(e) => setParcelas(Number(e.target.value))}
                 >
@@ -140,7 +140,7 @@ export default function ModalEntrada({
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-foreground mb-1">
                   Juros (%)
                 </label>
                 <input
@@ -148,14 +148,14 @@ export default function ModalEntrada({
                   min="0"
                   max="100"
                   step="0.1"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
                   placeholder="0"
                   value={juros}
                   onChange={(e) => setJuros(Number(e.target.value))}
                 />
               </div>
               {juros > 0 && valorEntrada && (
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-foreground-secondary">
                   <p>Valor Original: R$ {Number(valorEntrada).toFixed(2)}</p>
                   <p>
                     Valor com Juros: R${' '}
@@ -183,7 +183,7 @@ export default function ModalEntrada({
               Cancelar
             </Button>
             <Button
-              className="bg-gradient-to-r from-green-500 to-green-700 text-white px-5 py-3 rounded-full hover:from-green-600 hover:to-green-800 w-auto sm:w-auto"
+              className="bg-primary text-primary-foreground px-5 h-10 rounded-md hover:bg-primary/90 w-auto sm:w-auto"
               type="button"
               onClick={enviarEntradaComMetodo}
             >

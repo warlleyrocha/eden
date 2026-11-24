@@ -10,7 +10,9 @@ import Home from '../pages/Home';
 import useAuth from '../hooks/useAuth';
 import Caixa from '@/pages/Caixa';
 import Stock from '@/pages/estoque';
-import Orcamento from '@/pages/orcamentos';
+import Clientes from '@/pages/clientes';
+import Orcamentos from '@/pages/orcamentos';
+import { AppLayout } from '@/components/layout/app-layout';
 
 const Private = ({ children }: { children: React.ReactElement }) => {
   const { authenticated, loading } = useAuth();
@@ -31,36 +33,20 @@ const Public = ({ children }: { children: React.ReactElement }) => {
 const router = createBrowserRouter(
   [
     {
-      path: '/home',
       element: (
         <Private>
-          <Home />
+          <AppLayout />
         </Private>
       ),
-    },
-    {
-      path: '/caixa',
-      element: (
-        <Private>
-          <Caixa />
-        </Private>
-      ),
-    },
-    {
-      path: '/estoque',
-      element: (
-        <Private>
-          <Stock />
-        </Private>
-      ),
-    },
-    {
-      path: '/orcamento',
-      element: (
-        <Private>
-          <Orcamento />
-        </Private>
-      ),
+      children: [
+        { path: '/home', element: <Home /> },
+        { path: '/caixa', element: <Caixa /> },
+        { path: '/estoque', element: <Stock /> },
+        { path: '/clientes', element: <Clientes /> },
+        { path: '/orcamentos', element: <Orcamentos /> },
+        // Rota antiga (clientes + orçamentos juntos)
+        { path: '/orcamento', element: <Navigate to="/orcamentos" replace /> },
+      ],
     },
     {
       path: '/signin',

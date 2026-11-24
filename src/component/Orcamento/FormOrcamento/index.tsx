@@ -126,19 +126,19 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Overlay com fundo escuro semi-transparente */}
       <div
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px]"
         onClick={handleOverlayClick}
       />
 
       {/* Conteúdo do Modal */}
-      <div className="relative bg-white p-6 rounded-lg shadow-xl w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="relative bg-white p-6 rounded-card shadow-modal w-11/12 max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Cabeçalho */}
         <div className="flex justify-between items-start mb-6">
           <div>
-            <h2 className="text-2xl font-bold text-[#1E3A8A]">
+            <h2 className="text-2xl font-bold text-foreground">
               Novo Orçamento
             </h2>
-            <p className="text-[#152C6B] mt-1">
+            <p className="text-foreground-secondary mt-1">
               Crie um novo orçamento para um cliente:
             </p>
           </div>
@@ -146,7 +146,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
             variant="ghost"
             onClick={onClose}
             size="icon"
-            className="text-[#152C6B] hover:text-gray-700 hover:bg-gray-100 rounded-full"
+            className="text-foreground-secondary hover:text-foreground hover:bg-neutral-bg rounded-full"
           >
             <X className="h-5 w-5" />
             <span className="sr-only">Fechar modal</span>
@@ -157,7 +157,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
         <div className="mb-4">
           <Label
             htmlFor="cliente"
-            className="block text-sm font-medium text-gray-700"
+            className="block text-sm font-medium text-foreground"
           >
             Cliente
           </Label>
@@ -165,7 +165,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
             id="cliente"
             name="cliente"
             aria-label="Cliente"
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-border focus:outline-none focus:ring-brand/30 focus:border-brand sm:text-sm rounded-md"
             value={selectedClient}
             onChange={onClientChange}
           >
@@ -208,7 +208,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
         <div className="flex-shrink-0 mb-2">
           <Button
             variant="ghost"
-            className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
+            className="border w-full border-border p-2 rounded-md hover:bg-neutral-bg transition duration-200"
             onClick={onAddProduct}
           >
             <Plus className="mr-2" />
@@ -220,7 +220,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
         <div className="flex-shrink-0 mb-2">
           <Button
             variant="ghost"
-            className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
+            className="border w-full border-border p-2 rounded-md hover:bg-neutral-bg transition duration-200"
             onClick={onAddService}
           >
             <Plus className="mr-2" />
@@ -231,7 +231,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
         {/* Seção de Pagamento */}
         <div className="flex-shrink-0 mb-2">
           {registroConcluido ? (
-            <div className="text-sm text-gray-700 border border-zinc-400 p-4 rounded-md bg-gray-50 space-y-1">
+            <div className="text-sm text-foreground border border-border p-4 rounded-md bg-surface-secondary space-y-1">
               <p>
                 <strong>Resumo da Saída:</strong>
               </p>
@@ -259,7 +259,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
           ) : (
             <Button
               variant="ghost"
-              className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
+              className="border w-full border-border p-2 rounded-md hover:bg-neutral-bg transition duration-200"
               onClick={onOpenPaymentModal}
             >
               <Plus className="mr-2" />
@@ -286,13 +286,13 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
 
         {/* Descrição */}
         <div>
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium text-foreground mb-1">
             Descrição
           </Label>
           <Input
             type="text"
             placeholder="Descrição do orçamento"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30"
           />
         </div>
 
@@ -302,7 +302,7 @@ const FormOrcamento: React.FC<FormOrcamentoProps> = ({
         <div className="flex-shrink-0">
           <Button
             variant="ghost"
-            className="border-2 w-full border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
+            className="border w-full border-border p-2 rounded-md hover:bg-neutral-bg transition duration-200"
             onClick={onGenerateClick}
             disabled={isSubmitting}
           >

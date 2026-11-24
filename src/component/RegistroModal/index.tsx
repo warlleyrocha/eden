@@ -110,19 +110,19 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 p-4 sm:p-8">
       <button
-        className="bg-black opacity-60 absolute inset-0"
+        className="bg-slate-900/40 backdrop-blur-[2px] absolute inset-0"
         onClick={onClose}
         disabled={isSubmitting}
       ></button>
 
-      <div className="bg-white rounded-2xl p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-lg max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-semibold text-[#1E3A8A] mb-4">{titulo}</h2>
+      <div className="bg-white rounded-card p-6 sm:p-8 relative z-10 max-w-lg w-full shadow-modal max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-semibold text-foreground mb-4">{titulo}</h2>
 
         {isSubmitting && (
-          <div className="absolute inset-0 bg-white bg-opacity-90 rounded-2xl flex items-center justify-center z-20">
+          <div className="absolute inset-0 bg-surface/90 rounded-card flex items-center justify-center z-20">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-[#1E3A8A] mx-auto mb-4" />
-              <p className="text-[#1E3A8A] font-medium">{loadingTexto}</p>
+              <Loader2 className="h-8 w-8 animate-spin text-foreground mx-auto mb-4" />
+              <p className="text-foreground font-medium">{loadingTexto}</p>
             </div>
           </div>
         )}
@@ -133,7 +133,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
             <div>
               <label
                 htmlFor="value"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-sm font-medium text-foreground mb-1"
               >
                 Valor
               </label>
@@ -141,7 +141,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                 type="number"
                 step="0.01"
                 min="0.01"
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
                 placeholder="0,00"
                 value={valor}
                 onChange={(e) => setValor(e.target.value)}
@@ -155,7 +155,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
             <div className="flex-1 min-w-[200px]">
               {/* Seção para adicionar produto */}
               <div className="space-y-4 mb-4">
-                <h3 className="text-sm font-medium text-gray-700">
+                <h3 className="text-sm font-medium text-foreground">
                   Adicionar Produto
                 </h3>
 
@@ -163,11 +163,11 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                 <div className="flex flex-col md:flex-row gap-4">
                   {/* Campo Produto */}
                   <div className="flex-1">
-                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label className="block text-sm font-medium text-foreground mb-1">
                       Produto
                     </Label>
                     <select
-                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                      className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
                       value={produtoParaAdicionar}
                       onChange={(e) =>
                         setProdutoParaAdicionar?.(e.target.value)
@@ -188,7 +188,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
 
                   {/* Campo Quantidade */}
                   <div className="flex-1">
-                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label className="block text-sm font-medium text-foreground mb-1">
                       Quantidade
                       {produtoParaAdicionar &&
                         (() => {
@@ -210,8 +210,8 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                             <span
                               className={`ml-2 text-xs ${
                                 estoqueDisponivel > 0
-                                  ? 'text-green-600'
-                                  : 'text-red-600'
+                                  ? 'text-success-foreground'
+                                  : 'text-danger-foreground'
                               }`}
                             >
                               (Disponível: {estoqueDisponivel})
@@ -222,7 +222,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                     <Input
                       type="number"
                       placeholder="Quantidade"
-                      className={`w-full mt-[5px] py-4.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      className={`w-full mt-[5px] py-4.5 border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30 ${
                         produtoParaAdicionar &&
                         (() => {
                           const produtoSelecionado = products?.find(
@@ -241,8 +241,8 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                               ) || 0);
                           return (quantidadeParaAdicionar || 0) >
                             estoqueDisponivel
-                            ? 'border-red-300'
-                            : 'border-gray-300';
+                            ? 'border-danger/40'
+                            : 'border-border';
                         })()
                       }`}
                       value={
@@ -286,7 +286,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                 <div className="flex flex-col md:flex-row gap-4">
                   {/* Campo Valor Unitário */}
                   <div className="flex-1">
-                    <Label className="block text-sm font-medium text-gray-700 mb-1">
+                    <Label className="block text-sm font-medium text-foreground mb-1">
                       Valor Unitário (R$)
                     </Label>
                     <Input
@@ -294,7 +294,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                       step="0.01"
                       min="0.00"
                       placeholder="0,00"
-                      className="w-full mt-[5px] py-4.5 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-[5px] py-4.5 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30"
                       value={valorParaAdicionar ?? ''}
                       onChange={(e) => {
                         setValorParaAdicionar?.(String(e.target.value));
@@ -311,7 +311,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                         !produtoParaAdicionar ||
                         (quantidadeParaAdicionar ?? 0) <= 0
                       }
-                      className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
+                      className="px-4 h-10 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
                     >
                       Adicionar
                     </Button>
@@ -321,8 +321,8 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
 
               {/* Lista de produtos selecionados */}
               {(produtosSelecionados ?? []).length > 0 && (
-                <div className="border rounded-md p-4 bg-gray-50">
-                  <Label className="block text-sm font-medium text-gray-700 mb-2">
+                <div className="border rounded-md p-4 bg-surface-secondary">
+                  <Label className="block text-sm font-medium text-foreground mb-2">
                     Produtos Selecionados
                   </Label>
                   <div className="space-y-2">
@@ -341,7 +341,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                             <div className="text-sm font-medium">
                               {produto?.nome}
                             </div>
-                            <div className="text-xs text-gray-600">
+                            <div className="text-xs text-foreground-secondary">
                               Qtd: {item.quantidade} ×{' '}
                               {formatarMoeda(Number(item.valorUnitario))} ={' '}
                               {formatarMoeda(valorTotal)}
@@ -350,7 +350,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                           <Button
                             type="button"
                             onClick={() => removerProduto?.(index)}
-                            className="px-2 py-1 bg-red-500 text-white rounded text-xs hover:bg-red-600"
+                            className="px-2 py-1 bg-danger-bg text-danger-foreground border border-danger/30 rounded-sm text-xs hover:bg-danger/20"
                           >
                             Remover
                           </Button>
@@ -360,12 +360,12 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                   </div>
 
                   {/* Valor Total */}
-                  <div className="mt-3 pt-3 border-t border-gray-200">
+                  <div className="mt-3 pt-3 border-t border-border">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-gray-700">
+                      <span className="text-sm font-medium text-foreground">
                         Valor Total:
                       </span>
-                      <span className="text-lg font-bold text-[#1E3A8A]">
+                      <span className="text-lg font-bold text-foreground">
                         {formatarMoeda(valorTotalProdutos)}
                       </span>
                     </div>
@@ -378,13 +378,13 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
           <div>
             <label
               htmlFor="description"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Descrição
             </label>
             <input
               type="text"
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
               placeholder={`Descrição da ${tipo}`}
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
@@ -395,7 +395,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
           <div>
             <label
               htmlFor="payment-method"
-              className="block text-sm font-medium text-gray-700 mb-1"
+              className="block text-sm font-medium text-foreground mb-1"
             >
               Método de Pagamento
             </label>
@@ -431,7 +431,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                     checked={metodoPagamento === id}
                     onChange={() => setMetodoPagamento(id)}
                     disabled={isSubmitting}
-                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                    className="h-4 w-4 accent-primary focus:ring-brand/30 border-border"
                   />
                   <label htmlFor={id} className="flex items-center gap-2">
                     {icon}
@@ -447,13 +447,13 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
               <div>
                 <label
                   htmlFor="parcelas-select"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-foreground mb-1"
                 >
                   Número de Parcelas
                 </label>
                 <select
                   id="parcelas-select"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
                   value={parcelas}
                   onChange={(e) => setParcelas(Number(e.target.value))}
                   disabled={isSubmitting}
@@ -468,7 +468,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
               <div>
                 <label
                   htmlFor="juros"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium text-foreground mb-1"
                 >
                   Juros (%)
                 </label>
@@ -477,7 +477,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                   min="0"
                   max="100"
                   step="0.1"
-                  className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  className="mt-1 block h-10 w-full px-3 bg-surface border border-border rounded-md shadow-xs hover:border-border-hover focus:outline-none focus:ring-[3px] focus:ring-brand/25 focus:border-brand sm:text-sm"
                   placeholder="0"
                   value={juros}
                   onChange={(e) => setJuros(Number(e.target.value))}
@@ -485,7 +485,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
                 />
               </div>
               {juros > 0 && (
-                <div className="text-sm text-gray-600">
+                <div className="text-sm text-foreground-secondary">
                   {tipo === 'entrada' && valorTotalProdutos > 0 ? (
                     <>
                       <p>Valor Original: {formatarMoeda(valorTotalProdutos)}</p>
@@ -526,14 +526,14 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
           <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
             <Button
               variant="outline"
-              className="w-full sm:w-auto rounded-full border-gray-300 hover:bg-gray-50"
+              className="w-full sm:w-auto rounded-full border-border hover:bg-neutral-bg"
               onClick={onClose}
               disabled={isSubmitting}
             >
               Cancelar
             </Button>
             <Button
-              className="w-full sm:w-auto bg-[#22C55E] hover:bg-[#1AAE4E] text-white px-5 py-3 rounded-full transition-colors duration-200"
+              className="w-full sm:w-auto bg-primary hover:bg-primary/90 text-primary-foreground px-5 h-10 rounded-md transition-colors duration-200"
               disabled={isSubmitting}
               onClick={onSubmit}
             >
@@ -548,7 +548,7 @@ export const RegistroModal: React.FC<RegistroModalProps> = ({
             </Button>
           </div>
           {error && (
-            <div className="error-message text-red-600 text-sm mt-2 text-center">
+            <div className="error-message text-danger-foreground text-sm mt-2 text-center">
               {error}
             </div>
           )}
