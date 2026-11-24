@@ -25,7 +25,11 @@ type ApiError = {
   status?: number;
 };
 
-export function useFinanceiro() {
+/**
+ * @param enabled `false` não busca as movimentações ao montar (ex.: dashboard
+ *   de funcionário sem `gerenciar_caixa`, que receberia 403).
+ */
+export function useFinanceiro({ enabled = true }: { enabled?: boolean } = {}) {
   const [movimentacoes, setMovimentacoes] = useState<MovimentoFinanceiro[]>([]);
   const [relatorio, setRelatorio] = useState<RelatorioFinanceiro | null>(null);
   const [relatorioPeriodo, setRelatorioPeriodo] = useState<RelatorioFinanceiro | null>(null);
@@ -205,11 +209,12 @@ export function useFinanceiro() {
 
   // Auto-fetch inicial
   useEffect(() => {
+    if (!enabled) return;
     const controller = new AbortController();
     fetchMovimentacoes(controller.signal);
 
     return () => controller.abort();
-  }, [fetchMovimentacoes]);
+  }, [fetchMovimentacoes, enabled]);
 
   return {
     // Estados

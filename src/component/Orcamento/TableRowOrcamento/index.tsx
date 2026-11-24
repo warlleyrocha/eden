@@ -1,9 +1,9 @@
 import { memo, useMemo } from 'react';
-import { Printer, Trash2 } from 'lucide-react';
+import { Printer } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { OrcamentoStatusBadge } from '@/components/app/status-badge';
+import { RowActions } from '@/components/app/row-actions';
 import { formatarMoeda } from '@/utils/formatters';
 
 export interface OrcamentoRenderDetails {
@@ -48,27 +48,17 @@ export const TableRowOrcamento = memo<TableRowOrcamentoProps>(
           <OrcamentoStatusBadge status={orcamento.status} />
         </TableCell>
         <TableCell className="pr-6">
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => onPrint(orcamento.id)}
-              aria-label="Imprimir orçamento"
-              title="Imprimir"
-            >
-              <Printer />
-            </Button>
-            <Button
-              variant="outline"
-              size="icon-sm"
-              onClick={() => onDeleteOrcamento(orcamento.id)}
-              aria-label="Excluir orçamento"
-              title="Excluir"
-              className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
-            >
-              <Trash2 />
-            </Button>
-          </div>
+          <RowActions
+            label={`orçamento #${numeroSequencial}`}
+            actions={[
+              {
+                label: 'Imprimir',
+                icon: Printer,
+                onSelect: () => onPrint(orcamento.id),
+              },
+            ]}
+            onDelete={() => onDeleteOrcamento(orcamento.id)}
+          />
         </TableCell>
       </TableRow>
     );

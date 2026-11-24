@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useStore } from '@/hooks/useLoja';
+import { usePermissoes } from '@/hooks/usePermissoes';
 import { cn } from '@/lib/utils';
 
 import { NAV_ITEMS, findNavItem } from './nav-items';
@@ -44,9 +45,14 @@ export function AppSidebar() {
   const { toggleSidebar, isMobile, setOpenMobile } = useSidebar();
   const { storeData } = useStore();
   const logout = useLogout();
+  const { podeAcessar, usuario } = usePermissoes();
   const active = findNavItem(pathname);
+  const items = NAV_ITEMS.filter(podeAcessar);
 
   const storeName = storeData?.nome ?? 'Minha loja';
+  // Funcionário: mostra quem está logado; loja: o nome e o e-mail da loja.
+  const accountName = usuario?.nome ?? storeName;
+  const accountDetail = usuario ? storeName : (storeData?.email ?? 'Administrador');
 
   return (
     <Sidebar className="border-r border-sidebar-border">
@@ -73,7 +79,7 @@ export function AppSidebar() {
         <SidebarGroup className="p-2">
           <SidebarGroupContent>
             <SidebarMenu className="gap-1.5">
-              {NAV_ITEMS.map((item) => {
+              {items.map((item) => {
                 const isActive = active?.url === item.url;
                 return (
                   <SidebarMenuItem key={item.url}>
@@ -111,15 +117,15 @@ export function AppSidebar() {
             >
               <Avatar className="size-9 rounded-md">
                 <AvatarFallback className="rounded-md bg-brand-bg text-sm font-semibold text-brand-foreground">
-                  {getInitials(storeName)}
+                  {getInitials(accountName)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground">
-                  {storeName}
+                  {accountName}
                 </p>
                 <p className="truncate text-xs text-foreground-secondary">
-                  {storeData?.email ?? 'Administrador'}
+                  {accountDetail}
                 </p>
               </div>
               <ChevronsUpDown className="size-4 shrink-0 text-foreground-muted" />
@@ -131,8 +137,13 @@ export function AppSidebar() {
             className="w-56"
           >
             <DropdownMenuLabel className="font-normal">
-              <p className="truncate text-sm font-medium">{storeName}</p>
-              {storeData?.cnpj && (
+              <p className="truncate text-sm font-medium">{accountName}</p>
+              {usuario && (
+                <p className="truncate text-xs text-foreground-secondary">
+                  {usuario.email}
+                </p>
+              )}
+              {!usuario && storeData?.cnpj && (
                 <p className="truncate text-xs text-foreground-secondary">
                   CNPJ {storeData.cnpj}
                 </p>

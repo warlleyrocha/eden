@@ -1,14 +1,22 @@
+export type PermissaoValue =
+  | 'gerenciar_caixa'
+  | 'cadastrar_produto'
+  | 'cadastrar_cliente'
+  | 'gerar_orcamento';
+
 export type Permissao = {
   /** Valor enviado ao backend em `permissoes`. */
-  value: string;
+  value: PermissaoValue;
   label: string;
   description: string;
 };
 
 /**
- * Permissões que podem ser atribuídas a um funcionário.
- * O backend aceita qualquer string; mantenha esta lista alinhada com as
- * verificações de permissão quando elas forem implementadas na API.
+ * Permissões que podem ser atribuídas a um funcionário. Cada uma libera o
+ * módulo do menu de mesmo nome.
+ *
+ * Lista oficial no backend: `src/models/auth/permissoes.ts` (EdenBackEnd).
+ * Um valor fora dela é recusado com 400, então mantenha as duas iguais.
  */
 export const PERMISSOES: Permissao[] = [
   {
@@ -33,7 +41,7 @@ export const PERMISSOES: Permissao[] = [
   },
 ];
 
-const LABELS = new Map(PERMISSOES.map((p) => [p.value, p.label]));
+const LABELS = new Map<string, string>(PERMISSOES.map((p) => [p.value, p.label]));
 
 export function getPermissaoLabel(value: string) {
   return LABELS.get(value) ?? value;

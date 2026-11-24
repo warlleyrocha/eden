@@ -1,5 +1,5 @@
 import { memo, useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import { FileText, Plus, Printer, Trash2 } from 'lucide-react';
+import { FileText, Plus, Printer } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { SectionCard } from '@/components/app/section-card';
 import { SearchInput } from '@/components/app/search-input';
 import { EmptyState } from '@/components/app/empty-state';
 import { OrcamentoStatusBadge } from '@/components/app/status-badge';
+import { RowActions } from '@/components/app/row-actions';
 import { ConfirmDialog } from '@/component/ConfirmDialog';
 
 import OrcamentoPrintContent from '../PrintOrcamento';
@@ -338,25 +339,17 @@ function TableOrcamento({
                     <span className="tabular text-lg font-semibold">
                       {formatarMoeda(orcamento.total)}
                     </span>
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={() => onPrint(orcamento.id)}
-                        aria-label="Imprimir orçamento"
-                      >
-                        <Printer />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="icon-sm"
-                        onClick={() => setDeleteId(orcamento.id)}
-                        aria-label="Excluir orçamento"
-                        className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
-                      >
-                        <Trash2 />
-                      </Button>
-                    </div>
+                    <RowActions
+                      label={`orçamento #${orcamento.numeroSequencial}`}
+                      actions={[
+                        {
+                          label: 'Imprimir',
+                          icon: Printer,
+                          onSelect: () => onPrint(orcamento.id),
+                        },
+                      ]}
+                      onDelete={() => setDeleteId(orcamento.id)}
+                    />
                   </div>
                 </li>
               ))}

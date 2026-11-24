@@ -1,5 +1,11 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
+import axios from 'axios';
 import { api } from '../../services/api';
+import {
+  consumirAvisoSessao,
+  salvarSessao,
+  type LoginResponse,
+} from '@/lib/session';
 import useAuth from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -109,6 +115,19 @@ export default function SignIn() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Sessão encerrada pela API (token expirado, funcionário desativado...)
+  useEffect(() => {
+    const aviso = consumirAvisoSessao();
+    if (aviso) {
+      toast.warning('Sessão encerrada', {
+        description: aviso,
+        duration: 5000,
+        position: 'bottom-right',
+        richColors: true,
+      });
+    }
+  }, []);
+
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
@@ -120,19 +139,14 @@ export default function SignIn() {
 
     setIsSubmitting(true);
     try {
-      const response = await api.post('/auth/login', {
+      const response = await api.post<LoginResponse>('/auth/login', {
         email: email,
         senha: password,
       });
 
       if (response.status === 200) {
-        const { access_token, loja } = response.data;
-
-        localStorage.setItem('token', access_token);
-
-        if (loja?.id) {
-          localStorage.setItem('storeId', loja.id);
-        }
+        // Token, loja e, para funcionário, role + permissões
+        salvarSessao(response.data);
 
         // "Lembrar de mim": guarda o e-mail para preencher no próximo acesso
         if (rememberMe) {
@@ -154,8 +168,23 @@ export default function SignIn() {
           navigate('/home');
         }, 3000); // Aguarda o toast antes de redirecionar
       }
-    } catch {
+    } catch (err) {
       setIsSubmitting(false);
+      const message = axios.isAxiosError(err)
+        ? err.response?.data?.message
+        : undefined;
+
+      if (message === 'Funcionário desativado') {
+        toast.error('Acesso desativado', {
+          description:
+            'Seu acesso foi desativado. Fale com o responsável pela loja.',
+          duration: 4000,
+          position: 'bottom-right',
+          richColors: true,
+        });
+        return;
+      }
+
       toast.error('Credenciais inválidas!', {
         description: 'Verifique seu Email e senha.',
         duration: 2000,

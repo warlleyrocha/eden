@@ -16,37 +16,46 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatarMoeda } from '@/utils/formatters';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 import { useDashboard } from './useDashboard';
 import { CashFlowChart } from './CashFlowChart';
 import { StockStatusChart } from './StockStatusChart';
 
 export default function Home() {
+  const { pode } = usePermissoes();
+  const verCaixa = pode('gerenciar_caixa');
+  const verOrcamentos = pode('gerar_orcamento');
+
   const { kpis, fluxoMensal, fluxoDiario, estoque, orcamentosRecentes, loading } =
-    useDashboard();
+    useDashboard({ financeiro: verCaixa });
 
   return (
     <>
       {/* Indicadores */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <KpiCard
-          label="Entradas hoje"
-          value={formatarMoeda(kpis.entradasHoje)}
-          trend={{ value: kpis.entradasVar, label: 'em relação a ontem' }}
-          loading={loading.financeiro}
-        />
-        <KpiCard
-          label="Saídas hoje"
-          value={formatarMoeda(kpis.saidasHoje)}
-          trend={{ value: kpis.saidasVar, invert: true, label: 'em relação a ontem' }}
-          loading={loading.financeiro}
-        />
-        <KpiCard
-          label="Saldo do mês"
-          value={formatarMoeda(kpis.saldoMes)}
-          trend={{ value: kpis.saldoMesVar, label: 'em relação ao mês anterior' }}
-          loading={loading.financeiro}
-        />
+        {verCaixa && (
+          <>
+            <KpiCard
+              label="Entradas hoje"
+              value={formatarMoeda(kpis.entradasHoje)}
+              trend={{ value: kpis.entradasVar, label: 'em relação a ontem' }}
+              loading={loading.financeiro}
+            />
+            <KpiCard
+              label="Saídas hoje"
+              value={formatarMoeda(kpis.saidasHoje)}
+              trend={{ value: kpis.saidasVar, invert: true, label: 'em relação a ontem' }}
+              loading={loading.financeiro}
+            />
+            <KpiCard
+              label="Saldo do mês"
+              value={formatarMoeda(kpis.saldoMes)}
+              trend={{ value: kpis.saldoMesVar, label: 'em relação ao mês anterior' }}
+              loading={loading.financeiro}
+            />
+          </>
+        )}
         <KpiCard
           label="Orçamentos em aberto"
           value={kpis.orcamentosAbertos}
@@ -61,13 +70,15 @@ export default function Home() {
 
       {/* Área analítica */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <div className="min-w-0 xl:col-span-2">
-          <CashFlowChart
-            mensal={fluxoMensal}
-            diario={fluxoDiario}
-            loading={loading.financeiro}
-          />
-        </div>
+        {verCaixa && (
+          <div className="min-w-0 xl:col-span-2">
+            <CashFlowChart
+              mensal={fluxoMensal}
+              diario={fluxoDiario}
+              loading={loading.financeiro}
+            />
+          </div>
+        )}
         <StockStatusChart
           contagem={estoque.contagem}
           total={estoque.total}
@@ -80,11 +91,13 @@ export default function Home() {
         title="Orçamentos recentes"
         flush
         actions={
-          <Button asChild variant="outline" className="rounded-full">
-            <Link to="/orcamentos">
-              Ver todos <ArrowRight />
-            </Link>
-          </Button>
+          verOrcamentos && (
+            <Button asChild variant="outline" className="rounded-full">
+              <Link to="/orcamentos">
+                Ver todos <ArrowRight />
+              </Link>
+            </Button>
+          )
         }
       >
         {loading.orcamentos ? (

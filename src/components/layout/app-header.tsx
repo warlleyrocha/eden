@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useStore } from '@/hooks/useLoja';
+import { usePermissoes } from '@/hooks/usePermissoes';
 
 import { findNavItem } from './nav-items';
 import { GlobalSearch } from './global-search';
@@ -23,13 +24,18 @@ export function AppHeader() {
   const { state, isMobile, toggleSidebar } = useSidebar();
   const { storeData } = useStore();
   const logout = useLogout();
+  const { usuario } = usePermissoes();
 
   const current = findNavItem(pathname);
   const isDashboard = current?.url === '/home';
   const storeName = storeData?.nome;
+  // Funcionário é cumprimentado pelo primeiro nome; a loja, pelo nome dela.
+  const greetingName = usuario ? usuario.nome.split(' ')[0] : storeName;
+  const accountName = usuario?.nome ?? storeName;
+  const accountEmail = usuario?.email ?? storeData?.email;
 
   const title = isDashboard
-    ? `Olá${storeName ? `, ${storeName}` : ''} 👋`
+    ? `Olá${greetingName ? `, ${greetingName}` : ''} 👋`
     : (current?.title ?? '');
   const subtitle = isDashboard
     ? 'Bem-vindo de volta! Aqui está o resumo de hoje.'
@@ -74,7 +80,7 @@ export function AppHeader() {
             >
               <Avatar className="size-10 border border-border">
                 <AvatarFallback className="bg-brand-bg text-sm font-semibold text-brand-foreground">
-                  {getInitials(storeName)}
+                  {getInitials(accountName)}
                 </AvatarFallback>
               </Avatar>
             </button>
@@ -82,11 +88,11 @@ export function AppHeader() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="font-normal">
               <p className="truncate text-sm font-medium">
-                {storeName ?? 'Minha loja'}
+                {accountName ?? 'Minha loja'}
               </p>
-              {storeData?.email && (
+              {accountEmail && (
                 <p className="truncate text-xs text-foreground-secondary">
-                  {storeData.email}
+                  {accountEmail}
                 </p>
               )}
             </DropdownMenuLabel>

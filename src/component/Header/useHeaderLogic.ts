@@ -4,6 +4,7 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useAuth from '@/hooks/useAuth';
 import { useStore } from '@/hooks/useLoja';
+import { limparSessao } from '@/lib/session';
 import { useOrcamento } from '@/hooks/useOrcamento';
 import { toast } from 'sonner';
 
@@ -41,7 +42,7 @@ export function useHeaderLogic() {
 
   // Função para realizar logout do usuário
   const handleLogOut = useCallback(() => {
-    localStorage.removeItem('token');
+    limparSessao();
     setAuthenticated(false);
     navigate('/signin');
   }, [setAuthenticated, navigate]);

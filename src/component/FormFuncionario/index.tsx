@@ -5,7 +5,9 @@ import { z } from 'zod';
 
 import type {
   CreateFuncionario,
+  Funcionario,
   FuncionarioFormValues,
+  UpdateFuncionario,
 } from '@/@types/funcionario';
 import { EntityFormLayout } from '@/components/app/entity-form-layout';
 import { FormField } from '@/components/app/form-field';
@@ -16,59 +18,99 @@ import { cn } from '@/lib/utils';
 
 import { IconEmail, IconName } from '../Icons/FormIcons';
 
-const schema = z
-  .object({
-    name: z.string().trim().min(1, 'Informe o nome do funcionário.'),
-    email: z
-      .string()
-      .trim()
-      .min(1, 'Informe o e-mail.')
-      .email('E-mail inválido.'),
-    password: z.string().min(6, 'A senha precisa ter no mínimo 6 caracteres.'),
-    confirmPassword: z.string(),
-    permissoes: z.array(z.string()),
-  })
-  .refine((d) => d.password === d.confirmPassword, {
-    path: ['confirmPassword'],
-    message: 'As senhas não conferem.',
-  });
+const SENHA_CURTA = 'A senha precisa ter no mínimo 6 caracteres.';
 
-const INITIAL_FORM: FuncionarioFormValues = {
-  name: '',
-  email: '',
-  password: '',
-  confirmPassword: '',
-  permissoes: [],
-};
+/** Na edição a senha é opcional: em branco mantém a atual. */
+function makeSchema(isEdit: boolean) {
+  return z
+    .object({
+      name: z.string().trim().min(1, 'Informe o nome do funcionário.'),
+      email: z
+        .string()
+        .trim()
+        .min(1, 'Informe o e-mail.')
+        .email('E-mail inválido.'),
+      password: isEdit
+        ? z.string().refine((v) => v === '' || v.length >= 6, SENHA_CURTA)
+        : z.string().min(6, SENHA_CURTA),
+      confirmPassword: z.string(),
+      permissoes: z.array(z.string()),
+    })
+    .refine((d) => d.password === d.confirmPassword, {
+      path: ['confirmPassword'],
+      message: 'As senhas não conferem.',
+    });
+}
+
+function toFormValues(f?: Funcionario | null): FuncionarioFormValues {
+  return {
+    name: f?.nome ?? '',
+    email: f?.email ?? '',
+    password: '',
+    confirmPassword: '',
+    permissoes: f?.permissoes ?? [],
+  };
+}
+
+function mesmasPermissoes(a: string[], b: string[]) {
+  return a.length === b.length && a.every((p) => b.includes(p));
+}
+
+/** Só os campos alterados, como o PATCH espera. */
+function diff(f: Funcionario, data: FuncionarioFormValues): UpdateFuncionario {
+  const payload: UpdateFuncionario = {};
+  const nome = data.name.trim();
+  const email = data.email.trim().toLowerCase();
+  if (nome !== f.nome) payload.nome = nome;
+  if (email !== f.email) payload.email = email;
+  if (data.password) payload.senha = data.password;
+  if (!mesmasPermissoes(data.permissoes, f.permissoes)) {
+    payload.permissoes = data.permissoes;
+  }
+  return payload;
+}
 
 type FormFuncionarioProps = Readonly<{
-  onSubmit: (data: CreateFuncionario) => Promise<unknown>;
+  /** Com funcionário, edita; sem, cadastra. */
+  funcionario?: Funcionario | null;
+  onCreate: (data: CreateFuncionario) => Promise<unknown>;
+  onUpdate: (id: string, data: UpdateFuncionario) => Promise<unknown>;
   onClose: () => void;
   loading?: boolean;
 }>;
 
 export default function FormFuncionario({
-  onSubmit,
+  funcionario,
+  onCreate,
+  onUpdate,
   onClose,
   loading,
 }: FormFuncionarioProps) {
+  const isEdit = !!funcionario;
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<FuncionarioFormValues>({
-    defaultValues: INITIAL_FORM,
-    resolver: zodResolver(schema),
+    defaultValues: toFormValues(funcionario),
+    resolver: zodResolver(makeSchema(isEdit)),
   });
 
   const submit = handleSubmit(async (data) => {
     try {
-      await onSubmit({
-        nome: data.name.trim(),
-        email: data.email.trim().toLowerCase(),
-        senha: data.password,
-        permissoes: data.permissoes,
-      });
+      if (funcionario) {
+        const payload = diff(funcionario, data);
+        if (Object.keys(payload).length > 0) {
+          await onUpdate(funcionario.id, payload);
+        }
+      } else {
+        await onCreate({
+          nome: data.name.trim(),
+          email: data.email.trim().toLowerCase(),
+          senha: data.password,
+          permissoes: data.permissoes,
+        });
+      }
       onClose();
     } catch {
       // O erro já é exibido via toast; mantém o formulário aberto.
@@ -77,11 +119,15 @@ export default function FormFuncionario({
 
   return (
     <EntityFormLayout
-      title="Novo funcionário"
-      description="Cadastre um funcionário e defina o que ele pode acessar."
+      title={isEdit ? 'Editar funcionário' : 'Novo funcionário'}
+      description={
+        isEdit
+          ? 'Altere os dados ou as permissões de acesso.'
+          : 'Cadastre um funcionário e defina o que ele pode acessar.'
+      }
       onSubmit={submit}
       onCancel={onClose}
-      submitLabel="Cadastrar funcionário"
+      submitLabel={isEdit ? 'Salvar alterações' : 'Cadastrar funcionário'}
       loading={loading}
       noValidate
     >
@@ -133,9 +179,10 @@ export default function FormFuncionario({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <FormField
           htmlFor="password"
-          label="Senha"
+          label={isEdit ? 'Nova senha' : 'Senha'}
           icon={<KeyRound className="mr-2 size-4 text-foreground-muted" />}
           error={errors.password?.message}
+          hint={isEdit ? 'Deixe em branco para manter a atual.' : undefined}
         >
           <Controller
             name="password"
@@ -145,7 +192,7 @@ export default function FormFuncionario({
                 {...field}
                 id="password"
                 type="password"
-                placeholder="Mínimo 6 caracteres"
+                placeholder={isEdit ? 'Opcional' : 'Mínimo 6 caracteres'}
                 autoComplete="new-password"
                 aria-invalid={!!errors.password}
               />

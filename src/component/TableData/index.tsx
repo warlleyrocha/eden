@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Package, Pencil, Trash2 } from 'lucide-react';
+import { Package } from 'lucide-react';
 
-import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -11,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { StockStatusBadge } from '@/components/app/status-badge';
+import { RowActions } from '@/components/app/row-actions';
 import { formatarMoeda } from '@/utils/formatters';
 import { ConfirmDialog } from '../ConfirmDialog';
 
@@ -27,40 +27,6 @@ function ProductThumb() {
     <span className="flex size-10 shrink-0 items-center justify-center rounded-md border border-border bg-surface-secondary text-foreground-secondary">
       <Package className="size-[18px]" strokeWidth={1.75} />
     </span>
-  );
-}
-
-function RowActions({
-  nome,
-  onEdit,
-  onDelete,
-}: {
-  nome: string;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  return (
-    <div className="flex justify-end gap-2">
-      <Button
-        variant="outline"
-        size="icon-sm"
-        onClick={onEdit}
-        aria-label={`Editar ${nome}`}
-        title="Editar"
-      >
-        <Pencil />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon-sm"
-        onClick={onDelete}
-        aria-label={`Excluir ${nome}`}
-        title="Excluir"
-        className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
-      >
-        <Trash2 />
-      </Button>
-    </div>
   );
 }
 
@@ -116,7 +82,7 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
                   </TableCell>
                   <TableCell className="pr-6">
                     <RowActions
-                      nome={item.nome}
+                      label={item.nome}
                       onEdit={() => onEdit?.(item.id)}
                       onDelete={() => setSelectedId(item.id)}
                     />
@@ -144,7 +110,7 @@ export function TableData({ items, onEdit, onDelete }: TableDataProps) {
                   </div>
                 </div>
                 <RowActions
-                  nome={item.nome}
+                  label={item.nome}
                   onEdit={() => onEdit?.(item.id)}
                   onDelete={() => setSelectedId(item.id)}
                 />

@@ -4,7 +4,7 @@ export interface Funcionario {
   email: string;
   lojaId: string;
   permissoes: string[];
-  ativo?: boolean;
+  ativo: boolean;
 }
 
 /** Corpo de POST /auth/loja/criar-funcionario (lojaId vem do token). */
@@ -14,6 +14,9 @@ export interface CreateFuncionario {
   senha: string;
   permissoes: string[];
 }
+
+/** Corpo de PATCH /auth/loja/funcionarios/:id: só os campos que mudam. */
+export type UpdateFuncionario = Partial<CreateFuncionario & { ativo: boolean }>;
 
 export interface FuncionarioFormValues {
   name: string;

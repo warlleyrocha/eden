@@ -134,9 +134,25 @@ const DELETE_CLIENT_ERRORS = {
   409: 'Não é possível deletar cliente com orçamentos vinculados.',
 };
 
+// 409 (e-mail já usado por loja ou funcionário) e 403 (conta de funcionário)
+// não estão no mapa: caem na mensagem que a API devolve.
+const FETCH_FUNCIONARIOS_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao listar funcionários.',
+};
+
 const CREATE_FUNCIONARIO_ERRORS = {
   [HTTP_STATUS.BAD_REQUEST]: 'Erro ao cadastrar funcionário.',
   [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
+};
+
+const UPDATE_FUNCIONARIO_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao atualizar funcionário.',
+  [HTTP_STATUS.NOT_FOUND]: 'Funcionário não encontrado nesta loja.',
+};
+
+const DELETE_FUNCIONARIO_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao excluir funcionário.',
+  [HTTP_STATUS.NOT_FOUND]: 'Funcionário não encontrado nesta loja.',
 };
 
 const createErrorHandlerMap = (
@@ -222,5 +238,8 @@ export {
   UPDATE_MOVEMENTS_ERRORS,
   DELETE_CLIENT_ERRORS,
   DELETE_MOVEMENTS_ERRORS,
+  FETCH_FUNCIONARIOS_ERRORS,
   CREATE_FUNCIONARIO_ERRORS,
+  UPDATE_FUNCIONARIO_ERRORS,
+  DELETE_FUNCIONARIO_ERRORS,
 };
