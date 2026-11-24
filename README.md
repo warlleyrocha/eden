@@ -66,8 +66,7 @@ Este é o **frontend** do sistema **multi-tenant** Éden, desenvolvido com **Rea
 ├── tsconfig.app.json         # Configuração TypeScript para app
 ├── tsconfig.json             # Configuração principal do TypeScript
 ├── tsconfig.node.json        # Configuração TypeScript para Node
-├── vite.config.ts           # Configuração do Vite
-└── yarn.lock                 # Lock das dependências (Yarn)
+└── vite.config.ts           # Configuração do Vite
 ```
 
 ## 🚀 Começando
@@ -80,17 +79,11 @@ git clone https://github.com/warlleyrocha/eden.git
 
 ### 2. Instalar dependências
 
-**Opção 1 - Usando Yarn (recomendado):**
 ```bash
-yarn install
+npm install
 ```
 
-**Opção 2 - Usando NPM:**
-```bash
-npm install --legacy-peer-deps
-```
-
-> **Nota:** O projeto foi desenvolvido com Yarn. Se usar NPM, a flag `--legacy-peer-deps` é necessária para resolver conflitos de dependências.
+> **Nota:** O projeto usa **npm** como gerenciador de pacotes. Não use Yarn/pnpm para evitar lockfiles conflitantes.
 
 ### 3. Iniciar o projeto
 
