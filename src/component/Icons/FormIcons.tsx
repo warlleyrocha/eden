@@ -3,7 +3,7 @@ type IconProps = {
 };
 
 export const IconName = ({
-  className = 'w-4 h-4 mr-2 text-gray-500',
+  className = 'w-4 h-4 mr-2 text-foreground-muted',
 }: IconProps) => (
   <svg
     className={className}
@@ -21,7 +21,7 @@ export const IconName = ({
 );
 
 export const IconPhone = ({
-  className = 'w-4 h-4 mr-2 text-gray-500',
+  className = 'w-4 h-4 mr-2 text-foreground-muted',
 }: IconProps) => (
   <svg
     className={className}
@@ -39,7 +39,7 @@ export const IconPhone = ({
 );
 
 export const IconEmail = ({
-  className = 'w-4 h-4 mr-2 text-gray-500',
+  className = 'w-4 h-4 mr-2 text-foreground-muted',
 }: IconProps) => (
   <svg
     className={className}
@@ -57,7 +57,7 @@ export const IconEmail = ({
 );
 
 export const IconDocument = ({
-  className = 'w-4 h-4 mr-2 text-gray-500',
+  className = 'w-4 h-4 mr-2 text-foreground-muted',
 }: IconProps) => (
   <svg
     className={className}
@@ -75,7 +75,7 @@ export const IconDocument = ({
 );
 
 export const IconAddress = ({
-  className = 'w-4 h-4 mr-2 text-gray-500',
+  className = 'w-4 h-4 mr-2 text-foreground-muted',
 }: IconProps) => (
   <svg
     className={className}

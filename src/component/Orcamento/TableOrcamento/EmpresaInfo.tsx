@@ -105,13 +105,13 @@ export function OrcamentoModalDetails({
     <div className="fixed inset-0 z-60 flex items-center justify-center p-2 sm:p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity"
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-[2px] transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       />
 
       {/* Modal Content */}
-      <div className="relative bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
+      <div className="relative bg-surface rounded-card border border-border shadow-modal w-full max-w-4xl max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 print:hidden">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">

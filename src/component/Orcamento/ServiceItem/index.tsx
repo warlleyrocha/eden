@@ -52,35 +52,35 @@ export const ServiceItem = memo<ServiceItemProps>(
     return (
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <div className="flex-1 min-w-[200px]">
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium text-foreground mb-1">
             Serviço
           </Label>
           <Input
             type="text"
             placeholder="Descrição do Serviço"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30"
             value={item.description}
             onChange={handleDescriptionChange}
           />
         </div>
         <div className="flex-1 min-w-[150px]">
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium text-foreground mb-1">
             Valor (R$)
           </Label>
           <div className="flex gap-2">
             <Input
               type="text"
               placeholder="Valor"
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30"
               value={item.value}
               onChange={handleValueChange}
             />
             <Button
               variant="ghost"
-              className="border-2 border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200"
+              className="border-2 border-border p-2 rounded-md hover:bg-neutral-bg transition duration-200"
               onClick={handleRemove}
             >
-              <Trash className="text-red-500" />
+              <Trash className="text-danger-foreground" />
             </Button>
           </div>
         </div>

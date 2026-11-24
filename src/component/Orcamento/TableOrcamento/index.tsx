@@ -1,23 +1,26 @@
 import { memo, useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import { FileText, Search, Trash } from 'lucide-react';
+import { FileText, Plus, Printer, Trash2 } from 'lucide-react';
 import { useReactToPrint } from 'react-to-print';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   Table,
   TableBody,
-  TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { SectionCard } from '@/components/app/section-card';
+import { SearchInput } from '@/components/app/search-input';
+import { EmptyState } from '@/components/app/empty-state';
+import { OrcamentoStatusBadge } from '@/components/app/status-badge';
+import { ConfirmDialog } from '@/component/ConfirmDialog';
 
 import OrcamentoPrintContent from '../PrintOrcamento';
 import FormOrcamento from '../FormOrcamento';
 import { TableRowOrcamento } from '../TableRowOrcamento';
 
 import { formatCpfCnpj } from '@/utils/formatCpfCnpj';
-import { formatarDataSegura } from '@/utils/date';
 import { formatarMoeda } from '@/utils/formatters';
 import {
   updateItem,
@@ -223,7 +226,6 @@ function TableOrcamento({
 
   const onPrint = useCallback(
     (orcamentoId: string) => {
-      console.log('Imprimindo orçamento: ', orcamentoId);
       // Atualiza o selectedOrcamento primeiro
       handleOpenModalDetails(orcamentoId);
       setShouldPrint(true); // Marca que queremos imprimir assim que os dados carregarem
@@ -239,128 +241,141 @@ function TableOrcamento({
     }
   }, [shouldPrint, selectedOrcamento, handlePrint]);
 
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const temBusca = searchTerm.trim() !== '';
+
   return (
-    <div className="flex-1">
-      {/* 🔍 Barra de busca e botão */}
-      <div className="flex flex-row justify-between gap-2 pb-6">
-        {/* Campo de busca */}
-        <div className="relative w-full sm:w-[30%]">
-          <Input
-            type="text"
-            placeholder="Buscar orçamentos"
-            value={searchTerm}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setSearchTerm(e.target.value)
+    <>
+      <SectionCard
+        title="Orçamentos"
+        description={
+          temBusca
+            ? `${filteredOrcamentos.length} de ${formattedOrcamentos.length} orçamentos`
+            : `${formattedOrcamentos.length} orçamento${formattedOrcamentos.length === 1 ? '' : 's'}`
+        }
+        flush
+        actions={
+          <>
+            <SearchInput
+              value={searchTerm}
+              onChange={setSearchTerm}
+              placeholder="Buscar por cliente, status ou data..."
+              className="sm:w-80"
+            />
+            <Button onClick={toggleModal}>
+              <Plus /> Novo orçamento
+            </Button>
+          </>
+        }
+      >
+        {filteredOrcamentos.length === 0 ? (
+          <EmptyState
+            icon={<FileText />}
+            title={temBusca ? 'Nenhum orçamento encontrado' : 'Nenhum orçamento criado'}
+            description={
+              temBusca
+                ? 'Tente buscar por outro cliente, status ou data.'
+                : 'Crie um orçamento para enviar ao cliente.'
             }
-            className="w-full bg-white placeholder:text-[#55575c] pl-10 pr-3 sm:pr-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            action={
+              temBusca ? (
+                <Button variant="outline" size="sm" onClick={() => setSearchTerm('')}>
+                  Limpar busca
+                </Button>
+              ) : (
+                <Button size="sm" onClick={toggleModal}>
+                  <Plus /> Novo orçamento
+                </Button>
+              )
+            }
           />
-          <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none" />
-        </div>
+        ) : (
+          <>
+            {/* Desktop / tablet */}
+            <div className="hidden md:block">
+              <Table className="min-w-[720px]">
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-24 pl-6">Nº</TableHead>
+                    <TableHead>Cliente</TableHead>
+                    <TableHead>Data</TableHead>
+                    <TableHead className="text-right">Total</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="pr-6 text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredOrcamentos.map((orcamento) => (
+                    <TableRowOrcamento
+                      key={orcamento.id}
+                      orcamento={orcamento}
+                      numeroSequencial={orcamento.numeroSequencial}
+                      onPrint={onPrint}
+                      onDeleteOrcamento={setDeleteId}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
 
-        {/* Botão novo orçamento */}
-        <div>
-          <Button
-            onClick={toggleModal}
-            className="flex items-center sm:space-x-2 bg-[#1E3A8A] text-white hover:bg-[#152C6B] px-3 sm:px-4 py-2 rounded-lg cursor-pointer text-sm sm:text-base"
-          >
-            <FileText className="mr-2" />
-            Novo Orçamento
-          </Button>
-        </div>
-      </div>
-
-      {/* 🖥️ Lista em Tabela (Desktop/Tablet) */}
-      <div className="hidden md:block bg-white rounded-lg shadow-md">
-        <div className="overflow-x-auto rounded-lg border border-gray-200 shadow-md">
-          <Table className="w-full min-w-[800px]">
-            <TableHeader>
-              <TableRow className="bg-gray-100 text-center">
-                <TableCell className="py-3 px-4  font-semibold">ID</TableCell>
-                <TableCell className="py-3 px-4  font-semibold">Nome</TableCell>
-                <TableCell className="py-3 px-4  font-semibold">Data</TableCell>
-                <TableCell className="py-3 px-4  font-semibold">
-                  Total
-                </TableCell>
-                <TableCell className="py-3 px-4  font-semibold">
-                  Status
-                </TableCell>
-                <TableCell className="py-3 px-4 text-center font-semibold">
-                  Ações
-                </TableCell>
-              </TableRow>
-            </TableHeader>
-
-            <TableBody>
+            {/* Mobile: cards */}
+            <ul className="divide-y divide-border border-t border-border md:hidden">
               {filteredOrcamentos.map((orcamento) => (
-                <TableRowOrcamento
-                  key={orcamento.id}
-                  orcamento={orcamento}
-                  numeroSequencial={orcamento.numeroSequencial}
-                  onPrint={onPrint}
-                  onDeleteOrcamento={onDeleteOrcamento}
-                />
+                <li key={orcamento.id} className="flex flex-col gap-3 px-5 py-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium">
+                        {orcamento.cliente?.nome ?? 'Cliente não informado'}
+                      </p>
+                      <p className="tabular text-xs text-foreground-secondary">
+                        #{orcamento.numeroSequencial} ·{' '}
+                        {new Date(orcamento.criadoEm).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                    <OrcamentoStatusBadge status={orcamento.status} />
+                  </div>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="tabular text-lg font-semibold">
+                      {formatarMoeda(orcamento.total)}
+                    </span>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() => onPrint(orcamento.id)}
+                        aria-label="Imprimir orçamento"
+                      >
+                        <Printer />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-sm"
+                        onClick={() => setDeleteId(orcamento.id)}
+                        aria-label="Excluir orçamento"
+                        className="hover:border-danger/40 hover:bg-danger-bg hover:text-danger-foreground"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </div>
+                  </div>
+                </li>
               ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+            </ul>
+          </>
+        )}
+      </SectionCard>
 
-      {/* 📱 Lista em Cards (Mobile) */}
-      <div className="block md:hidden space-y-4">
-        {filteredOrcamentos.map((orcamento) => (
-          <div
-            key={orcamento.id}
-            className="bg-white w-full border border-gray-200 rounded-lg p-4 shadow-sm hover:bg-gray-50"
-          >
-            <div className="flex justify-between items-start mb-3">
-              <h3 className="font-semibold text-gray-900 text-lg flex-1 mr-2">
-                #{orcamento.numeroSequencial} - {orcamento.cliente?.nome}
-              </h3>
-              <div className="flex space-x-1">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-blue-600 hover:bg-blue-100 min-w-[32px] px-1.5 h-8"
-                  onClick={() => onPrint(orcamento.id)}
-                >
-                  <FileText className="w-3.5 h-3.5" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-red-600 hover:bg-red-100 min-w-[32px] px-1.5 h-8"
-                  onClick={() => onDeleteOrcamento(orcamento.id)}
-                >
-                  <Trash className="w-3.5 h-3.5" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-2 text-sm">
-              <div className="flex items-center">
-                <span className="text-gray-600 w-20">Data:</span>
-                <span className="text-gray-900 font-medium">
-                  {formatarDataSegura(orcamento.criadoEm)}
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <span className="text-gray-600 w-20">Total:</span>
-                <span className="text-gray-900 font-medium">
-                  {formatarMoeda(orcamento.total)}
-                </span>
-              </div>
-
-              <div className="flex items-center">
-                <span className="text-gray-600 w-20">Status:</span>
-                <span className="text-gray-900 font-medium">
-                  {orcamento.status}
-                </span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      <ConfirmDialog
+        open={deleteId !== null}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Excluir orçamento"
+        description="Tem certeza que deseja excluir este orçamento? Esta ação não pode ser desfeita."
+        confirmLabel="Excluir"
+        onConfirm={() => {
+          if (deleteId) onDeleteOrcamento(deleteId);
+          setDeleteId(null);
+        }}
+      />
 
       {isModalOpen && (
         <FormOrcamento
@@ -413,7 +428,7 @@ function TableOrcamento({
           />
         </div>
       </div>
-    </div>
+    </>
   );
 }
 

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Calendar } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 type CashClosureModelProps = {
   totalEntries: string;
@@ -63,103 +65,77 @@ const CashClosureModel: React.FC<CashClosureModelProps> = ({
     }
   };
 
+  const dias =
+    startDate && endDate && validateDates()
+      ? Math.ceil(
+        (new Date(endDate).getTime() - new Date(startDate).getTime()) /
+            (1000 * 60 * 60 * 24)
+      ) + 1
+      : null;
+
   return (
-    <div className="flex flex-col p-6 rounded-lg bg-white max-w-md mx-auto">
-      <h1 className="text-2xl font-bold mb-4 text-[#1E3A8A]">
-        Fechamento de Caixa
-      </h1>
-      <p className="text-sm text-gray-600 mb-4">
-        Selecione o período para visualizar o fechamento
-      </p>
-
-      <div className="mb-4">
-        <label
-          htmlFor="selected-period"
-          className="block mb-2 text-sm font-medium text-gray-700"
-        >
-          Período Selecionado
-        </label>
-        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border">
-          <Calendar className="w-4 h-4 text-blue-600" />
-          <span className="text-sm text-gray-700 font-medium">
-            {startDate && endDate
-              ? `${formatDateForDisplay(startDate)} à ${formatDateForDisplay(
-                endDate
-              )}`
-              : 'Selecione as datas'}
-          </span>
-        </div>
-        {!validateDates() && (
-          <p className="text-red-500 text-xs mt-1">
-            A data inicial deve ser anterior ou igual à data final
-          </p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div>
-          <label
-            htmlFor="start-date"
-            className="block mb-1 text-sm font-medium text-gray-700"
-          >
-            Data Inicial
-          </label>
-          <input
+    <div className="flex flex-col gap-5">
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-2">
+          <Label htmlFor="start-date">Data inicial</Label>
+          <Input
+            id="start-date"
             type="date"
             value={startDate}
             onChange={(e) => handleStartDateChange(e.target.value)}
             max={endDate || getCurrentDate()}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
         </div>
-
-        <div>
-          <label
-            htmlFor="end-date"
-            className="block mb-1 text-sm font-medium text-gray-700"
-          >
-            Data Final
-          </label>
-          <input
+        <div className="space-y-2">
+          <Label htmlFor="end-date">Data final</Label>
+          <Input
+            id="end-date"
             type="date"
             value={endDate}
             onChange={(e) => handleEndDateChange(e.target.value)}
             min={startDate}
             max={getTomorrowDate()}
-            className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
           />
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex justify-between text-lg bg-green-50 p-4 rounded-lg border border-green-200">
-          <span className="text-green-700 font-medium">Total de Entradas:</span>
-          <span className="text-green-700 font-bold">{totalEntries}</span>
-        </div>
-
-        <div className="flex justify-between text-lg bg-red-50 p-4 rounded-lg border border-red-200">
-          <span className="text-red-700 font-medium">Total de Saídas:</span>
-          <span className="text-red-700 font-bold">{totalExits}</span>
-        </div>
-
-        <div className="flex justify-between text-lg bg-blue-50 p-4 rounded-lg border border-blue-200">
-          <span className="text-blue-700 font-medium">Saldo Final:</span>
-          <span className="text-blue-700 font-bold">{finalBalance}</span>
-        </div>
+      <div className="flex items-center gap-2 rounded-md border border-border bg-surface-secondary px-3 py-2.5 text-sm">
+        <Calendar className="size-4 text-foreground-secondary" />
+        <span className="tabular font-medium">
+          {startDate && endDate
+            ? `${formatDateForDisplay(startDate)} a ${formatDateForDisplay(endDate)}`
+            : 'Selecione as datas (sem período, mostra o dia de hoje)'}
+        </span>
+        {dias && (
+          <span className="ml-auto text-xs text-foreground-secondary">
+            {dias} dia{dias > 1 ? 's' : ''}
+          </span>
+        )}
       </div>
-
-      {startDate && endDate && validateDates() && (
-        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-600">
-            Período de{' '}
-            {Math.ceil(
-              (new Date(endDate).getTime() - new Date(startDate).getTime()) /
-                (1000 * 60 * 60 * 24)
-            ) + 1}{' '}
-            dias selecionado
-          </p>
-        </div>
+      {!validateDates() && (
+        <p className="-mt-3 text-xs text-danger-foreground">
+          A data inicial deve ser anterior ou igual à data final
+        </p>
       )}
+
+      <dl className="divide-y divide-border overflow-hidden rounded-lg border border-border">
+        <div className="flex items-center justify-between px-4 py-3">
+          <dt className="flex items-center gap-2 text-sm text-foreground-secondary">
+            <span className="size-2 rounded-full bg-success" /> Total de entradas
+          </dt>
+          <dd className="tabular font-semibold text-success-foreground">{totalEntries}</dd>
+        </div>
+        <div className="flex items-center justify-between px-4 py-3">
+          <dt className="flex items-center gap-2 text-sm text-foreground-secondary">
+            <span className="size-2 rounded-full bg-danger" /> Total de saídas
+          </dt>
+          <dd className="tabular font-semibold text-danger-foreground">{totalExits}</dd>
+        </div>
+        <div className="flex items-center justify-between bg-surface-secondary px-4 py-3">
+          <dt className="text-sm font-medium">Saldo final</dt>
+          <dd className="tabular text-lg font-bold">{finalBalance}</dd>
+        </div>
+      </dl>
     </div>
   );
 };

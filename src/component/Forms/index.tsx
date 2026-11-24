@@ -1,5 +1,11 @@
 import type { FormValues } from '@/@types/clients';
 import { Button } from '@/components/ui/button';
+import {
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -68,33 +74,32 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
   if (loading) {
     buttonLabel = 'Salvando...';
   } else if (selectedClient) {
-    buttonLabel = 'Atualizar Cliente';
+    buttonLabel = 'Salvar alterações';
   } else {
-    buttonLabel = 'Cadastrar Cliente';
+    buttonLabel = 'Cadastrar cliente';
   }
 
   return (
-    <div className="space-y-6">
+    <div>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Header */}
-        <div className="text-center border-b border-gray-200 pb-4">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
-            {selectedClient ? 'Atualizar Cliente' : 'Novo Cliente'}
-          </h2>
-          <p className="text-sm text-gray-600">
+        <DialogHeader>
+          <DialogTitle>
+            {selectedClient ? 'Editar cliente' : 'Novo cliente'}
+          </DialogTitle>
+          <DialogDescription>
             {selectedClient
-              ? 'Atualize as informações do cliente'
-              : 'Preencha os dados para cadastrar um novo cliente'}
-          </p>
-        </div>
+              ? 'Atualize as informações do cliente.'
+              : 'Preencha os dados para cadastrar um novo cliente.'}
+          </DialogDescription>
+        </DialogHeader>
 
         {/* Form Fields */}
-        <div className="space-y-5">
+        <div className="space-y-4">
           {/* Nome */}
           <div className="space-y-2">
             <Label
               htmlFor="name"
-              className="text-sm font-semibold text-gray-700 flex items-center"
+              className="flex items-center text-sm font-medium text-foreground"
             >
               <IconName />
               Nome Completo
@@ -109,7 +114,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
                   id="name"
                   type="text"
                   placeholder="Digite o nome completo"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                 
                 />
               )}
             />
@@ -121,7 +126,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="phone"
-                className="text-sm font-semibold text-gray-700 flex items-center"
+                className="flex items-center text-sm font-medium text-foreground"
               >
                 <IconPhone />
                 Telefone
@@ -143,7 +148,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
                         field.onChange(formatPhone(value));
                       }
                     }}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                   
                   />
                 )}
               />
@@ -153,7 +158,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
             <div className="space-y-2">
               <Label
                 htmlFor="email"
-                className="text-sm font-semibold text-gray-700 flex items-center"
+                className="flex items-center text-sm font-medium text-foreground"
               >
                 <IconEmail />
                 Email
@@ -168,7 +173,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
                     id="email"
                     type="email"
                     placeholder="exemplo@email.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                   
                   />
                 )}
               />
@@ -179,7 +184,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
           <div className="space-y-2">
             <Label
               htmlFor="cpfCnpj"
-              className="text-sm font-semibold text-gray-700 flex items-center"
+              className="flex items-center text-sm font-medium text-foreground"
             >
               <IconDocument />
               CPF/CNPJ
@@ -202,7 +207,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
                       field.onChange(formatCpfCnpj(value));
                     }
                   }}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                 
                 />
               )}
             />
@@ -212,7 +217,7 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
           <div className="space-y-2">
             <Label
               htmlFor="address"
-              className="text-sm font-semibold text-gray-700 flex items-center"
+              className="flex items-center text-sm font-medium text-foreground"
             >
               <IconAddress />
               Endereço Completo
@@ -227,32 +232,21 @@ export default function Forms({ showModal, setShowModal }: FormsProps) {
                   id="address"
                   type="text"
                   placeholder="Rua, número, bairro, cidade - UF"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm"
+                 
                 />
               )}
             />
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3 pt-6 border-t border-gray-200">
-          <Button
-            type="button"
-            onClick={handleCloseModal}
-            variant="outline"
-            className="w-full sm:w-auto px-6 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 hover:border-gray-400 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
-          >
+        <DialogFooter>
+          <Button type="button" onClick={handleCloseModal} variant="outline">
             Cancelar
           </Button>
-
-          <Button
-            type="submit"
-            className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-blue-800 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transform transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl"
-            disabled={loading}
-          >
+          <Button type="submit" disabled={loading}>
             {buttonLabel}
           </Button>
-        </div>
+        </DialogFooter>
       </form>
     </div>
   );

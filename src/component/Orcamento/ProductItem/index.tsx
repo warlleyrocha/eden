@@ -73,11 +73,11 @@ export const ProductItem = memo<ProductItemProps>(
     return (
       <div className="flex flex-wrap gap-4 items-center mb-4">
         <div className="flex-1 min-w-[200px]">
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium text-foreground mb-1">
             Produto
           </Label>
           <select
-            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-border focus:outline-none focus:ring-brand/30 focus:border-brand sm:text-sm rounded-md"
             value={item.name}
             onChange={handleProductChange}
             aria-label="Produto"
@@ -94,26 +94,26 @@ export const ProductItem = memo<ProductItemProps>(
         </div>
 
         <div className="flex-1 min-w-[150px]">
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium text-foreground mb-1">
             Valor (R$)
           </Label>
           <Input
             type="text"
             placeholder="Valor"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30"
             value={item.unitPrice}
             onChange={handlePriceChange}
           />
         </div>
 
         <div className="flex-1 min-w-[150px]">
-          <Label className="block text-sm font-medium text-gray-700 mb-1">
+          <Label className="block text-sm font-medium text-foreground mb-1">
             Quantidade
           </Label>
           <Input
             type="number"
             placeholder="Quantidade"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-brand/30"
             value={item.quantity ?? ''}
             onChange={handleQuantityChange}
           />
@@ -121,14 +121,14 @@ export const ProductItem = memo<ProductItemProps>(
 
         <Button
           variant="ghost"
-          className="border-2 border-zinc-400 p-2 rounded-md hover:bg-gray-100 transition duration-200 self-end"
+          className="border-2 border-border p-2 rounded-md hover:bg-neutral-bg transition duration-200 self-end"
           onClick={handleRemove}
         >
-          <Trash className="text-red-500" />
+          <Trash className="text-danger-foreground" />
         </Button>
 
         {stockError && (
-          <p className="mt-1 text-sm text-red-600">{stockError}</p>
+          <p className="mt-1 text-sm text-danger-foreground">{stockError}</p>
         )}
       </div>
     );
