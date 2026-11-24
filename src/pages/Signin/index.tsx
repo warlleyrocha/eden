@@ -189,9 +189,9 @@ export default function SignIn() {
             {FEATURES.map(({ title, description, icon: Icon }) => (
               <li
                 key={title}
-                className="flex items-start gap-3 rounded-xl border border-white/70 bg-white/70 p-4 shadow-card backdrop-blur-sm"
+                className="group/feature flex items-start gap-3 rounded-xl border border-white/70 bg-white/70 p-4 shadow-card backdrop-blur-sm transition-[translate,box-shadow,background-color,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[translate] hover:-translate-y-1.5 hover:border-white hover:bg-white/90 hover:shadow-modal motion-reduce:transition-none motion-reduce:hover:translate-y-0"
               >
-                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-bg text-brand-foreground">
+                <span className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-brand-bg text-brand-foreground transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/feature:scale-110 motion-reduce:transition-none motion-reduce:group-hover/feature:scale-100">
                   <Icon className="size-[18px]" />
                 </span>
                 <span className="min-w-0">
