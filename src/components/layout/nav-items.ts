@@ -1,6 +1,7 @@
 import {
   FileText,
   House,
+  IdCard,
   Package,
   Users,
   Wallet,
@@ -45,6 +46,12 @@ export const NAV_ITEMS: NavItem[] = [
     url: '/orcamentos',
     icon: FileText,
     description: 'Propostas e aprovações',
+  },
+  {
+    title: 'Funcionários',
+    url: '/funcionarios',
+    icon: IdCard,
+    description: 'Equipe e permissões de acesso',
   },
 ];
 

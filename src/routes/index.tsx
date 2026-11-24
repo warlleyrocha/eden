@@ -12,6 +12,7 @@ import Caixa from '@/pages/Caixa';
 import Stock from '@/pages/estoque';
 import Clientes from '@/pages/clientes';
 import Orcamentos from '@/pages/orcamentos';
+import Funcionarios from '@/pages/funcionarios';
 import { AppLayout } from '@/components/layout/app-layout';
 
 const Private = ({ children }: { children: React.ReactElement }) => {
@@ -44,6 +45,7 @@ const router = createBrowserRouter(
         { path: '/estoque', element: <Stock /> },
         { path: '/clientes', element: <Clientes /> },
         { path: '/orcamentos', element: <Orcamentos /> },
+        { path: '/funcionarios', element: <Funcionarios /> },
         // Rota antiga (clientes + orçamentos juntos)
         { path: '/orcamento', element: <Navigate to="/orcamentos" replace /> },
       ],

@@ -134,6 +134,11 @@ const DELETE_CLIENT_ERRORS = {
   409: 'Não é possível deletar cliente com orçamentos vinculados.',
 };
 
+const CREATE_FUNCIONARIO_ERRORS = {
+  [HTTP_STATUS.BAD_REQUEST]: 'Erro ao cadastrar funcionário.',
+  [HTTP_STATUS.NOT_FOUND]: ERROR_MESSAGES.NOT_FOUND_STORE,
+};
+
 const createErrorHandlerMap = (
   operationMessages: ErrorMessageMap
 ): Record<number, ErrorHandler> => ({
@@ -217,4 +222,5 @@ export {
   UPDATE_MOVEMENTS_ERRORS,
   DELETE_CLIENT_ERRORS,
   DELETE_MOVEMENTS_ERRORS,
+  CREATE_FUNCIONARIO_ERRORS,
 };

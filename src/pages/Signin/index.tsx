@@ -23,7 +23,10 @@ import {
 const REMEMBERED_EMAIL_KEY = 'rememberedEmail';
 
 // Destaques do painel esquerdo: os módulos do menu, exceto o Dashboard
-const FEATURES = NAV_ITEMS.filter((item) => item.url !== '/home');
+// Grade 2x2 no painel institucional: só os módulos principais.
+const FEATURES = NAV_ITEMS.filter(
+  (item) => item.url !== '/home' && item.url !== '/funcionarios'
+);
 
 function showComingSoon(feature: string) {
   toast.info(`${feature} em breve`, {
